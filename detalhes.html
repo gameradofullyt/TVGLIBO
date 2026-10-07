@@ -1,0 +1,1009 @@
+<!DOCTYPE html>
+<html lang="pt-br" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalhes | GAMERADO TV</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-color: #0f0f0f;
+            --primary-red: #e50914;
+            --text-light: #ffffff;
+            --text-muted: #aaaaaa;
+            --card-bg: #141414;
+            --inner-card-bg: #1a1a1a;
+            --border-color: rgba(255, 255, 255, 0.15);
+            --tmdb-yellow: #f5c518;
+            --dub-green: #4caf50;
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Poppins', sans-serif; background-color: var(--bg-color); color: var(--text-light); overflow-x: hidden; padding-bottom: 30px; }
+        
+        /* Ações Superiores */
+        .top-nav {
+            position: absolute; top: 20px; left: 20px; right: 20px;
+            display: flex; justify-content: space-between; z-index: 20;
+        }
+        .back-btn { color: white; font-size: 1.5rem; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.8)); text-decoration: none; cursor:pointer;}
+        
+        .top-actions { display: flex; gap: 15px; }
+        .action-btn-top {
+            background: rgba(20, 20, 20, 0.5); border: 1px solid rgba(255,255,255,0.1);
+            backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+            width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; position: relative; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        }
+        .action-btn-top i { font-size: 1.25rem; color: #fff; transition: all 0.3s ease; }
+        .action-btn-top:active { transform: scale(0.9); }
+
+        .action-btn-top.heart.active { background: rgba(229, 9, 20, 0.15); border-color: #e50914; }
+        .action-btn-top.heart.active i { color: #e50914; animation: heartBurst 0.6s forwards; }
+
+        .action-btn-top.list.active { background: rgba(76, 175, 80, 0.15); border-color: #4CAF50; }
+        .action-btn-top.list.active i { color: #4CAF50; animation: checkPop 0.5s forwards; }
+
+        @keyframes heartBurst { 0% { transform: scale(1); } 25% { transform: scale(1.4); text-shadow: 0 0 15px #e50914; } 50% { transform: scale(0.9); } 75% { transform: scale(1.2); } 100% { transform: scale(1); } }
+        @keyframes checkPop { 0% { transform: scale(0); opacity: 0; } 50% { transform: scale(1.4); text-shadow: 0 0 15px #4CAF50; opacity: 1; } 100% { transform: scale(1); } }
+
+        .hero-banner {
+            position: relative; width: 100%; height: 35vh;
+            background-size: cover; background-position: center;
+            display: flex; align-items: flex-end; justify-content: center;
+        }
+        .hero-overlay {
+            position: absolute; inset: 0; z-index: 1;
+            background: linear-gradient(to top, var(--bg-color) 0%, rgba(15,15,15,0.7) 60%, rgba(15,15,15,0.2) 100%);
+            backdrop-filter: blur(3px); 
+        }
+        .poster-image {
+            position: relative; z-index: 2; width: 175px; height: 260px;
+            border-radius: 10px; object-fit: cover; box-shadow: 0 15px 35px rgba(0,0,0,0.9); margin-bottom: -70px;
+        }
+
+        .tags-container {
+            display: flex; flex-wrap: wrap; gap: 8px; padding: 0 20px;
+            margin-top: 85px; justify-content: center;
+        }
+        .tag { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.2); padding: 4px 10px; border-radius: 4px; font-size: 0.7rem; color: var(--text-light); font-weight: 500; }
+
+        .title-section { padding: 20px 20px 5px; text-align: center; }
+        .title-section h1 { font-size: 1.5rem; font-weight: 700; }
+
+        .action-bar { 
+            display: flex; flex-direction: column; gap: 12px; padding: 10px 20px 20px; 
+        }
+        .action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+        .btn-modern {
+            background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px;
+            padding: 12px; display: flex; align-items: center; justify-content: center;
+            color: var(--text-light); gap: 10px; font-size: 0.95rem; font-family: 'Poppins', sans-serif;
+            font-weight: 500; cursor: pointer; transition: all 0.2s ease;
+        }
+        .btn-modern:active { transform: scale(0.96); }
+        .btn-modern i { font-size: 1.1rem; color: #fff; }
+
+        .btn-modern.primary {
+            background: #a32222; border: none; width: 100%; font-size: 1.1rem;
+            font-weight: 700; padding: 15px; border-radius: 16px;
+        }
+        .btn-modern.primary i { font-size: 1.2rem; }
+
+        .btn-modern.secondary-series {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid var(--border-color);
+            width: 100%;
+            font-size: 1.05rem;
+            font-weight: 600;
+            padding: 14px;
+            border-radius: 16px;
+            color: #fff;
+        }
+
+        /* SEÇÃO DE SÉRIES (EPISÓDIOS E TEMPORADAS) */
+        .series-container { padding: 0 20px 20px; display: flex; flex-direction: column; gap: 15px; }
+        .season-select-wrapper { display: flex; align-items: center; justify-content: space-between; background: var(--card-bg); border: 1px solid var(--border-color); padding: 12px 16px; border-radius: 12px; }
+        .season-select-wrapper select { background: transparent; border: none; color: #fff; font-size: 1rem; font-family: 'Poppins', sans-serif; font-weight: 600; outline: none; width: 100%; cursor: pointer; }
+        .season-select-wrapper select option { background: #141414; color: #fff; }
+
+        .episodes-list { display: flex; flex-direction: column; gap: 10px; }
+        .ep-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: background 0.2s; }
+        .ep-card:hover { background: rgba(255,255,255,0.05); }
+        .ep-info { display: flex; flex-direction: column; gap: 2px; }
+        .ep-title { font-size: 0.95rem; font-weight: 600; color: #fff; }
+        .ep-duration { font-size: 0.8rem; color: #888; }
+        .ep-play-icon { width: 36px; height: 36px; border-radius: 50%; background: rgba(229, 9, 20, 0.2); border: 1px solid var(--primary-red); color: var(--primary-red); display: flex; align-items: center; justify-content: center; }
+
+        /* SEÇÃO DE DETALHES E ABAS */
+        .details-container { padding: 0 20px; display: flex; flex-direction: column; gap: 15px; margin-top: 5px; }
+        .card-box { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 16px; }
+        
+        .tabs-card { display: flex; justify-content: space-between; overflow: hidden; padding: 0 5px; }
+        .tab { flex: 1; text-align: center; padding: 18px 0; font-size: 0.95rem; font-weight: 700; color: var(--text-muted); cursor: pointer; position: relative; }
+        .tab.active { color: var(--text-light); }
+        .tab.active::after {
+            content: ''; position: absolute; bottom: 0; left: 20%; right: 20%;
+            height: 3px; background-color: #d32f2f; border-radius: 3px 3px 0 0;
+        }
+
+        /* CONTEÚDO DAS ABAS */
+        .content-card { padding: 20px; }
+        .content-card h2 { font-size: 1.2rem; color: var(--text-light); font-weight: 700; margin-bottom: 15px; }
+        .content-card p { font-size: 0.95rem; color: #d1d1d1; line-height: 1.5; text-align: left; }
+
+        /* ESTILO TAB INFORMAÇÕES EXATO FOTO 8 */
+        .info-inner-card { background: var(--inner-card-bg); border-radius: 12px; padding: 16px; margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.05); }
+        .rating-box { display: flex; justify-content: space-between; align-items: center; }
+        .rating-left { display: flex; flex-direction: column; gap: 2px;}
+        .rating-title { font-size: 0.8rem; color: #ccc; font-weight: 700; display: flex; align-items: center; gap: 8px; text-transform: uppercase; letter-spacing: 0.5px;}
+        .rating-title i { color: var(--tmdb-yellow); font-size: 1.3rem; }
+        .rating-sub { font-size: 0.85rem; color: #888; margin-left: 28px; }
+        .rating-right { font-weight: 700; }
+        .rating-score { font-size: 1.8rem; color: var(--tmdb-yellow); }
+        .rating-max { font-size: 0.9rem; color: #888; margin-left: 2px;}
+
+        .details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+        .detail-item { background: var(--inner-card-bg); padding: 14px 16px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); display: flex; flex-direction: column; gap: 6px; }
+        .info-label { font-size: 0.75rem; color: #999; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;}
+        .info-value { font-size: 1.1rem; font-weight: 700; color: #fff; }
+        .text-yellow { color: var(--tmdb-yellow) !important; }
+        .text-green { color: var(--dub-green) !important; }
+        .badge-age { background: transparent; border: 1.5px solid var(--tmdb-yellow); color: var(--tmdb-yellow); padding: 2px 8px; border-radius: 6px; font-weight: 800; font-size: 0.9rem; display: inline-block; width: fit-content; }
+
+        .genres-list { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 5px; }
+        .genre-tag-info { background: #262626; padding: 8px 14px; border-radius: 8px; font-size: 0.9rem; color: #e0e0e0; font-weight: 500; }
+        
+        .list-details { display: flex; flex-direction: column; gap: 8px; }
+        .list-item { display: flex; justify-content: space-between; align-items: center; background: var(--inner-card-bg); padding: 14px 16px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); }
+        .list-label { font-size: 0.95rem; color: #bbb; font-weight: 700; }
+        .list-value { font-size: 0.95rem; color: #fff; text-align: right; font-weight: 400;}
+        .traduzir-btn { color: #ccc; font-size: 0.9rem; text-decoration: none; display: flex; justify-content: flex-end; align-items: center; gap: 6px; margin-top: 15px; margin-right: 5px; }
+
+        /* GALERIA DE FOTOS */
+        .gallery-section { padding: 0 20px; margin-top: 25px; margin-bottom: 10px;}
+        .gallery-track { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; gap: 15px; border-radius: 12px; box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
+        .gallery-track::-webkit-scrollbar { display: none; }
+        .gallery-item { flex: 0 0 100%; scroll-snap-align: center; border-radius: 12px; overflow: hidden; position: relative; }
+        .gallery-item img { width: 100%; height: 210px; object-fit: cover; display: block; border-radius: 12px; }
+        .gallery-pagination { display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 15px; }
+        .dot { width: 8px; height: 8px; background-color: #666; border-radius: 50%; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); }
+        .dot.active { width: 24px; background-color: #fff; border-radius: 4px; }
+
+        /* AVALIAÇÕES */
+        .reviews-section { padding: 20px; margin-top: 10px; }
+        .reviews-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; }
+        .reviews-title-block h3 { font-size: 1.4rem; font-weight: 700; color: var(--text-light); margin-bottom: 2px; }
+        .reviews-title-block p { font-size: 0.85rem; color: #999; }
+        .view-all { color: #e50914; font-size: 0.85rem; font-weight: 500; text-decoration: none; margin-top: 5px; cursor: pointer;}
+        
+        .review-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 16px; padding: 16px; margin-bottom: 15px; }
+        .review-user { display: flex; align-items: center; gap: 12px; }
+        .user-avatar-wrapper { position: relative; width: 42px; height: 42px; }
+        .user-avatar-wrapper img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+        .avatar-badge { position: absolute; bottom: -2px; right: -4px; color: #e50914; background: var(--card-bg); border-radius: 50%; font-size: 1rem; width: 16px; height: 16px; display: flex; align-items: center; justify-content: center; }
+        .user-info { flex: 1; display: flex; justify-content: space-between; align-items: center; }
+        .user-name { font-weight: 700; font-size: 1rem; color: #fff; }
+        .user-time { font-size: 0.8rem; color: #999; }
+        .review-rating { display: flex; align-items: center; gap: 10px; margin-top: 4px; margin-left: 54px; }
+        .stars { color: var(--tmdb-yellow); font-size: 0.85rem; letter-spacing: 1px; }
+        .score { color: var(--tmdb-yellow); font-weight: 700; font-size: 0.9rem; }
+        .vip-badge { background: rgba(245, 197, 24, 0.15); color: var(--tmdb-yellow); padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 700; display: flex; align-items: center; gap: 4px; }
+        .vip-badge i { font-size: 0.65rem; }
+        .review-text { margin-top: 15px; font-size: 0.95rem; color: #ccc; line-height: 1.4; }
+
+        /* RECOMENDAÇÕES */
+        .recommendations { padding: 20px 0; margin-top: 5px; }
+        .rec-header { display: flex; justify-content: space-between; align-items: center; padding: 0 20px; margin-bottom: 15px; }
+        .rec-header h3 { font-size: 1.1rem; }
+        .rec-header .mais-btn { background: #1e1e1e; border: 1px solid rgba(255,255,255,0.1); color: white; padding: 4px 12px; border-radius: 6px; font-size: 0.75rem; text-decoration: none; }
+        .slider-track { display: flex; overflow-x: auto; scroll-behavior: smooth; gap: 15px; padding: 0 20px; }
+        .slider-track::-webkit-scrollbar { display: none; }
+        .rec-card { position: relative; width: 145px; height: 215px; flex-shrink: 0; border-radius: 10px; overflow: hidden; cursor: pointer; box-shadow: 0 6px 15px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.05); }
+        .rec-card img { width: 100%; height: 100%; object-fit: cover; }
+
+        /* MODAIS */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 1000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
+        .modal-overlay.active { display: flex; }
+        .modal-content { background: linear-gradient(145deg, #1f1f1f, #121212); width: 90%; max-width: 450px; border-radius: 16px; padding: 20px; max-height: 75vh; overflow-y: auto; box-shadow: 0 15px 35px rgba(0,0,0,0.8); border: 1px solid rgba(255,255,255,0.1); animation: scaleUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        .modal-content::-webkit-scrollbar { width: 6px; }
+        .modal-content::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
+        @keyframes scaleUp { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px;}
+        .modal-header h3 { font-size: 1.2rem; margin: 0; color: var(--primary-red); }
+        .close-modal { color: var(--text-muted); font-size: 1.5rem; cursor: pointer; }
+        
+        .options-list { display: flex; flex-direction: column; gap: 12px; margin-top: 10px; }
+        .opt-btn { display: flex; align-items: center; gap: 15px; padding: 15px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; cursor: pointer; transition: all 0.3s ease; text-align: left; color: #fff;}
+        .opt-btn:hover { background: rgba(229, 9, 20, 0.1); border-color: var(--primary-red); }
+        .opt-btn i { font-size: 1.5rem; color: var(--primary-red); width: 35px; text-align: center;}
+        .opt-text { display: flex; flex-direction: column; }
+        .opt-text strong { font-size: 1rem; margin-bottom: 2px;}
+        .opt-text span { font-size: 0.8rem; color: #aaa; line-height: 1.2;}
+
+        /* MODAL AVALIAÇÃO */
+        .rate-modal-content { background: #181818; width: 90%; max-width: 450px; border-radius: 16px; padding: 25px 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.9); animation: scaleUp 0.3s forwards; }
+        .rate-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 20px; }
+        .rate-header-left { display: flex; align-items: center; gap: 15px; }
+        .rate-icon-box { background: #262626; width: 48px; height: 48px; border-radius: 50%; display: flex; justify-content: center; align-items: center; }
+        .rate-icon-box i { color: var(--tmdb-yellow); font-size: 1.4rem; }
+        .rate-title-box h3 { font-size: 1.3rem; color: #fff; font-weight: 700; margin: 0 0 2px 0; }
+        .rate-title-box p { font-size: 0.85rem; color: #aaa; margin: 0; line-height: 1.2; }
+        .rate-stars-card { background: #202020; border-radius: 12px; padding: 20px; text-align: center; margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.03); }
+        .rate-stars-card h4 { font-size: 1.05rem; color: #fff; font-weight: 700; margin-bottom: 15px; }
+        .stars-container { display: flex; justify-content: center; gap: 10px; margin-bottom: 10px; }
+        .stars-container i { font-size: 2.5rem; color: #444; cursor: pointer; transition: color 0.15s, transform 0.1s; }
+        .stars-container i:active { transform: scale(0.85); }
+        .stars-container i.active { color: var(--tmdb-yellow); }
+        .rate-label { color: var(--tmdb-yellow); font-weight: 700; font-size: 1rem; min-height: 24px; }
+        .rate-comment-section { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+        .rate-comment-section label { font-size: 1.05rem; font-weight: 700; color: #fff; }
+        .rate-textarea { background: #202020; border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 15px; color: #fff; font-family: 'Poppins', sans-serif; font-size: 0.95rem; resize: none; height: 110px; outline: none; transition: border-color 0.3s; }
+        .rate-textarea:focus { border-color: #555; }
+        .btn-submit-rate { background: #b52929; color: white; border: none; width: 100%; padding: 16px; border-radius: 12px; font-size: 1.1rem; font-weight: 700; cursor: pointer; transition: background 0.2s; font-family: 'Poppins', sans-serif; }
+
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <div class="top-nav">
+        <a onclick="goBackFromDetails()" class="back-btn"><i class="fas fa-arrow-left"></i></a>
+        <div class="top-actions">
+            <div class="action-btn-top list" onclick="toggleBtn(this, 'list')" title="Listar">
+                <i class="fas fa-plus"></i>
+            </div>
+            <div class="action-btn-top heart" onclick="toggleBtn(this, 'heart')" title="Gostei">
+                <i class="far fa-heart"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="hero-banner" id="heroBanner">
+        <div class="hero-overlay"></div>
+        <img src="" id="posterImage" class="poster-image" alt="Capa">
+    </div>
+
+    <div class="tags-container" id="tagsContainer">
+        <span class="tag" id="tagAudio">DUB</span>
+        <span class="tag" id="tagYear">2026</span>
+        <span class="tag" id="tagGenre">Gênero</span>
+        <span class="tag">Em Alta</span>
+        <span class="tag">4K HDR</span>
+    </div>
+
+    <div class="title-section">
+        <h1 id="itemTitle">Carregando...</h1>
+    </div>
+
+    <!-- BARRA DE AÇÕES (Para Filmes e Séries) -->
+    <div class="action-bar" id="mainActionBar">
+        <!-- Botão Principal: Assistir (Filmes) ou Episódios (Séries) -->
+        <button class="btn-modern primary" onclick="handlePlay()" id="btnAssistirPrincipal">
+            <i class="fas fa-play"></i> Assistir
+        </button>
+        
+        <!-- Botão de Temporadas (Aparece apenas quando for Série) -->
+        <button class="btn-modern secondary-series hidden" id="btnTemporadas" onclick="openSeasonsModal()">
+            <i class="fas fa-layer-group"></i> <span id="btnTemporadasText">Temporadas</span>
+        </button>
+
+        <div class="action-grid">
+            <button class="btn-modern" onclick="handleDownload()">
+                <i class="fas fa-download"></i> Baixar
+            </button>
+            <button class="btn-modern" onclick="alert('Conectando ao dispositivo de espelhamento...')">
+                <i class="fas fa-tv"></i> Espelhar
+            </button>
+            <button class="btn-modern" onclick="openModal('rateModal')">
+                <i class="far fa-star"></i> Avaliar
+            </button>
+            <button class="btn-modern" onclick="compartilhar()">
+                <i class="fas fa-share-alt"></i> Compartilhar
+            </button>
+        </div>
+    </div>
+
+    <!-- SEÇÃO DE ABAS E CONTEÚDOS -->
+    <div class="details-container">
+        <div class="card-box tabs-card">
+            <div class="tab active" onclick="changeTab(this, 'tab-overview')">Visão geral</div>
+            <div class="tab" onclick="changeTab(this, 'tab-info')">Informações</div>
+            <div class="tab" onclick="changeTab(this, 'tab-videos')">Vídeos</div>
+        </div>
+
+        <div class="card-box content-card" id="tab-overview">
+            <h2>Sinopse</h2>
+            <p id="itemSinopse">Carregando...</p>
+        </div>
+
+        <div class="card-box content-card hidden" id="tab-info">
+            <div class="info-inner-card rating-box">
+                <div class="rating-left">
+                    <div class="rating-title"><i class="far fa-star"></i> NOTA DA COMUNIDADE</div>
+                    <div class="rating-sub">Baseada em TMDB</div>
+                </div>
+                <div class="rating-right">
+                    <span class="rating-score" id="infoRating">6,1</span><span class="rating-max">/10</span>
+                </div>
+            </div>
+
+            <div class="details-grid">
+                <div class="detail-item">
+                    <span class="info-label">ANO</span>
+                    <span class="info-value text-yellow" id="infoYearText">2010</span>
+                </div>
+                <div class="detail-item">
+                    <span class="info-label">ÁUDIO</span>
+                    <span class="info-value text-green">DUB</span>
+                </div>
+                <div class="detail-item">
+                    <span class="info-label">CLASSIFICAÇÃO INDICATIVA</span>
+                    <span class="info-value badge-age">12</span>
+                </div>
+                <div class="detail-item">
+                    <span class="info-label">VISUALIZAÇÕES</span>
+                    <span class="info-value">16</span>
+                </div>
+                <div class="detail-item">
+                    <span class="info-label">DURAÇÃO</span>
+                    <span class="info-value" id="infoDurationText">1 h 44 min</span>
+                </div>
+                <div class="detail-item">
+                    <span class="info-label">STATUS</span>
+                    <span class="info-value">Lançado</span>
+                </div>
+            </div>
+
+            <div class="info-inner-card" style="margin-bottom: 12px; padding: 16px;">
+                <span class="info-label" style="display:block; margin-bottom: 8px;">GÊNEROS</span>
+                <div class="genres-list" id="infoGenresList">
+                    <span class="genre-tag-info">Comédia</span>
+                    <span class="genre-tag-info">Romance</span>
+                </div>
+            </div>
+
+            <div class="list-details">
+                <div class="list-item">
+                    <span class="list-label">Título original</span>
+                    <span class="list-value" id="originalTitle">--</span>
+                </div>
+                <div class="list-item">
+                    <span class="list-label">Países</span>
+                    <span class="list-value">United States of America</span>
+                </div>
+                <div class="list-item">
+                    <span class="list-label">Idiomas originais</span>
+                    <span class="list-value">English</span>
+                </div>
+                <div class="list-item">
+                    <span class="list-label">Direção</span>
+                    <span class="list-value">Alan Poul</span>
+                </div>
+            </div>
+
+            <a href="#" class="traduzir-btn"><i class="fas fa-language"></i> Traduzir ficha</a>
+        </div>
+        
+        <div class="card-box content-card hidden" id="tab-videos">
+            <p>Nenhum vídeo extra disponível.</p>
+        </div>
+    </div>
+
+    <!-- GALERIA DE FOTOS -->
+    <div class="gallery-section" id="gallerySection">
+        <div class="gallery-track" id="galleryTrack" onscroll="updateGalleryDots()"></div>
+        <div class="gallery-pagination" id="galleryPagination"></div>
+    </div>
+
+    <!-- AVALIAÇÕES -->
+    <div class="reviews-section">
+        <div class="reviews-header">
+            <div class="reviews-title-block">
+                <h3>Avaliações</h3>
+                <p>Notas e opiniões de quem já assistiu</p>
+            </div>
+            <a onclick="openModal('allReviewsModal')" class="view-all">Ver todas ></a>
+        </div>
+        
+        <div id="mainReviewsContainer">
+            <div class="review-card">
+                <div class="review-user">
+                    <div class="user-avatar-wrapper">
+                        <img src="https://i.imgur.com/3xflR2f.jpeg" alt="Gamerado">
+                        <div class="avatar-badge"><i class="fas fa-play-circle"></i></div>
+                    </div>
+                    <div class="user-info">
+                        <span class="user-name">Gamerado</span>
+                        <span class="user-time">Agora</span>
+                    </div>
+                </div>
+                
+                <div class="review-rating">
+                    <div class="stars">
+                        <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                    </div>
+                    <span class="score">5,0</span>
+                    <span class="vip-badge">VIP <i class="fas fa-star"></i></span>
+                </div>
+                
+                <div class="review-text">
+                    Pedimos respeito nos comentários e que utilizem este espaço para compartilhar opiniões e experiências sobre o aplicativo.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- RECOMENDAÇÕES -->
+    <div class="recommendations">
+        <div class="rec-header">
+            <h3>Recomendações</h3>
+            <a href="explorar.html" class="mais-btn">Explorar</a>
+        </div>
+        <div class="slider-track" id="recTrack"></div>
+    </div>
+
+    <!-- ================= MODAIS ================= -->
+    <!-- MODAL DE SELEÇÃO DE TEMPORADAS -->
+    <div class="modal-overlay" id="seasonsModal" onclick="closeModal(event, 'seasonsModal')">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h3>Selecione a Temporada</h3>
+                <i class="fas fa-times close-modal" onclick="closeModal(null, 'seasonsModal')"></i>
+            </div>
+            <div class="options-list" id="seasonsListContainer"></div>
+        </div>
+    </div>
+
+    <!-- MODAL DE SELEÇÃO DE EPISÓDIOS -->
+    <div class="modal-overlay" id="episodesModal" onclick="closeModal(event, 'episodesModal')">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h3 id="episodesModalTitle">Episódios</h3>
+                <i class="fas fa-times close-modal" onclick="closeModal(null, 'episodesModal')"></i>
+            </div>
+            <div class="options-list" id="episodesListContainer"></div>
+        </div>
+    </div>
+
+    <!-- MODAL DE SELEÇÃO DINÂMICA (Para Filmes) -->
+    <div class="modal-overlay" id="optionsModal" onclick="closeModal(event, 'optionsModal')">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h3 id="optionsModalTitle">Escolha a Opção</h3>
+                <i class="fas fa-times close-modal" onclick="closeModal(null, 'optionsModal')"></i>
+            </div>
+            <div class="options-list" id="optionsListContainer"></div>
+        </div>
+    </div>
+
+    <!-- MODAL TODAS AS AVALIAÇÕES -->
+    <div class="modal-overlay" id="allReviewsModal" onclick="closeModal(event, 'allReviewsModal')">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h3 style="color: #fff; font-size: 1.2rem;">Todas as Avaliações</h3>
+                <i class="fas fa-times close-modal" onclick="closeModal(null, 'allReviewsModal')"></i>
+            </div>
+            <div id="allReviewsContainer" style="display: flex; flex-direction: column;"></div>
+        </div>
+    </div>
+
+    <!-- MODAL DE AVALIAÇÃO -->
+    <div class="modal-overlay" id="rateModal" onclick="closeModal(event, 'rateModal')">
+        <div class="rate-modal-content" onclick="event.stopPropagation()">
+            <div class="rate-header">
+                <div class="rate-header-left">
+                    <div class="rate-icon-box"><i class="fas fa-star"></i></div>
+                    <div class="rate-title-box">
+                        <h3>Avaliar</h3>
+                        <p>Sua opinião ajuda outras pessoas<br>a escolher</p>
+                    </div>
+                </div>
+                <i class="fas fa-times close-modal" onclick="closeModal(null, 'rateModal')"></i>
+            </div>
+            <div class="rate-stars-card">
+                <h4>Como você avalia este título?</h4>
+                <div class="stars-container" id="starRating">
+                    <i class="far fa-star" data-val="1"></i>
+                    <i class="far fa-star" data-val="2"></i>
+                    <i class="far fa-star" data-val="3"></i>
+                    <i class="far fa-star" data-val="4"></i>
+                    <i class="far fa-star" data-val="5"></i>
+                </div>
+                <div class="rate-label" id="rateText">Selecione uma nota</div>
+            </div>
+            <div class="rate-comment-section">
+                <label>Seu comentário</label>
+                <textarea class="rate-textarea" id="rateComment" placeholder="Conte o que achou..."></textarea>
+            </div>
+            <button class="btn-submit-rate" onclick="enviarAvaliacao()">Enviar Avaliação</button>
+        </div>
+    </div>
+
+    <script>
+        // Lógica das Abas
+        function changeTab(element, targetId) {
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.content-card').forEach(card => card.classList.add('hidden'));
+            element.classList.add('active');
+            document.getElementById(targetId).classList.remove('hidden');
+        }
+
+        // Modais e Navegação
+        function goBackFromDetails() {
+            if (window.history.length > 1) { window.history.back(); } 
+            else { window.location.replace("index.html"); }
+        }
+        function openModal(id) { 
+            if(id === 'allReviewsModal') { syncAllReviews(); }
+            document.getElementById(id).classList.add('active'); 
+        }
+        function closeModal(e, id) { 
+            if(e && e.target.id !== id) return;
+            document.getElementById(id).classList.remove('active'); 
+        }
+
+        // ================= CÓDIGO DO GEMINI 1 =================
+        function toggleBtn(element, type) {
+            element.classList.toggle('active');
+            const icon = element.querySelector('i');
+            
+            // Define qual chave usar no localStorage
+            const storageKey = type === 'heart' ? 'userFavorites' : 'userMyList';
+            let currentList = JSON.parse(localStorage.getItem(storageKey)) || [];
+            
+            // Monta o objeto que será salvo e lido pela página conta.html
+            const itemToSave = {
+                title: currentData.title,
+                url: currentData.url,
+                cover: currentData.cover
+            };
+
+            const isActive = element.classList.contains('active');
+
+            // Animação e troca de ícones
+            if(type === 'heart') { 
+                icon.classList.toggle('far'); 
+                icon.classList.toggle('fas'); 
+            }
+            if(type === 'list') { 
+                icon.classList.toggle('fa-plus'); 
+                icon.classList.toggle('fa-check'); 
+            }
+
+            // Adiciona ou remove da lista do LocalStorage
+            if (isActive) {
+                // Adiciona apenas se ainda não existir na lista
+                if (!currentList.some(item => item.title === itemToSave.title)) {
+                    currentList.push(itemToSave);
+                }
+            } else {
+                // Remove da lista se desmarcar
+                currentList = currentList.filter(item => item.title !== itemToSave.title);
+            }
+            
+            // Salva a lista atualizada no navegador
+            localStorage.setItem(storageKey, JSON.stringify(currentList));
+        }
+
+        // ================= CÓDIGO DO GEMINI 2 =================
+        // Função para verificar se o título atual já está salvo no localStorage
+        function checkSavedStatus() {
+            const myList = JSON.parse(localStorage.getItem('userMyList')) || [];
+            const favList = JSON.parse(localStorage.getItem('userFavorites')) || [];
+
+            // Verifica "Minha Lista"
+            if (myList.some(item => item.title === currentData.title)) {
+                const listBtn = document.querySelector('.action-btn-top.list');
+                if (listBtn) {
+                    listBtn.classList.add('active');
+                    const icon = listBtn.querySelector('i');
+                    if (icon) icon.classList.replace('fa-plus', 'fa-check');
+                }
+            }
+
+            // Verifica "Favoritos"
+            if (favList.some(item => item.title === currentData.title)) {
+                const heartBtn = document.querySelector('.action-btn-top.heart');
+                if (heartBtn) {
+                    heartBtn.classList.add('active');
+                    const icon = heartBtn.querySelector('i');
+                    if (icon) icon.classList.replace('far', 'fas');
+                }
+            }
+        }
+
+        // ================= RECUPERAÇÃO DOS DADOS DAS SÉRIES (seriesData) =================
+        function getSeriesData() {
+            let data = null;
+            try {
+                data = JSON.parse(localStorage.getItem('seriesData')) || JSON.parse(sessionStorage.getItem('seriesData'));
+            } catch(e) {}
+            if (!data && window.seriesData) {
+                data = window.seriesData;
+            }
+            // Estrutura Padrão Fallback para Séries se const seriesData não estiver injetado no escopo global
+            if (!data) {
+                data = {
+                    "Lúcifer": {
+                        "1ª Temporada": [
+                            { title: "Episódio 1 - Piloto", duration: "45 min", url: "https://ia601808.us.archive.org/19/items/lucifer-ep-1x-2/Lucifer%20EP%201x2.mp4" },
+                            { title: "Episódio 2 - Lucifer Stay, Good Devil", duration: "45 min", url: "https://ia601808.us.archive.org/19/items/lucifer-ep-1x-2/Lucifer%20EP%201x2.mp4" },
+                            { title: "Episódio 3 - The Would-Be Prince of Darkness", duration: "43 min", url: "https://ia601808.us.archive.org/19/items/lucifer-ep-1x-2/Lucifer%20EP%201x2.mp4" }
+                        ],
+                        "2ª Temporada": [
+                            { title: "Episódio 1 - Tudo Volta ao Normal", duration: "44 min", url: "https://ia601808.us.archive.org/19/items/lucifer-ep-1x-2/Lucifer%20EP%201x2.mp4" },
+                            { title: "Episódio 2 - Liar, Liar, Slutty Dress on Fire", duration: "42 min", url: "https://ia601808.us.archive.org/19/items/lucifer-ep-1x-2/Lucifer%20EP%201x2.mp4" }
+                        ]
+                    }
+                };
+            }
+            return data;
+        }
+
+        function findSeriesObject(allSeries, title) {
+            if (!allSeries) return null;
+            if (allSeries[title]) return allSeries[title];
+            const lowerTitle = title.toLowerCase();
+            for (let key in allSeries) {
+                if (key.toLowerCase() === lowerTitle || lowerTitle.includes(key.toLowerCase()) || key.toLowerCase().includes(lowerTitle)) {
+                    return allSeries[key];
+                }
+            }
+            const keys = Object.keys(allSeries);
+            return keys.length > 0 ? allSeries[keys[0]] : null;
+        }
+
+        let currentData = {};
+        let currentSelectedSeason = "1ª Temporada";
+
+        function initPageData() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const paramTitle = urlParams.get('title');
+            const paramUrl = urlParams.get('url');
+
+            let savedSession = {};
+            try {
+                savedSession = JSON.parse(sessionStorage.getItem('currentMediaData') || '{}');
+            } catch(e) {}
+
+            currentData = {
+                title: paramTitle || savedSession.title || "Conteúdo Desconhecido",
+                url: (paramUrl && paramUrl !== '#') ? paramUrl : (savedSession.url || ""),
+                year: urlParams.get('year') || savedSession.year || "2026",
+                duration: urlParams.get('duration') || savedSession.duration || "1h 45m",
+                genre: urlParams.get('genre') || savedSession.genre || "Ação / Drama",
+                cover: urlParams.get('cover') || savedSession.cover || "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQDy-5PgPJuw6RHPJR_qGvL56ZkI0GEg27wtJXqQjsmGFjTaYqrNOqRki0&s=10",
+                banner: urlParams.get('banner') || savedSession.banner || "",
+                synopsis: savedSession.synopsis || "Sinopse do conteúdo indisponível no momento."
+            };
+
+            const isSerie = currentData.title.toLowerCase().includes('lúcifer') || 
+                            paramUrl === '#' || 
+                            currentData.duration.toLowerCase().includes('temporada') ||
+                            savedSession.type === 'serie';
+
+            currentData.isSerie = isSerie;
+
+            // Atualizar Interface
+            document.title = currentData.title + " | GAMERADO TV";
+            document.getElementById('itemTitle').innerText = currentData.title;
+            document.getElementById('originalTitle').innerText = currentData.title;
+            document.getElementById('tagYear').innerText = currentData.year;
+            document.getElementById('infoYearText').innerText = currentData.year;
+            document.getElementById('infoDurationText').innerText = currentData.duration;
+            document.getElementById('tagGenre').innerText = currentData.genre.split('/')[0].trim();
+            document.getElementById('itemSinopse').innerText = currentData.synopsis;
+
+            if (currentData.cover) document.getElementById('posterImage').src = currentData.cover;
+            if (currentData.banner) {
+                document.getElementById('heroBanner').style.backgroundImage = `url('${currentData.banner}')`;
+            } else if (currentData.cover) {
+                document.getElementById('heroBanner').style.backgroundImage = `url('${currentData.cover}')`;
+            }
+
+            const generos = currentData.genre.split('/');
+            document.getElementById('infoGenresList').innerHTML = generos.map(g => `<span class="genre-tag-info">${g.trim()}</span>`).join('');
+
+            // Configurações específicas quando for SÉRIE
+            if (isSerie) {
+                const btnAssistir = document.getElementById('btnAssistirPrincipal');
+                btnAssistir.innerHTML = `<i class="fas fa-list-ul"></i> Episódios`;
+                btnAssistir.onclick = function() { openEpisodesModal(); };
+
+                const btnTemp = document.getElementById('btnTemporadas');
+                btnTemp.classList.remove('hidden');
+
+                const allSeries = getSeriesData();
+                const seriesObj = findSeriesObject(allSeries, currentData.title);
+                if (seriesObj) {
+                    const seasons = Object.keys(seriesObj);
+                    if (seasons.length > 0) {
+                        currentSelectedSeason = seasons[0];
+                        updateSeasonButtonText();
+                    }
+                }
+            } else {
+                // Caso seja FILME, configura clique do botão principal para o Player
+                const pullDataLocal = sessionStorage.getItem('currentMediaData');
+                if (pullDataLocal) {
+                    const parseData = JSON.parse(pullDataLocal);
+                    document.getElementById('btnAssistirPrincipal').onclick = () => {
+                        window.location.href = `player.html?title=${encodeURIComponent(parseData.title || currentData.title)}&url=${encodeURIComponent(parseData.url || currentData.url)}`;
+                    };
+                }
+            }
+
+            loadRecommendations();
+            buildGallery();
+
+            // ================= CÓDIGO DO GEMINI 3 =================
+            checkSavedStatus();
+        }
+
+        // ================= MENUS PERSONALIZADOS (TEMPORADAS E EPISÓDIOS) =================
+        function updateSeasonButtonText() {
+            const btnText = document.getElementById('btnTemporadasText');
+            if (btnText) {
+                btnText.innerText = `Temporadas (${currentSelectedSeason})`;
+            }
+        }
+
+        function openSeasonsModal() {
+            const container = document.getElementById('seasonsListContainer');
+            container.innerHTML = '';
+
+            const allSeries = getSeriesData();
+            const seriesObj = findSeriesObject(allSeries, currentData.title);
+
+            if (!seriesObj) {
+                container.innerHTML = '<p style="color:#aaa; text-align:center; padding: 10px;">Nenhuma temporada disponível.</p>';
+                openModal('seasonsModal');
+                return;
+            }
+
+            const seasons = Object.keys(seriesObj);
+            seasons.forEach((seasonName) => {
+                const epCount = Array.isArray(seriesObj[seasonName]) ? seriesObj[seasonName].length : 0;
+                const isSelected = seasonName === currentSelectedSeason;
+                
+                container.innerHTML += `
+                    <div class="opt-btn" onclick="selectSeason('${seasonName}')" style="${isSelected ? 'border-color: var(--primary-red); background: rgba(229, 9, 20, 0.15);' : ''}">
+                        <i class="fas fa-folder-open" style="${isSelected ? 'color: var(--primary-red);' : 'color: #aaa;'}"></i>
+                        <div class="opt-text">
+                            <strong>${seasonName} ${isSelected ? '✓' : ''}</strong>
+                            <span>${epCount} Episódio(s) disponível(is)</span>
+                        </div>
+                    </div>
+                `;
+            });
+
+            openModal('seasonsModal');
+        }
+
+        function selectSeason(seasonName) {
+            currentSelectedSeason = seasonName;
+            updateSeasonButtonText();
+            closeModal(null, 'seasonsModal');
+            openEpisodesModal();
+        }
+
+        function openEpisodesModal() {
+            const container = document.getElementById('episodesListContainer');
+            const titleEl = document.getElementById('episodesModalTitle');
+            container.innerHTML = '';
+
+            titleEl.innerText = `Episódios - ${currentSelectedSeason}`;
+
+            const allSeries = getSeriesData();
+            const seriesObj = findSeriesObject(allSeries, currentData.title);
+
+            if (!seriesObj || !seriesObj[currentSelectedSeason]) {
+                container.innerHTML = '<p style="color:#aaa; text-align:center; padding: 10px;">Nenhum episódio encontrado para esta temporada.</p>';
+                openModal('episodesModal');
+                return;
+            }
+
+            const episodes = seriesObj[currentSelectedSeason];
+            episodes.forEach((ep, index) => {
+                const epTitle = ep.title || `Episódio ${index + 1}`;
+                const epDuration = ep.duration || '45 min';
+                const epUrl = ep.url || currentData.url || "https://ia601808.us.archive.org/19/items/lucifer-ep-1x-2/Lucifer%20EP%201x2.mp4";
+
+                container.innerHTML += `
+                    <div class="opt-btn" onclick="goToPlayer('${epUrl}', 'Servidor Principal', '${epTitle}')">
+                        <i class="fas fa-play-circle"></i>
+                        <div class="opt-text">
+                            <strong>${epTitle}</strong>
+                            <span>Duração: ${epDuration}</span>
+                        </div>
+                    </div>
+                `;
+            });
+
+            openModal('episodesModal');
+        }
+
+        // ================= GALERIA DE FOTOS =================
+        function buildGallery() {
+            const track = document.getElementById('galleryTrack');
+            const pagination = document.getElementById('galleryPagination');
+            
+            let images = [
+                currentData.banner || currentData.cover,
+                currentData.cover,
+                "https://image.tmdb.org/t/p/w500/7WsyChQLEftFiDOVTGkv3hFpyyt.jpg",
+                "https://image.tmdb.org/t/p/w500/4HodYYKEIsGOdinkGi2Ucz6X9i0.jpg"
+            ];
+
+            track.innerHTML = '';
+            pagination.innerHTML = '';
+
+            images.forEach((imgSrc, index) => {
+                if(!imgSrc) return;
+                track.innerHTML += `<div class="gallery-item"><img src="${imgSrc}" alt="Foto ${index+1}"></div>`;
+                pagination.innerHTML += `<div class="dot ${index === 0 ? 'active' : ''}"></div>`;
+            });
+        }
+
+        function updateGalleryDots() {
+            const track = document.getElementById('galleryTrack');
+            const dots = document.querySelectorAll('.gallery-pagination .dot');
+            let index = Math.round(track.scrollLeft / track.clientWidth);
+            dots.forEach((dot, i) => { i === index ? dot.classList.add('active') : dot.classList.remove('active'); });
+        }
+
+        // ================= REDIRECIONAMENTO E PLAYER =================
+        function handlePlay() { 
+            if (currentData.isSerie) {
+                openEpisodesModal();
+            } else {
+                openOptionsModal('play'); 
+            }
+        }
+        function handleDownload() { openOptionsModal('download'); }
+
+        function goToPlayer(videoUrl, serverName, extraTitle = '') {
+            const finalTitle = extraTitle ? `${currentData.title} (${extraTitle})` : currentData.title;
+            const linkToPlay = videoUrl || currentData.url || "https://ia601808.us.archive.org/19/items/lucifer-ep-1x-2/Lucifer%20EP%201x2.mp4";
+
+            sessionStorage.setItem('currentPlayerData', JSON.stringify({
+                title: finalTitle,
+                url: linkToPlay,
+                server: serverName || "Servidor Principal"
+            }));
+
+            window.location.href = `player.html?title=${encodeURIComponent(finalTitle)}&url=${encodeURIComponent(linkToPlay)}`;
+        }
+
+        function openOptionsModal(actionType) {
+            const modalTitle = document.getElementById('optionsModalTitle');
+            const container = document.getElementById('optionsListContainer');
+            container.innerHTML = '';
+
+            const serverNameClean = "Servidor Principal"; 
+            const linkToUse = currentData.url || "https://ia601808.us.archive.org/19/items/lucifer-ep-1x-2/Lucifer%20EP%201x2.mp4";
+
+            if (actionType === 'play') {
+                modalTitle.innerText = "Assistir";
+                container.innerHTML = `
+                    <div class="opt-btn" onclick="goToPlayer('${linkToUse}', '${serverNameClean}')">
+                        <i class="fas fa-play-circle"></i>
+                        <div class="opt-text">
+                            <strong>${serverNameClean}</strong>
+                            <span>Abrir reprodutor de vídeo</span>
+                        </div>
+                    </div>
+                `;
+            } else if (actionType === 'download') {
+                modalTitle.innerText = "Baixar Conteúdo";
+                container.innerHTML = `
+                    <div class="opt-btn" onclick="alert('Iniciando download através do ${serverNameClean}')">
+                        <i class="fas fa-cloud-download-alt"></i>
+                        <div class="opt-text">
+                            <strong>${serverNameClean}</strong>
+                            <span>Fazer download para assistir offline</span>
+                        </div>
+                    </div>
+                `;
+            }
+
+            openModal('optionsModal');
+        }
+
+        // ================= COMPARTILHAMENTO NATIVO =================
+        function compartilhar() {
+            if (navigator.share) {
+                navigator.share({
+                    title: currentData.title || 'GAMERADO TV',
+                    text: `Assista ${currentData.title} no GAMERADO TV!`,
+                    url: window.location.href
+                }).catch((error) => console.log('Erro ao compartilhar', error));
+            } else {
+                alert('Compartilhamento nativo não suportado neste dispositivo.');
+            }
+        }
+
+        // ================= SISTEMA DE AVALIAÇÃO =================
+        const stars = document.querySelectorAll('#starRating i');
+        const rateText = document.getElementById('rateText');
+        let currentRating = 0;
+        const ratingLabels = { 1: "Péssimo", 2: "Poderia melhorar", 3: "Bom", 4: "Muito bom", 5: "Excelente" };
+
+        stars.forEach(star => {
+            star.addEventListener('mouseover', function() {
+                resetStars();
+                const val = this.getAttribute('data-val');
+                highlightStars(val);
+                rateText.innerText = ratingLabels[val];
+            });
+            star.addEventListener('mouseout', function() {
+                resetStars();
+                if (currentRating > 0) {
+                    highlightStars(currentRating);
+                    rateText.innerText = ratingLabels[currentRating];
+                } else { rateText.innerText = "Selecione uma nota"; }
+            });
+            star.addEventListener('click', function() {
+                currentRating = this.getAttribute('data-val');
+                highlightStars(currentRating);
+                rateText.innerText = ratingLabels[currentRating];
+            });
+        });
+
+        function highlightStars(val) {
+            for (let i = 0; i < val; i++) { stars[i].classList.remove('far'); stars[i].classList.add('fas', 'active'); }
+        }
+        function resetStars() {
+            stars.forEach(s => { s.classList.remove('fas', 'active'); s.classList.add('far'); });
+        }
+
+        function enviarAvaliacao() {
+            const comment = document.getElementById('rateComment').value.trim();
+            if (currentRating === 0) { alert("Selecione uma nota!"); return; }
+            if (comment === "") { alert("O comentário é obrigatório."); return; }
+            
+            let starsHtml = '';
+            for(let i = 1; i <= 5; i++){ starsHtml += (i <= currentRating) ? '<i class="fas fa-star"></i>' : '<i class="far fa-star"></i>'; }
+
+            const newReviewHtml = `
+            <div class="review-card" style="border-color: var(--primary-red);">
+                <div class="review-user">
+                    <div class="user-avatar-wrapper"><img src="https://ui-avatars.com/api/?name=Voce&background=e50914&color=fff"></div>
+                    <div class="user-info"><span class="user-name">Você</span><span class="user-time">Agora</span></div>
+                </div>
+                <div class="review-rating"><div class="stars">${starsHtml}</div><span class="score">${currentRating},0</span></div>
+                <div class="review-text">${comment}</div>
+            </div>`;
+
+            document.getElementById('mainReviewsContainer').insertAdjacentHTML('afterbegin', newReviewHtml);
+            closeModal(null, 'rateModal');
+            document.getElementById('rateComment').value = '';
+            currentRating = 0;
+            resetStars();
+            rateText.innerText = "Selecione uma nota";
+        }
+
+        function syncAllReviews() {
+            document.getElementById('allReviewsContainer').innerHTML = document.getElementById('mainReviewsContainer').innerHTML;
+        }
+
+        function loadRecommendations() {
+            const track = document.getElementById('recTrack');
+            const posters = [
+                "https://image.tmdb.org/t/p/w220_and_h330_face/ldCCmRdBPk5FR13W975zXAM1dGi.jpg",
+                "https://image.tmdb.org/t/p/w220_and_h330_face/gfnXixcGC060QcG6JPxN6AMdVsq.jpg",
+                "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRdsi_s_oeL6ct-vvYPSnly6d3hUTnxhiEqV6uyRbLJBK0JwJy0Z59Q_lI&s=10",
+                "https://image.tmdb.org/t/p/w220_and_h330_face/wTW2t8ocWDlHnc8bLXVQSYsZepP.jpg",
+                "https://image.tmdb.org/t/p/w220_and_h330_face/1pdfLvkbY9ohJlCjQH2TGbiROQw.jpg"
+            ];
+            track.innerHTML = posters.map(url => `<div class="rec-card"><img src="${url}"></div>`).join('');
+        }
+
+        window.addEventListener('DOMContentLoaded', initPageData);
+    </script>
+</body>
+</html>

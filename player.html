@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Assistindo... | GAMERADOFLIX</title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <style>
+        /* CSS Unificado do Player */
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body, html { width: 100%; height: 100%; background-color: #000; font-family: 'Poppins', sans-serif; overflow: hidden; color: #fff; }
+
+        .player-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        #vPlayer, #youtubeFrame {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            z-index: 1;
+            transition: transform 0.3s ease;
+            border: none;
+        }
+
+        /* Overlay de Brilho */
+        .brightness-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0);
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        /* Interface de Controles */
+        .controls-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.4);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: env(safe-area-inset-top) 20px env(safe-area-inset-bottom) 20px;
+            opacity: 1;
+            transition: opacity 0.4s ease;
+            z-index: 10;
+        }
+
+        .controls-overlay.hidden { opacity: 0; pointer-events: none; }
+
+        .top-bar { display: flex; align-items: center; justify-content: space-between; width: 100%; }
+        .back-btn, .lock-btn { background: none; border: none; color: #fff; font-size: 1.4rem; padding: 15px; cursor: pointer; text-decoration: none; }
+        .video-title { font-size: 1rem; font-weight: 400; flex-grow: 1; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #e50914; }
+
+        /* Controles Centrais */
+        .center-controls { display: flex; align-items: center; justify-content: center; gap: 50px; }
+        
+        .skip-wrapper {
+            position: relative;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: none;
+            border: none;
+            color: #fff;
+            cursor: pointer;
+        }
+
+        .skip-wrapper i { font-size: 2.4rem; opacity: 0.9; }
+        
+        .skip-num {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -42%);
+            font-size: 0.7rem;
+            font-weight: 700;
+            pointer-events: none;
+        }
+
+        .play-pause-btn {
+            width: 80px;
+            height: 80px;
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 4rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            cursor: pointer;
+        }
+
+        /* Loading Spinner */
+        .loader {
+            position: absolute;
+            width: 65px;
+            height: 65px;
+            border: 4px solid rgba(255,255,255,0.2);
+            border-top: 4px solid #e50914;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            display: none;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* Bottom Bar */
+        .bottom-bar { display: flex; flex-direction: column; width: 100%; gap: 10px; }
+        .progress-area { display: flex; align-items: center; gap: 15px; width: 100%; font-size: 0.8rem; }
+        
+        input[type="range"] {
+            flex-grow: 1;
+            height: 4px;
+            -webkit-appearance: none;
+            background: rgba(255,255,255,0.2);
+            border-radius: 2px;
+            outline: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 14px;
+            height: 14px;
+            background: #e50914;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        /* Estrutura da barra inferior */
+        .bottom-nav-row { display: flex; justify-content: space-between; align-items: center; width: 100%; padding-bottom: 5px; }
+        .bottom-nav-row button { background: none; border: none; color: #fff; font-size: 1.3rem; cursor: pointer; padding: 5px; transition: color 0.3s; }
+        .btn-group { display: flex; gap: 20px; align-items: center; }
+
+        /* Cadeado */
+        .locked-screen {
+            position: absolute; inset: 0; z-index: 50; display: none;
+            align-items: center; justify-content: center; background: transparent;
+        }
+        .locked-screen.active { display: flex; }
+        .unlock-btn { width: 60px; height: 60px; border-radius: 50%; background: rgba(0,0,0,0.6); border: 1px solid #fff; color: #fff; font-size: 1.5rem; }
+
+        /* Gestos */
+        .gesture-indicator {
+            position: absolute; top: 20%; left: 50%; transform: translateX(-50%);
+            background: rgba(0,0,0,0.7); padding: 10px 20px; border-radius: 20px;
+            display: none; align-items: center; gap: 10px; z-index: 100;
+        }
+
+        /* Menu de Opções / Submenus */
+        .menu-overlay {
+            position: absolute; inset: 0; background: rgba(0,0,0,0.7);
+            z-index: 60; display: none; align-items: flex-end; justify-content: flex-end;
+        }
+        .menu-card {
+            width: 300px; background: #1a1a1a; margin: 20px; border-radius: 15px;
+            overflow: hidden; box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            position: relative;
+        }
+        .menu-item { padding: 15px 20px; border-bottom: 1px solid #333; display: flex; justify-content: space-between; cursor: pointer; }
+        .menu-item:last-child { border: none; }
+        .menu-item.selected { color: #e50914; font-weight: bold; }
+
+        /* Estilos adicionados do playeradd.html para o Menu de Qualidade/Áudio */
+        .disabled-item { opacity: 0.5; cursor: not-allowed; pointer-events: none; }
+        .menu-header {
+            padding: 15px; text-align: center; font-weight: bold; border-bottom: 1px solid #333; display: flex; align-items: center;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="player-container" id="mainContainer">
+        <div class="brightness-overlay" id="bOverlay"></div>
+        
+        <div id="playerTarget" style="width:100%; height:100%;">
+            <video id="vPlayer" playsinline autoplay></video>
+        </div>
+
+        <div class="gesture-indicator" id="gIndicator">
+            <i class="fas fa-sun"></i>
+            <span id="gText">50%</span>
+        </div>
+
+        <div class="controls-overlay" id="cOverlay">
+            <div class="top-bar">
+                <a onclick="goBackFromPlayer()" class="back-btn"><i class="fas fa-arrow-left"></i></a>
+                <div class="video-title" id="playerTitle">Carregando título...</div>
+                <button class="lock-btn" onclick="setLock(true)"><i class="fas fa-unlock"></i></button>
+            </div>
+
+            <div class="center-controls" id="centerControls">
+                <button class="skip-wrapper" onclick="seek(-10)">
+                    <i class="fas fa-undo-alt"></i>
+                    <span class="skip-num">10</span>
+                </button>
+                
+                <div class="play-pause-btn" onclick="togglePlay()">
+                    <div class="loader" id="vLoader"></div>
+                    <i class="fas fa-play" id="playIcon"></i>
+                </div>
+
+                <button class="skip-wrapper" onclick="seek(10)">
+                    <i class="fas fa-redo-alt"></i>
+                    <span class="skip-num">10</span>
+                </button>
+            </div>
+
+            <div class="bottom-bar" id="bottomBar">
+                <div class="progress-area">
+                    <span id="curTime">00:00</span>
+                    <input type="range" id="pBar" value="0">
+                    <span id="durTime">00:00</span>
+                </div>
+                
+                <div class="bottom-nav-row">
+                    <div class="btn-group left-group">
+                        <button style="opacity: 0.5; cursor: not-allowed;" title="Espelhar"><i class="fas fa-tv"></i></button>
+                        <button onclick="toggleMute()" title="Mudo"><i class="fas fa-volume-up" id="volIcon"></i></button>
+                    </div>
+
+                    <div class="btn-group center-group" id="epNavBtns" style="display: none;">
+                        <button id="prevEpBtn" title="Episódio Anterior"><i class="fas fa-step-backward"></i></button>
+                        <button id="nextEpBtn" title="Próximo Episódio"><i class="fas fa-step-forward"></i></button>
+                    </div>
+
+                    <div class="btn-group right-group">
+                        <button onclick="changeZoom()"><i class="fas fa-expand" id="zIcon"></i></button>
+                        <button onclick="toggleMenu(true)"><i class="fas fa-cog"></i></button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="locked-screen" id="lScreen" onclick="showUnlockBtn()">
+            <button class="unlock-btn" id="uBtn" style="opacity:0" onclick="setLock(false)">
+                <i class="fas fa-lock"></i>
+            </button>
+        </div>
+
+        <!-- Estrutura de Menu com Qualidade, Faixa de Áudio e Velocidade -->
+        <div class="menu-overlay" id="mOverlay" onclick="toggleMenu(false)">
+            <div class="menu-card" onclick="event.stopPropagation()">
+                
+                <!-- Menu Principal de Configurações -->
+                <div id="mainSettingsMenu">
+                    <div class="menu-header">
+                        <span style="flex-grow:1;">Configurações</span>
+                    </div>
+                    <!-- Qualidade não clicável -->
+                    <div class="menu-item disabled-item">
+                        Qualidade <span style="color:#888; font-size:0.8rem;">Auto</span>
+                    </div>
+                    <!-- Faixa de Áudio -->
+                    <div class="menu-item" id="audioMenuBtn" onclick="showSubMenu('audioSettingsMenu')">
+                        Faixa de Áudio <span id="currentAudioText" style="color:#888; font-size:0.8rem;">Português</span>
+                    </div>
+                    <!-- Velocidade -->
+                    <div class="menu-item" onclick="showSubMenu('speedSettingsMenu')">
+                        Velocidade <span id="currentSpeedText" style="color:#888; font-size:0.8rem;">Normal</span>
+                    </div>
+                </div>
+
+                <!-- Submenu: Velocidade -->
+                <div id="speedSettingsMenu" style="display: none;">
+                    <div class="menu-header">
+                        <i class="fas fa-arrow-left" style="cursor:pointer; position:absolute;" onclick="showSubMenu('mainSettingsMenu')"></i>
+                        <span style="flex-grow:1;">Velocidade</span>
+                    </div>
+                    <div class="menu-item speed-item" onclick="setSpeed(0.5, this)">0.5x</div>
+                    <div class="menu-item speed-item selected" onclick="setSpeed(1.0, this)">Normal</div>
+                    <div class="menu-item speed-item" onclick="setSpeed(1.5, this)">1.5x</div>
+                    <div class="menu-item speed-item" onclick="setSpeed(2.0, this)">2.0x</div>
+                </div>
+
+                <!-- Submenu: Faixa de Áudio -->
+                <div id="audioSettingsMenu" style="display: none;">
+                    <div class="menu-header">
+                        <i class="fas fa-arrow-left" style="cursor:pointer; position:absolute;" onclick="showSubMenu('mainSettingsMenu')"></i>
+                        <span style="flex-grow:1;">Faixa de Áudio</span>
+                    </div>
+                    <div id="audioTrackList">
+                        <!-- Popula pelo Javascript -->
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- LÓGICA DE DADOS DO PLAYER ORIGINAL ---
+        const params = new URLSearchParams(window.location.search);
+        const videoTitle = params.get("title") || "Assistindo Agora";
+        const videoUrl = params.get("url") || params.get("src");
+        const youtubeUrl = params.get("youtube");
+
+        document.getElementById("playerTitle").innerText = videoTitle;
+        document.title = videoTitle + " | GAMERADOFLIX";
+
+        const video = document.getElementById('vPlayer');
+        const container = document.getElementById('mainContainer');
+        const controls = document.getElementById('cOverlay');
+        const playIcon = document.getElementById('playIcon');
+        const loader = document.getElementById('vLoader');
+        const progressBar = document.getElementById('pBar');
+        
+        let hideTimeout;
+        let isLocked = false;
+        let zoomLevel = 0;
+        let previousVolume = 1;
+
+        // --- LÓGICA DE CONTINUAR DE ONDE PAROU E PRÓX/ANT EPISÓDIO ---
+        const tempoSalvo = params.get("t"); // Captura o tempo da URL (em segundos)
+        const savedDataStr = sessionStorage.getItem('currentMediaData');
+        let currentDataObj = savedDataStr ? JSON.parse(savedDataStr) : null;
+        let isSerieObj = currentDataObj && currentDataObj.type === 'serie';
+        
+        // Identificar Temporada e Episódio Atual
+        let currentS = -1;
+        let currentE = -1;
+
+        if (isSerieObj && currentDataObj.seriesInfo && currentDataObj.seriesInfo.seasons) {
+            const seasons = currentDataObj.seriesInfo.seasons;
+            for (let s = 0; s < seasons.length; s++) {
+                for (let e = 0; e < seasons[s].episodes.length; e++) {
+                    if (videoTitle.includes(seasons[s].episodes[e].name) || seasons[s].episodes[e].link === videoUrl) {
+                        currentS = s;
+                        currentE = e;
+                        break;
+                    }
+                }
+                if (currentS !== -1) break;
+            }
+        }
+
+        // --- LÓGICA DE SALVAMENTO DE TEMPO REAL ---
+        let lastSaveTime = 0;
+
+        function salvarProgresso() {
+            if (!video || isNaN(video.duration) || video.duration === 0 || video.currentTime < 2) return;
+            
+            let cwList = JSON.parse(localStorage.getItem('continueWatchingList') || '[]');
+            let title = currentDataObj ? currentDataObj.title : videoTitle;
+            let urlToSave = videoUrl || (currentDataObj ? currentDataObj.url : "");
+            let progress = (video.currentTime / video.duration) * 100;
+            
+            if (progress > 98) {
+                cwList = cwList.filter(item => item.title !== title);
+            } else {
+                let existingIdx = cwList.findIndex(item => item.title === title);
+                
+                let cwItem = {
+                    title: title,
+                    cover: currentDataObj ? currentDataObj.cover : "",
+                    type: currentDataObj ? currentDataObj.type : "movie",
+                    year: currentDataObj ? currentDataObj.year : "2026",
+                    progress: progress,
+                    playerUrl: `player.html?title=${encodeURIComponent(title)}&url=${encodeURIComponent(urlToSave)}&t=${video.currentTime}`
+                };
+
+                if (isSerieObj && currentS !== -1) {
+                     cwItem.season = currentS + 1;
+                     cwItem.episode = currentE + 1;
+                     cwItem.type = 'serie';
+                }
+
+                if (existingIdx !== -1) cwList.splice(existingIdx, 1);
+                cwList.unshift(cwItem);
+            }
+            
+            if (cwList.length > 20) cwList.pop();
+            localStorage.setItem('continueWatchingList', JSON.stringify(cwList));
+        }
+
+        // --- NAVEGAÇÃO INTELIGENTE (VOLTAR, HARDWARE BACK, ESC) ---
+        function goBackFromPlayer() {
+            salvarProgresso();
+            if (window.history.length > 1) {
+                window.history.back();
+            } else {
+                window.location.replace("detalhes.html");
+            }
+        }
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                if (!document.fullscreenElement) {
+                    goBackFromPlayer();
+                }
+            }
+        });
+
+        function updateNavButtons() {
+            const navContainer = document.getElementById('epNavBtns');
+            
+            if (!isSerieObj || currentS === -1 || currentE === -1) {
+                if (navContainer) navContainer.style.display = 'none';
+                return;
+            }
+            
+            if (navContainer) navContainer.style.display = 'flex';
+            
+            const seasons = currentDataObj.seriesInfo.seasons;
+            const prevBtn = document.getElementById('prevEpBtn');
+            const nextBtn = document.getElementById('nextEpBtn');
+            
+            if (currentS === 0 && currentE === 0) {
+                prevBtn.style.color = 'gray';
+                prevBtn.style.cursor = 'not-allowed';
+                prevBtn.onclick = null;
+            } else {
+                prevBtn.style.color = '#fff';
+                prevBtn.style.cursor = 'pointer';
+                prevBtn.onclick = goPrevEp;
+            }
+            
+            if (currentS === seasons.length - 1 && currentE === seasons[currentS].episodes.length - 1) {
+                nextBtn.style.color = 'gray';
+                nextBtn.style.cursor = 'not-allowed';
+                nextBtn.onclick = null;
+            } else {
+                nextBtn.style.color = '#fff';
+                nextBtn.style.cursor = 'pointer';
+                nextBtn.onclick = goNextEp;
+            }
+        }
+
+        function goPrevEp() {
+            if (currentS === 0 && currentE === 0) return;
+            let targetS = currentS;
+            let targetE = currentE - 1;
+            const seasons = currentDataObj.seriesInfo.seasons;
+            
+            if (targetE < 0) {
+                targetS--;
+                targetE = seasons[targetS].episodes.length - 1;
+            }
+            goToEp(targetS, targetE);
+        }
+
+        function goNextEp() {
+            const seasons = currentDataObj.seriesInfo.seasons;
+            if (currentS === seasons.length - 1 && currentE === seasons[currentS].episodes.length - 1) return;
+            
+            let targetS = currentS;
+            let targetE = currentE + 1;
+            
+            if (targetE >= seasons[targetS].episodes.length) {
+                targetS++;
+                targetE = 0;
+            }
+            goToEp(targetS, targetE);
+        }
+
+        function goToEp(sIdx, eIdx) {
+            const ep = currentDataObj.seriesInfo.seasons[sIdx].episodes[eIdx];
+            const newTitle = currentDataObj.title + ' - ' + ep.name;
+            const finalUrl = ep.link ? ep.link : currentDataObj.url;
+
+            currentS = sIdx;
+            currentE = eIdx;
+
+            const vPlayerObj = document.getElementById('vPlayer');
+            const isYtCheck = youtubeUrl || (finalUrl.includes('youtube.com') || finalUrl.includes('youtu.be'));
+
+            if (!isYtCheck && vPlayerObj) {
+                document.getElementById("playerTitle").innerText = newTitle;
+                document.title = newTitle + " | GAMERADOFLIX";
+                
+                vPlayerObj.src = finalUrl;
+                vPlayerObj.play().catch(() => {});
+                
+                const newUrlParams = new URL(window.location);
+                newUrlParams.searchParams.set("title", newTitle);
+                newUrlParams.searchParams.set("url", finalUrl);
+                window.history.replaceState({}, '', newUrlParams);
+
+                updateNavButtons();
+            } else {
+                window.location.replace(`player.html?title=${encodeURIComponent(newTitle)}&url=${encodeURIComponent(finalUrl)}`);
+            }
+        }
+
+        updateNavButtons();
+
+        // Carregamento da Fonte (YouTube vs Direto)
+        if (youtubeUrl) {
+            let id = '';
+            if (youtubeUrl.includes('youtu.be')) id = youtubeUrl.split('youtu.be/')[1];
+            else if (youtubeUrl.includes('v=')) id = youtubeUrl.split('v=')[1].split('&')[0];
+            
+            let iframeSrc = `https://www.youtube.com/embed/${id}?autoplay=1&rel=0`;
+            if (tempoSalvo) iframeSrc += `&start=${Math.floor(tempoSalvo)}`;
+            
+            document.getElementById('playerTarget').innerHTML = `
+                <iframe id="youtubeFrame" src="${iframeSrc}" 
+                allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+            document.getElementById('centerControls').style.display = 'none';
+            document.getElementById('bottomBar').style.display = 'none';
+            
+        } else if (videoUrl) {
+            video.src = videoUrl;
+
+            if (tempoSalvo) {
+                video.addEventListener('loadedmetadata', () => {
+                    video.currentTime = parseFloat(tempoSalvo);
+                });
+                if (video.readyState >= 1) {
+                    video.currentTime = parseFloat(tempoSalvo);
+                }
+            }
+        }
+
+        // --- FUNCIONALIDADES DO PLAYER ---
+
+        document.body.addEventListener('click', async function init() {
+            if (!youtubeUrl) video.play().catch(() => {});
+            try {
+                if (container.requestFullscreen) await container.requestFullscreen();
+                else if (container.webkitRequestFullscreen) await container.webkitRequestFullscreen();
+                if (screen.orientation && screen.orientation.lock) {
+                    await screen.orientation.lock('landscape').catch(() => {});
+                }
+            } catch (e) {}
+            document.body.removeEventListener('click', init);
+            resetTimer();
+        }, {once: false});
+
+        function changeZoom() {
+            zoomLevel = (zoomLevel + 1) % 3;
+            const icon = document.getElementById('zIcon');
+            const target = youtubeUrl ? document.getElementById('youtubeFrame') : video;
+            
+            if (zoomLevel === 0) {
+                target.style.objectFit = 'contain';
+                target.style.transform = 'scale(1)';
+                icon.className = 'fas fa-expand';
+            } else if (zoomLevel === 1) {
+                target.style.objectFit = 'cover';
+                target.style.transform = 'scale(1)';
+                icon.className = 'fas fa-compress';
+            } else {
+                target.style.objectFit = 'cover';
+                target.style.transform = 'scale(1.25)';
+                icon.className = 'fas fa-search-plus';
+            }
+        }
+
+        function toggleMute() {
+            const volIcon = document.getElementById('volIcon');
+            if (video.volume > 0 || !video.muted) {
+                previousVolume = video.volume > 0 ? video.volume : 1;
+                video.volume = 0;
+                video.muted = true;
+                volIcon.className = 'fas fa-volume-mute';
+            } else {
+                video.muted = false;
+                video.volume = previousVolume;
+                if (video.volume > 0.5) volIcon.className = 'fas fa-volume-up';
+                else volIcon.className = 'fas fa-volume-down';
+            }
+        }
+
+        container.addEventListener('click', (e) => {
+            if (isLocked) return;
+            if (e.target !== controls && e.target !== container && !container.contains(e.target)) return;
+            if (controls.classList.contains('hidden')) {
+                controls.classList.remove('hidden');
+                resetTimer();
+            } else {
+                controls.classList.add('hidden');
+            }
+        });
+
+        function resetTimer() {
+            clearTimeout(hideTimeout);
+            if (!video.paused) {
+                hideTimeout = setTimeout(() => {
+                    controls.classList.add('hidden');
+                }, 5000);
+            }
+        }
+
+        function togglePlay() {
+            if (video.paused) {
+                video.play();
+                playIcon.className = 'fas fa-pause';
+            } else {
+                video.pause();
+                playIcon.className = 'fas fa-play';
+            }
+            resetTimer();
+        }
+
+        function seek(s) {
+            video.currentTime += s;
+            resetTimer();
+        }
+
+        video.addEventListener('waiting', () => { loader.style.display = 'block'; playIcon.style.opacity = '0'; });
+        video.addEventListener('playing', () => { loader.style.display = 'none'; playIcon.style.opacity = '1'; playIcon.className = 'fas fa-pause'; });
+
+        video.addEventListener('timeupdate', () => {
+            const p = (video.currentTime / video.duration) * 100;
+            progressBar.value = p;
+            document.getElementById('curTime').innerText = formatTime(video.currentTime);
+            document.getElementById('durTime').innerText = formatTime(video.duration);
+
+            if (Math.abs(video.currentTime - lastSaveTime) > 5) {
+                salvarProgresso();
+                lastSaveTime = video.currentTime;
+            }
+        });
+
+        progressBar.addEventListener('input', () => {
+            video.currentTime = (progressBar.value / 100) * video.duration;
+        });
+
+        function formatTime(s) {
+            if(isNaN(s)) return "00:00";
+            let h = Math.floor(s / 3600);
+            let m = Math.floor((s % 3600) / 60);
+            let sec = Math.floor(s % 60);
+            
+            if (h > 0) {
+                return `${h}:${m.toString().padStart(2,'0')}:${sec.toString().padStart(2,'0')}`;
+            }
+            return `${m.toString().padStart(2,'0')}:${sec.toString().padStart(2,'0')}`;
+        }
+
+        // --- LÓGICA DO MENU DE CONFIGURAÇÕES (QUALIDADE, ÁUDIO, VELOCIDADE) ---
+        function showSubMenu(menuId) {
+            document.getElementById('mainSettingsMenu').style.display = 'none';
+            document.getElementById('speedSettingsMenu').style.display = 'none';
+            document.getElementById('audioSettingsMenu').style.display = 'none';
+            
+            document.getElementById(menuId).style.display = 'block';
+        }
+
+        function toggleMenu(s) {
+            document.getElementById('mOverlay').style.display = s ? 'flex' : 'none';
+            if (s) {
+                showSubMenu('mainSettingsMenu');
+                populateAudioTracks();
+            }
+        }
+        
+        function populateAudioTracks() {
+            const trackList = document.getElementById('audioTrackList');
+            const audioBtn = document.getElementById('audioMenuBtn');
+            const currentAudioText = document.getElementById('currentAudioText');
+            
+            if (video.audioTracks && video.audioTracks.length > 1) {
+                audioBtn.classList.remove('disabled-item');
+                audioBtn.onclick = () => showSubMenu('audioSettingsMenu');
+                
+                trackList.innerHTML = '';
+                let forcePtDefault = false;
+                
+                for (let i = 0; i < video.audioTracks.length; i++) {
+                    const track = video.audioTracks[i];
+                    let trackLabel = track.label || track.language || `Faixa ${i + 1}`;
+                    
+                    if(trackLabel.toLowerCase().includes('pt') || trackLabel.toLowerCase().includes('português')) {
+                        trackLabel = 'Português';
+                        if(!track.enabled && !video.dataset.ptForced) {
+                            forcePtDefault = i; 
+                        }
+                    }
+                    
+                    const div = document.createElement('div');
+                    div.className = `menu-item audio-item ${track.enabled ? 'selected' : ''}`;
+                    div.innerText = trackLabel;
+                    if(track.enabled) currentAudioText.innerText = trackLabel;
+                    
+                    div.onclick = function(e) {
+                        setAudioTrack(i, trackLabel, this);
+                        e.stopPropagation();
+                    };
+                    trackList.appendChild(div);
+                }
+                
+                if (forcePtDefault !== false) {
+                    video.dataset.ptForced = 'true';
+                    setAudioTrack(forcePtDefault, 'Português', trackList.children[forcePtDefault]);
+                }
+                
+            } else {
+                audioBtn.classList.add('disabled-item');
+                audioBtn.onclick = null;
+                currentAudioText.innerText = 'Português';
+            }
+        }
+
+        function setAudioTrack(index, label, el) {
+            if (video.audioTracks) {
+                for (let i = 0; i < video.audioTracks.length; i++) {
+                    video.audioTracks[i].enabled = (i === index);
+                }
+            }
+            document.querySelectorAll('.audio-item').forEach(i => i.classList.remove('selected'));
+            el.classList.add('selected');
+            document.getElementById('currentAudioText').innerText = label;
+            setTimeout(() => toggleMenu(false), 200);
+        }
+
+        function setSpeed(v, el) {
+            video.playbackRate = v;
+            document.querySelectorAll('.speed-item').forEach(i => i.classList.remove('selected'));
+            el.classList.add('selected');
+            document.getElementById('currentSpeedText').innerText = v === 1.0 ? 'Normal' : v + 'x';
+            setTimeout(() => toggleMenu(false), 200);
+        }
+
+        function setLock(s) {
+            isLocked = s;
+            document.getElementById('lScreen').classList.toggle('active', s);
+            controls.classList.add('hidden');
+        }
+
+        function showUnlockBtn() {
+            const btn = document.getElementById('uBtn');
+            btn.style.opacity = '1';
+            setTimeout(() => btn.style.opacity = '0', 3000);
+        }
+
+        // Gestos de Brilho e Volume
+        let startY;
+        let isRight;
+        container.addEventListener('touchstart', e => {
+            startY = e.touches[0].clientY;
+            isRight = e.touches[0].clientX > window.innerWidth / 2;
+        });
+
+        container.addEventListener('touchmove', e => {
+            if (isLocked || youtubeUrl) return;
+            let delta = startY - e.touches[0].clientY;
+            let indicator = document.getElementById('gIndicator');
+            indicator.style.display = 'flex';
+            
+            if (isRight) {
+                video.volume = Math.min(1, Math.max(0, video.volume + delta/5000));
+                video.muted = false;
+                document.getElementById('gText').innerText = "Vol: " + Math.round(video.volume*100) + "%";
+                
+                const volIcon = document.getElementById('volIcon');
+                if (video.volume === 0) volIcon.className = 'fas fa-volume-mute';
+                else if (video.volume > 0.5) volIcon.className = 'fas fa-volume-up';
+                else volIcon.className = 'fas fa-volume-down';
+
+            } else {
+                let b = document.getElementById('bOverlay');
+                let curB = parseFloat(b.style.background.replace(/[^\d.]/g, '')) || 0;
+                let newB = Math.min(0.8, Math.max(0, curB - delta/5000));
+                b.style.background = `rgba(0,0,0,${newB})`;
+                document.getElementById('gText').innerText = "Brilho: " + Math.round((1-newB)*100) + "%";
+            }
+        });
+
+        container.addEventListener('touchend', () => {
+            setTimeout(() => document.getElementById('gIndicator').style.display = 'none', 1000);
+        });
+
+        window.addEventListener('beforeunload', salvarProgresso);
+    </script>
+</body>
+</html>

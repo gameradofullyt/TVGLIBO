@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="pt-br" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GAMERADO TV | Home</title>
+    
+    <script>
+        const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+        const currentProfile = sessionStorage.getItem('currentProfile');
+
+        if (!isLoggedIn) {
+            window.location.replace('login.html');
+        } else if (!currentProfile) {
+            window.location.replace('selecaoconta.html');
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .card-info h4 { font-size: 0.95rem; margin-bottom: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: white; text-shadow: 1px 1px 4px rgba(0,0,0,0.9), 0 0 8px rgba(0,0,0,0.8); }
+        .card-info p { font-size: 0.75rem; opacity: 0.9; margin: 2px 0; color: white; text-shadow: 1px 1px 4px rgba(0,0,0,0.9); }
+        .card-date { color: var(--primary-red, #e50914); font-weight: bold; text-shadow: 1px 1px 4px rgba(0,0,0,0.9); }
+        body { padding-bottom: 60px; }
+        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(15, 15, 15, 0.95); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); display: flex; justify-content: space-around; align-items: center; padding: 8px 0; border-top: 1px solid rgba(255, 255, 255, 0.05); z-index: 1000; box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.5); }
+        .bottom-nav .nav-item { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #888; font-size: 0.7rem; font-family: 'Poppins', sans-serif; transition: all 0.3s ease; position: relative; width: 80px; }
+        .bottom-nav .nav-item i { font-size: 1.2rem; margin-bottom: 4px; transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), color 0.3s; }
+        .bottom-nav .nav-item:hover i, .bottom-nav .nav-item.active i { transform: translateY(-4px) scale(1.1); color: var(--primary-red, #e50914); }
+        .bottom-nav .nav-item:hover span, .bottom-nav .nav-item.active span { color: white; font-weight: bold; }
+        .bottom-nav .nav-item.active::after { content: ''; position: absolute; bottom: -6px; width: 4px; height: 4px; background-color: var(--primary-red, #e50914); border-radius: 50%; animation: popIn 0.3s ease forwards; }
+        @keyframes popIn { 0% { transform: scale(0); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+
+        .hero-carousel { position: relative; width: 100%; aspect-ratio: 16 / 9; max-height: 70vh; min-height: 250px; overflow: hidden; margin-bottom: 10px; cursor: grab; }
+        .hero-carousel:active { cursor: grabbing; }
+        .hero-track { width: 100%; height: 100%; position: relative; touch-action: pan-y; }
+        .hero-slide { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; transition: opacity 0.5s ease-in-out; z-index: 0; pointer-events: none; }
+        .hero-slide.active { opacity: 1; z-index: 1; pointer-events: auto; }
+        .hero-slide img { width: 100%; height: 100%; object-fit: cover; object-position: center; }
+        
+        .hero-overlay { position: absolute; bottom: 0; left: 0; width: 100%; height: 100%; background: transparent; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; padding-bottom: 35px; pointer-events: none; }
+        
+        .hero-play-btn { pointer-events: auto; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 60px; height: 60px; border: 2px solid var(--primary-red, #e50914); border-radius: 50%; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.5); cursor: pointer; color: white; font-size: 1.2rem; transition: transform 0.3s, background 0.3s; }
+        .hero-play-btn:hover { transform: translate(-50%, -50%) scale(1.15); background: var(--primary-red, #e50914); }
+        
+        .hero-popular { font-size: 0.65rem; color: #fff; letter-spacing: 1px; margin-bottom: 5px; text-transform: uppercase; font-weight: bold; text-shadow: 2px 2px 5px rgba(0,0,0,1), -1px -1px 5px rgba(0,0,0,1); }
+        .hero-title { font-size: 1.3rem; font-weight: bold; color: white; margin-bottom: 15px; text-align: center; padding: 0 15px; text-shadow: 2px 2px 8px rgba(0,0,0,1), -1px -1px 8px rgba(0,0,0,1); }
+        
+        .hero-dots { position: absolute; bottom: 15px; left: 50%; transform: translateX(-50%); display: flex; gap: 6px; z-index: 2; pointer-events: auto; }
+        .hero-dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.5); cursor: pointer; transition: all 0.3s; }
+        .hero-dot.active { width: 18px; border-radius: 4px; background: var(--primary-red, #e50914); }
+
+        #continue-watching-section { margin-bottom: 10px; }
+        .cw-track .cw-card { width: 300px; flex: 0 0 auto; margin-right: 15px; cursor: pointer; position: relative; background: transparent; border: none; }
+        .cw-thumb-container { position: relative; width: 100%; height: 168px; border-radius: 6px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+        .cw-thumb-container img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s; }
+        .cw-card:hover .cw-thumb-container img { transform: scale(1.05); }
+        .cw-progress-bar { position: absolute; bottom: 0; left: 0; width: 100%; height: 4px; background: rgba(255,255,255,0.3); }
+        .cw-progress-fill { height: 100%; background: var(--primary-red, #e50914); }
+        .cw-remove-btn { position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.7); color: white; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; cursor: pointer; z-index: 2; transition: background 0.3s; }
+        .cw-remove-btn:hover { background: var(--primary-red, #e50914); }
+        .cw-info { padding-top: 10px; text-align: left; }
+        .cw-info h4 { font-size: 1rem; margin: 0; color: white; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .cw-info p { font-size: 0.8rem; color: #aaa; margin: 3px 0 0 0; }
+
+        #resultados-grid .card { width: 100%; height: 100%; margin: 0; flex: none; }
+        #resultados-grid .card img { width: 100%; height: 280px; object-fit: cover; }
+    </style>
+</head>
+<body>
+
+    <header class="navbar">
+        <h1 class="logo-rgb">Início</h1>
+        <div class="search-wrapper">
+            <input type="text" id="searchInput" class="search-input" placeholder="Pesquisar em todo o site...">
+            <i class="fas fa-search search-icon" id="searchIconBtn"></i>
+        </div>
+    </header>
+
+    <div id="tela-pesquisa" class="tela-pesquisa hidden" style="display: none;">
+        <h2 class="category-title" style="padding: 0 20px;">
+            Resultado da pesquisa... <span class="emoji-animado">📀</span>
+        </h2>
+        <div id="resultados-grid" class="grid-filmes" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 20px; padding: 20px;"></div>
+        <p id="mensagem-vazia" class="hidden" style="text-align: center; width: 100%; margin-top: 40px; color: #888;">
+            Nenhum filme ou série encontrado para esta pesquisa.
+        </p>
+    </div>
+
+    <main class="content" id="conteudo-principal">
+        
+        <section class="hero-carousel" id="hero-carousel-container">
+            <div class="hero-track" id="hero-track">
+              <div class="hero-slide active">
+                    <img src="https://i.ytimg.com/vi/H4dGpz6cnHo/maxresdefault.jpg" alt="Mortal Kombat">
+                    <div class="hero-overlay">
+                        <div class="hero-play-btn" onclick="window.location.href='player.html?title=Mortal Kombat 2&url=#'"><i class="fas fa-play"></i></div>
+                        <p class="hero-popular">POPULAR HOJE</p>
+                        <h2 class="hero-title">Backrooms</h2>
+                    </div>
+                </div>
+                <div class="hero-slide">
+                    <img src="https://i.imgur.com/01ux4rT.png" alt="Peaky Blinders">
+                    <div class="hero-overlay">
+                        <div class="hero-play-btn" onclick="window.location.href='player.html?title=Peaky Blinders&url=#'"><i class="fas fa-play"></i></div>
+                        <p class="hero-popular">POPULAR HOJE</p>
+                        <h2 class="hero-title">One Piece: A Série</h2>
+                    </div>
+                </div>
+                <div class="hero-slide">
+                    <img src="https://i.imgur.com/PDUEsLm.png" alt="Mortal Kombat">
+                    <div class="hero-overlay">
+                        <div class="hero-play-btn" onclick="window.location.href='player.html?title=Mortal Kombat 2&url=#'"><i class="fas fa-play"></i></div>
+                        <p class="hero-popular">POPULAR HOJE</p>
+                        <h2 class="hero-title">Predador: Terras Selvagens</h2>
+                    </div>
+                </div>
+                </div>
+            <div class="hero-dots" id="hero-dots"></div>
+        </section>
+
+        <section class="category-slider" id="continue-watching-section" style="display: none;">
+            <h2 class="category-title">
+                Continuar Assistindo
+                <a href="continuar-assistindo.html" class="ver-mais-h2">Ver Mais ></a>
+            </h2>
+            <div class="slider-wrapper">
+                <button class="slider-arrow prev" onclick="scrollSlider(this, -1)">&#10094;</button>
+                <div class="slider-track cw-track" id="cw-track"></div>
+                <button class="slider-arrow next" onclick="scrollSlider(this, 1)">&#10095;</button>
+            </div>
+        </section>
+
+<section class="category-slider">
+    <h2 class="category-title netflix-style">
+    Últimos Episódios
+        <a href="generos.html" class="ver-mais-h2">Gêneros ></a>
+    </h2>
+
+    <div class="slider-wrapper">
+        <button class="slider-arrow prev" onclick="scrollSlider(this, -1)">&#10094;</button>
+
+        <div class="slider-track">
+            <!-- Adicionada classe 'card-wide' e 'right-align' aqui -->
+            <div class="card card-wide" onclick="window.location.href='playeryt.html?title=GTA VI Trailer Oficial&url=https://youtu.be/QdBZY2fkU-0'">
+                <img src="https://seriesemcena.com.br/wp-content/uploads/2026/04/the-boys-calendario-episodios-temporada-5-prime-video-720x405.webp">
+                <div class="card-info right-align">
+                    <h4>The Boys</h4>
+                    <p>EP 5X1</p>
+                    <p class="card-date">2026</p>
+                </div>
+            </div>
+            <div class="card card-wide" onclick="window.location.href='playeryt.html?title=GTA VI Trailer Vazado&url=https://youtu.be/Kwzsg8Wkoz0'">
+                <img src="https://m.media-amazon.com/images/S/pv-target-images/5bffa82bc3b005deea9db4fe12894ad1ced96cdff126993d79af062b87c4b3a1._BR-6_AC_SX720_FMjpg_.jpg">
+                <div class="card-info right-align">
+                    <h4>The Boys</h4>
+                    <p>EP 5X1</p>
+                    <p class="card-date">2026</p>
+                </div>
+            </div>
+        </div>
+        <button class="slider-arrow next" onclick="scrollSlider(this, 1)">&#10095;</button>
+    </div>
+</section>
+
+<section class="category-slider" data-random="false">
+    <h2 class="category-title">
+        Filmes <span class="emoji-animado">📀</span>
+        <a href="lista-filmes.html" class="ver-mais-h2">Ver Mais ></a>
+    </h2>
+    <div class="slider-wrapper">
+        <button class="slider-arrow prev" onclick="scrollSlider(this, -1)">&#10094;</button>
+        <div class="slider-track">
+          
+          <div class="card" onclick="window.location.href='player.html?title=Venom&url=https://ia601808.us.archive.org/19/items/lucifer-ep-1x-2/Lucifer%20EP%201x2.mp4'">
+              <img src="https://upload.wikimedia.org/wikipedia/pt/0/05/Venom_poster.jpg">
+              <div class="card-info-modern">
+                  <h4>Venom</h4>
+                  <div class="meta-container">
+                      <div class="meta-left">
+                          <span class="tipo-filme">Filme</span>
+                          <span class="meta-data">2007</span>
+                      </div>
+                      <div class="meta-right">
+                          <span class="meta-duracao">1h 27m</span>
+                      </div>
+                  </div>
+              </div>
+          </div>
+
+        </div>
+        <button class="slider-arrow next" onclick="scrollSlider(this, 1)">&#10095;</button>
+    </div>
+</section>
+
+<section class="category-slider">
+    <h2>Séries 🎬 <a href="lista-series.html" class="ver-mais-h2">Ver Mais ></a></h2>
+    <div class="slider-wrapper">
+        <button class="slider-arrow prev" onclick="scrollSlider(this, -1)">&#10094;</button>
+        <div class="slider-track">
+
+<div class="card" onclick="window.location.href='player.html?title=Lúcifer&url=#'">
+              <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQDy-5PgPJuw6RHPJR_qGvL56ZkI0GEg27wtJXqQjsmGFjTaYqrNOqRki0&s=10">
+              <div class="card-info-modern">
+                  <h4>Lúcifer</h4>
+                  <div class="meta-container">
+                      <div class="meta-left">
+                          <span class="tipo-serie">Série</span>
+                          <span class="meta-data">2016</span>
+                      </div>
+                      <div class="meta-right">
+                          <span class="meta-duracao">6 Temporadas</span>
+                      </div>
+                  </div>
+              </div>
+          </div>
+
+        </div>
+        <button class="slider-arrow next" onclick="scrollSlider(this, 1)">&#10095;</button>
+    </div>
+</section>
+
+<section class="category-slider">
+    <h2>Anime 🎬 <a href="lista-series.html" class="ver-mais-h2">Ver Mais ></a></h2>
+    <div class="slider-wrapper">
+        <button class="slider-arrow prev" onclick="scrollSlider(this, -1)">&#10094;</button>
+        <div class="slider-track">
+          <div class="card" onclick="window.location.href='player.html?title=Solo Leveling&url=#'">
+              <img src="https://images.justwatch.com/poster/310154566/s332/temporada-1">
+              <div class="card-info-modern">
+                  <h4>Solo Leveling</h4>
+                  <div class="meta-container">
+                      <div class="meta-left">
+                          <span class="tipo-anime">Anime</span>
+                          <span class="meta-data">2024</span>
+                      </div>
+                      <div class="meta-right">
+                          <span class="meta-duracao">24m</span>
+                      </div>
+                  </div>
+              </div>
+          </div>
+
+        </div>
+        <button class="slider-arrow next" onclick="scrollSlider(this, 1)">&#10095;</button>
+    </div>
+</section>
+
+<section class="category-slider">
+    <h2>Desenhos 🎬 <a href="lista-series.html" class="ver-mais-h2">Ver Mais ></a></h2>
+    <div class="slider-wrapper">
+        <button class="slider-arrow prev" onclick="scrollSlider(this, -1)">&#10094;</button>
+        <div class="slider-track">
+
+          <div class="card" onclick="window.location.href='player.html?title=Ben 10&url=#'">
+              <img src="https://i.pinimg.com/474x/b9/0f/3e/b90f3efdb34c68e171731b3e0687f934.jpg">
+              <div class="card-info-modern">
+                  <h4>Ben 10</h4>
+                  <div class="meta-container">
+                      <div class="meta-left">
+                          <span class="tipo-serie">Desenho</span>
+                          <span class="meta-data">2005</span>
+                      </div>
+                      <div class="meta-right">
+                          <span class="meta-duracao">4 Temporadas</span>
+                      </div>
+                  </div>
+              </div>
+          </div>
+
+          <div class="card" onclick="window.location.href='player.html?title=Scooby-Doo Clássico&url=#'">
+              <img src="https://m.media-amazon.com/images/I/61-07SvtAsL._AC_UF894,1000_QL80_.jpg">
+              <div class="card-info-modern">
+                  <h4>Scooby-Doo Clássico</h4>
+                  <div class="meta-container">
+                      <div class="meta-left">
+                          <span class="tipo-serie">Desenho</span>
+                          <span class="meta-data">1968</span>
+                      </div>
+                      <div class="meta-right">
+                          <span class="meta-duracao">3 Temporadas</span>
+                      </div>
+                  </div>
+              </div>
+          </div>
+
+          <div class="card" onclick="window.location.href='player.html?title=Wandinha&url=#'">
+              <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRVwOPxpRoRVISD2M7BE6f4UHfhVXA8q_FPQjASpMAFtQ&s=10">
+              <div class="card-info-modern">
+                  <h4>Que Monstro Te Mordeu?</h4>
+                  <div class="meta-container">
+                      <div class="meta-left">
+                          <span class="tipo-serie">Série</span>
+                          <span class="meta-data">2014</span>
+                      </div>
+                      <div class="meta-right">
+                          <span class="meta-duracao">1 Temporada</span>
+                      </div>
+                  </div>
+              </div>
+          </div>
+
+          <div class="card" onclick="window.location.href='player.html?title=The Boys&url=#'">
+              <img src="https://i.pinimg.com/236x/ce/db/21/cedb2150c202e5b54b5d50ae69578914.jpg">
+              <div class="card-info-modern">
+                  <h4>Shaun, O Carneiro</h4>
+                  <div class="meta-container">
+                      <div class="meta-left">
+                          <span class="tipo-serie">Série</span>
+                          <span class="meta-data">2007</span>
+                      </div>
+                      <div class="meta-right">
+                          <span class="meta-duracao">7 Temporadas</span>
+                      </div>
+                  </div>
+              </div>
+          </div>
+
+          <div class="card" onclick="window.location.href='player.html?title=Round 6&url=#'">
+              <img src="https://i.pinimg.com/originals/e2/32/f6/e232f6d8ed8ba9df4dea3e483d0c0625.jpg">
+              <div class="card-info-modern">
+                  <h4>Tom & Jerry</h4>
+                  <div class="meta-container">
+                      <div class="meta-left">
+                          <span class="tipo-serie">Série</span>
+                          <span class="meta-data">1940</span>
+                      </div>
+                      <div class="meta-right">
+                          <span class="meta-duracao">2 Temporadas</span>
+                      </div>
+                  </div>
+              </div>
+          </div>
+          
+          <div class="card" onclick="window.location.href='player.html?title=Stranger Things&url=#'">
+              <img src="https://i.pinimg.com/222x/f7/4a/29/f74a29ca93d131832a1f4fc80627a746.jpg">
+              <div class="card-info-modern">
+                  <h4>O Incrível Mundo de Gumball</h4>
+                  <div class="meta-container">
+                      <div class="meta-left">
+                          <span class="tipo-serie">Série</span>
+                          <span class="meta-data">2011</span>
+                      </div>
+                      <div class="meta-right">
+                          <span class="meta-duracao">6 Temporadas</span>
+                      </div>
+                  </div>
+              </div>
+          </div>
+          
+          <div class="card" onclick="window.location.href='player.html?title=Stranger Things&url=#'">
+              <img src="https://image.tmdb.org/t/p/w220_and_h330_face/1jGPgDDcmg3Xgs3WO8sfYfbnFoA.jpg">
+              <div class="card-info-modern">
+                  <h4>Os Simpsons</h4>
+                  <div class="meta-container">
+                      <div class="meta-left">
+                          <span class="tipo-serie">Série</span>
+                          <span class="meta-data">1989</span>
+                      </div>
+                      <div class="meta-right">
+                          <span class="meta-duracao">37 Temporadas</span>
+                      </div>
+                  </div>
+              </div>
+          </div>
+          
+          <div class="card" onclick="window.location.href='player.html?title=He-Man e os Defensores do Universo&url=#'">
+              <img src="https://image.tmdb.org/t/p/w220_and_h330_face/lqwqYAqdFw02kLEbcmfl2KpZ2tc.jpg">
+              <div class="card-info-modern">
+                  <h4>He-Man e os Defensores do Universo</h4>
+                  <div class="meta-container">
+                      <div class="meta-left">
+                          <span class="tipo-serie">Série</span>
+                          <span class="meta-data">1983</span>
+                      </div>
+                      <div class="meta-right">
+                          <span class="meta-duracao">2 Temporadas</span>
+                      </div>
+                  </div>
+              </div>
+          </div>
+          
+          <div class="card" onclick="window.location.href='player.html?title=Caverna do Dragão&url=#'">
+              <img src="https://image.tmdb.org/t/p/w220_and_h330_face/qLWgJMJdtdCZWZVdQcFsAM5tZ5a.jpg">
+              <div class="card-info-modern">
+                  <h4>Caverna do Dragão</h4>
+                  <div class="meta-container">
+                      <div class="meta-left">
+                          <span class="tipo-serie">Série</span>
+                          <span class="meta-data">1983</span>
+                      </div>
+                      <div class="meta-right">
+                          <span class="meta-duracao">3 Temporadas</span>
+                      </div>
+                  </div>
+              </div>
+          </div>
+          
+          <div class="card" onclick="window.location.href='player.html?title=Bob Esponja&url=#'">
+              <img src="https://image.tmdb.org/t/p/w220_and_h330_face/eTTsOyXm49jixiQJ93L97CCvVBk.jpg">
+              <div class="card-info-modern">
+                  <h4>Bob Esponja</h4>
+                  <div class="meta-container">
+                      <div class="meta-left">
+                          <span class="tipo-serie">Série</span>
+                          <span class="meta-data">1999</span>
+                      </div>
+                      <div class="meta-right">
+                          <span class="meta-duracao">17 Temporadas</span>
+                      </div>
+                  </div>
+              </div>
+          </div>
+          
+          <div class="card" onclick="window.location.href='player.html?title=Ben 10: Supremacia Alienígena&url=#'">
+              <img src="https://image.tmdb.org/t/p/w220_and_h330_face/kP5ymRF6kFvox4CFJCEBK0NnSLq.jpg">
+              <div class="card-info-modern">
+                  <h4>Ben 10: Supremacia Alienígena</h4>
+                  <div class="meta-container">
+                      <div class="meta-left">
+                          <span class="tipo-serie">Série</span>
+                          <span class="meta-data">2010</span>
+                      </div>
+                      <div class="meta-right">
+                          <span class="meta-duracao">3 Temporadas</span>
+                      </div>
+                  </div>
+              </div>
+          </div>
+          
+          <div class="card" onclick="window.location.href='player.html?title=Solo Leveling&url=#'">
+              <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRSRF4ni2WHlfeOpr-sxCdKojN6yEVWms__twKw9CEJwIrZrDhyV7Fmml0&s=10">
+              <div class="card-info-modern">
+                  <h4>Solo Leveling</h4>
+                  <div class="meta-container">
+                      <div class="meta-left">
+                          <span class="tipo-serie">Série</span>
+                          <span class="meta-data">2024</span>
+                      </div>
+                      <div class="meta-right">
+                          <span class="meta-duracao">24m</span>
+                      </div>
+                  </div>
+              </div>
+          </div>
+
+        </div>
+        <button class="slider-arrow next" onclick="scrollSlider(this, 1)">&#10095;</button>
+    </div>
+</section>
+
+<section class="category-slider">
+    <h2 class="category-title netflix-style">
+        Outros Conteúdos 🍿
+    </h2>
+
+    <div class="slider-wrapper">
+        <button class="slider-arrow prev" onclick="scrollSlider(this, -1)">&#10094;</button>
+        <div class="slider-track">
+            <!-- A classe aqui fica centralizada (padrão) igual a imagem -->
+            <div class="card" onclick="window.open('https://livrosdogamerado.netlify.app/', '_blank')">
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRSRF4ni2WHlfeOpr-sxCdKojN6yEVWms__twKw9CEJwIrZrDhyV7Fmml0&s=10">
+                <div class="card-info">
+                    <h4>Biblioteca</h4>
+                    <p>Leia/Baixe Livros</p>
+                    <p class="card-date">Online</p>
+                </div>
+            </div>
+        </div>
+        <button class="slider-arrow next" onclick="scrollSlider(this, 1)">&#10095;</button>
+    </div>
+</section>
+
+    </main>
+
+    <nav class="bottom-nav">
+        <a href="#" class="nav-item active"><i class="fas fa-home"></i><span>Início</span></a>
+        <a href="generos.html" class="nav-item"><i class="fas fa-th-large"></i><span>Gêneros</span></a>
+        <a href="extras.html" class="nav-item"><i class="fas fa-compass"></i><span>Sagas</span></a>
+        <a href="explorar.html" class="nav-item"><i class="fas fa-compass"></i><span>Explorar</span></a>
+        <a href="conta.html" class="nav-item" id="btn-conta"><i class="fas fa-user"></i><span>Conta</span></a>
+    </nav>
+    
+    <script src="script.js"></script>
+
+    <script>
+        const defaultVideoLink = "https://ia801609.us.archive.org/18/items/filme-caes-assassinos-720-p-hd-1/Filme%20c%C3%A3es%20assassinos%28720P_HD%29_1.mp4";
+        
+        let heroCurrentIndex = 0;
+        const heroSlides = document.querySelectorAll('.hero-slide');
+        const heroDotsContainer = document.getElementById('hero-dots');
+        let heroInterval;
+
+        function renderHeroDots() {
+            heroDotsContainer.innerHTML = '';
+            for (let i = 0; i < heroSlides.length; i++) {
+                const dot = document.createElement('div');
+                dot.className = 'hero-dot' + (i === heroCurrentIndex ? ' active' : '');
+                dot.onclick = () => setHero(i);
+                heroDotsContainer.appendChild(dot);
+            }
+        }
+
+        function updateHeroUI() {
+            heroSlides.forEach((slide, idx) => {
+                if(idx === heroCurrentIndex) slide.classList.add('active');
+                else slide.classList.remove('active');
+            });
+            renderHeroDots();
+        }
+
+        function startHeroAutoPlay() {
+            heroInterval = setInterval(() => { moveHero(1); }, 5000);
+        }
+
+        function resetHeroAutoPlay() {
+            clearInterval(heroInterval);
+            startHeroAutoPlay();
+        }
+
+        function moveHero(step) {
+            heroCurrentIndex = (heroCurrentIndex + step + heroSlides.length) % heroSlides.length;
+            updateHeroUI();
+            resetHeroAutoPlay();
+        }
+
+        function setHero(index) {
+            heroCurrentIndex = index;
+            updateHeroUI();
+            resetHeroAutoPlay();
+        }
+
+        if (heroSlides.length > 0) { renderHeroDots(); startHeroAutoPlay(); }
+
+        // ==========================================
+        // CONTINUAR ASSISTINDO
+        // ==========================================
+        function loadContinueWatching() {
+            const cwSection = document.getElementById('continue-watching-section');
+            const cwTrack = document.getElementById('cw-track');
+            
+            let cwList = JSON.parse(localStorage.getItem('continueWatchingList') || '[]');
+
+            if (cwList.length > 0) {
+                cwSection.style.display = 'block';
+                cwTrack.innerHTML = '';
+                
+                cwList.forEach((item, index) => {
+                    const subtitle = item.type === 'serie' ? `EP ${item.season}x${item.episode}` : (item.year || '2026');
+                    const playerLink = item.playerUrl || `player.html?title=${encodeURIComponent(item.title)}`;
+                    
+                    const cardHtml = `
+                        <div class="cw-card" data-index="${index}">
+                            <div class="cw-remove-btn" onclick="removeCW(event, ${index})"><i class="fas fa-times"></i></div>
+                            <div class="cw-thumb-container" onclick="window.location.href='${playerLink}'">
+                                <img src="${item.cover}" alt="${item.title}">
+                                <div class="cw-progress-bar">
+                                    <div class="cw-progress-fill" style="width: ${item.progress}%"></div>
+                                </div>
+                            </div>
+                            <div class="cw-info" onclick="window.location.href='${playerLink}'">
+                                <h4>${item.title}</h4>
+                                <p>${subtitle}</p>
+                            </div>
+                        </div>
+                    `;
+                    cwTrack.innerHTML += cardHtml;
+                });
+            } else {
+                cwSection.style.display = 'none';
+            }
+        }
+
+        function removeCW(event, index) {
+            event.stopPropagation();
+            let cwList = JSON.parse(localStorage.getItem('continueWatchingList') || '[]');
+            cwList.splice(index, 1);
+            localStorage.setItem('continueWatchingList', JSON.stringify(cwList));
+            loadContinueWatching();
+        }
+
+        // ==========================================
+        // SCRAPER E PESQUISA GLOBAL (CORRIGIDA)
+        // ==========================================
+        const paginasExternas = ['lista-filmes.html', 'lista-series.html'];
+        let bancoDeFilmesGlobal = [];
+
+        async function montarBancoDeDados() {
+            document.querySelectorAll('main .card:not(.cw-card)').forEach(card => adicionarAoBanco(card));
+
+            for (let pagina of paginasExternas) {
+                try {
+                    const response = await fetch(pagina);
+                    if (response.ok) {
+                        const htmlTexto = await response.text();
+                        const parser = new DOMParser();
+                        const docExternal = parser.parseFromString(htmlTexto, 'text/html');
+                        docExternal.querySelectorAll('.card:not(.cw-card)').forEach(card => adicionarAoBanco(card));
+                    }
+                } catch (erro) { console.log(`Página ignorada.`); }
+            }
+        }
+
+        function adicionarAoBanco(cardElement) {
+            const tituloElemento = cardElement.querySelector('h4');
+            if (!tituloElemento) return;
+            const titulo = tituloElemento.innerText.trim();
+            if (!bancoDeFilmesGlobal.some(item => item.titulo === titulo)) {
+                bancoDeFilmesGlobal.push({
+                    titulo: titulo,
+                    tituloLowerCase: titulo.toLowerCase(),
+                    htmlNode: cardElement.cloneNode(true)
+                });
+            }
+        }
+
+        const searchInput = document.getElementById('searchInput');
+        const telaPesquisa = document.getElementById('tela-pesquisa');
+        const gridResultados = document.getElementById('resultados-grid');
+        const msgVazia = document.getElementById('mensagem-vazia');
+        const conteudoPrincipal = document.getElementById('conteudo-principal');
+
+        if (searchInput) {
+            searchInput.addEventListener('input', (e) => {
+                const termoBusca = e.target.value.toLowerCase().trim();
+                if (termoBusca.length > 0) {
+                    telaPesquisa.style.display = 'block';
+                    conteudoPrincipal.style.display = 'none';
+                    gridResultados.innerHTML = '';
+                    
+                    const resultados = bancoDeFilmesGlobal.filter(item => item.tituloLowerCase.includes(termoBusca));
+
+                    if (resultados.length > 0) {
+                        msgVazia.style.display = 'none';
+                        resultados.forEach(item => {
+                            const novoCard = item.htmlNode.cloneNode(true);
+                            reatribuirEventoCard(novoCard);
+                            gridResultados.appendChild(novoCard);
+                        });
+                    } else {
+                        msgVazia.style.display = 'block';
+                    }
+                } else {
+                    telaPesquisa.style.display = 'none';
+                    conteudoPrincipal.style.display = 'block';
+                }
+            });
+        }
+
+        // ==========================================
+        // DADOS DAS SÉRIES (5 SÉRIES COM TEMPORADAS REAIS)
+        // ==========================================
+        const seriesData = {
+            "The Walking Dead": {
+                seasons: [
+                    { seasonNumber: 1, episodes: [ { name: "Days Gone Bye", thumb: "https://via.placeholder.com/300x168", link: "https://ia800400.us.archive.org/8/items/cinquenta-tons-de-cinza/Cinquenta%20Tons%20de%20Cinza.mp4" }, { name: "Guts", thumb: "https://via.placeholder.com/300x168", link: "https://ia601901.us.archive.org/12/items/godzilla_20260703_1958/Godzilla.mp4" }, { name: "Tell It to the Frogs", thumb: "https://via.placeholder.com/300x168", link: defaultVideoLink } ] },
+                    { seasonNumber: 2, episodes: [ { name: "What Lies Ahead", thumb: "https://via.placeholder.com/300x168", link: defaultVideoLink }, { name: "Bloodletting", thumb: "https://via.placeholder.com/300x168", link: defaultVideoLink }, { name: "Save the Last One", thumb: "https://via.placeholder.com/300x168", link: defaultVideoLink } ] }
+                ]
+            },
+            "Stranger Things": {
+                seasons: [
+                    { seasonNumber: 1, episodes: [ { name: "O Desaparecimento de Will Byers", thumb: "https://via.placeholder.com/300x168", link: defaultVideoLink }, { name: "A Esquisitona na Rua Maple", thumb: "https://via.placeholder.com/300x168", link: defaultVideoLink }, { name: "Holly, Jolly", thumb: "https://via.placeholder.com/300x168", link: defaultVideoLink } ] },
+                    { seasonNumber: 2, episodes: [ { name: "MADMAX", thumb: "https://via.placeholder.com/300x168", link: defaultVideoLink }, { name: "Gostosuras ou Travessuras", thumb: "https://via.placeholder.com/300x168", link: defaultVideoLink }, { name: "O Girino", thumb: "https://via.placeholder.com/300x168", link: defaultVideoLink } ] }
+                ]
+            },
+            "The Boys": {
+                seasons: [
+                    { seasonNumber: 1, episodes: [ { name: "As Regras do Jogo", thumb: "https://via.placeholder.com/300x168", link: defaultVideoLink }, { name: "Cherry", thumb: "https://via.placeholder.com/300x168", link: defaultVideoLink }, { name: "Mandando Bala", thumb: "https://via.placeholder.com/300x168", link: defaultVideoLink } ] },
+                    { seasonNumber: 2, episodes: [ { name: "A Grande Viagem", thumb: "https://via.placeholder.com/300x168", link: defaultVideoLink }, { name: "Preparação e Planejamento", thumb: "https://via.placeholder.com/300x168", link: defaultVideoLink }, { name: "Passando dos Limites", thumb: "https://via.placeholder.com/300x168", link: defaultVideoLink } ] }
+                ]
+            },
+            "Round 6": {
+                seasons: [
+                    { seasonNumber: 1, episodes: [ { name: "Batatinha Frita 1, 2, 3", thumb: "https://via.placeholder.com/300x168", link: defaultVideoLink }, { name: "Inferno", thumb: "https://via.placeholder.com/300x168", link: defaultVideoLink }, { name: "O Homem do Guarda-Chuva", thumb: "https://via.placeholder.com/300x168", link: defaultVideoLink } ] },
+                    { seasonNumber: 2, episodes: [ { name: "O Retorno", thumb: "https://via.placeholder.com/300x168", link: defaultVideoLink }, { name: "Novas Regras", thumb: "https://via.placeholder.com/300x168", link: defaultVideoLink }, { name: "Sobrevivência", thumb: "https://via.placeholder.com/300x168", link: defaultVideoLink } ] }
+                ]
+            },
+            "Wandinha": {
+                seasons: [
+                    { seasonNumber: 1, episodes: [ { name: "Filha da Tristeza", thumb: "https://via.placeholder.com/300x168", link: defaultVideoLink }, { name: "A Angústia", thumb: "https://via.placeholder.com/300x168", link: defaultVideoLink }, { name: "Amigo ou Inimigo", thumb: "https://via.placeholder.com/300x168", link: defaultVideoLink } ] },
+                    { seasonNumber: 2, episodes: [ { name: "O Novo Mistério", thumb: "https://via.placeholder.com/300x168", link: defaultVideoLink }, { name: "Sombras do Passado", thumb: "https://via.placeholder.com/300x168", link: defaultVideoLink }, { name: "Lua Sangrenta", thumb: "https://via.placeholder.com/300x168", link: defaultVideoLink } ] }
+                ]
+            },
+            "Michael Jackson: A História": {
+                seasons: [
+                    { seasonNumber: 1, episodes: [ { name: "Episódio 1", thumb: "https://occ-0-7899-1740.1.nflxso.net/dnm/api/v6/9pS1daC2n6UGc3dUogvWIPMR_OU/AAAABb_lZJ8IDkQlcexifqNkmdbxB8LxRLiuAmAy4FVamTiiG7fTGxHKInotxu8QhyQ4Ec1V1CJPef5E4osjGqUMnwaAQv66ZL-mVNSAvutFxYAM9Ys49EoS9OYB.webp?r=4a9", link: "https://ia601602.us.archive.org/34/items/michael-jackson-a-historia-ep-1x-1/Michael%20Jackson%20A%20Hist%C3%B3ria%20EP%201x1.mp4" }, { name: "Episódio 2", thumb: "https://occ-0-7899-1740.1.nflxso.net/dnm/api/v6/9pS1daC2n6UGc3dUogvWIPMR_OU/AAAABZ3UoUPZ9Q878fUylWHrnotX5gRxJaMdVTOAnIrNP-jzuXC2itglifnz2mdd25YCWsjVdJ33vzRUO470lKTQYQuIvwBB9H7_p2aK9xRAoeMmFf_RScXrtXd_.webp?r=e60", link: "https://ia902908.us.archive.org/8/items/michael-jackson-a-historia-ep-1x-2/Michael%20Jackson%20A%20Hist%C3%B3ria%20EP%201x2.mp4" }, { name: "Episódio 3", thumb: "https://occ-0-7899-1740.1.nflxso.net/dnm/api/v6/9pS1daC2n6UGc3dUogvWIPMR_OU/AAAABbzKzQh8oC-0vBaEJL-Oug2-Smagx70cgophi3ibkMu-hxozOQPBapfDfOBl-e4W95p4W5sdXxVrGOzRzdRvCDXo4HEgsiBT9eH3ytrGBsKNBXkkC9cE4KIT.webp?r=ab0", link: "https://ia903105.us.archive.org/0/items/michael-jackson-a-historia-ep-1x-3/Michael%20Jackson%20A%20Hist%C3%B3ria%20EP%201x3.mp4" } ] }
+                ]
+            },
+        "Lúcifer": {
+                seasons: [
+                    { seasonNumber: 1, episodes: [ { name: " Piloto", thumb: "https://occ-0-1123-1740.1.nflxso.net/dnm/api/v6/9pS1daC2n6UGc3dUogvWIPMR_OU/AAAABW98FkdmfkvAZDN6JyxHekYIK_U_b8KJONyuH2QUnC37SsKxDXQImGBaGDD21RhbL-UMMc64JZqJgJsbB5mJx4wvNd7K7b77_5znmmbo7TMWpp1GF4vjP_63.webp?r=54a", link: "https://ia601607.us.archive.org/12/items/lucifer-ep-1x-1/Lucifer%20EP%201x1.mp4" }, { name: "Fica, Lúcifer. Bom Diabo", thumb: "https://occ-0-1123-1740.1.nflxso.net/dnm/api/v6/9pS1daC2n6UGc3dUogvWIPMR_OU/AAAABToZWrUjMPvwyRTPJFiGjjMim1haTnDSMmFbYficjzC6ouC0Zir_Lpjds-ZLbKNuX91xe8rLCU1pmwLWeMOAmVAn9v_MufkUT-UYqYq0y2rPH7CNeTQJ7OOK.webp?r=5db", link: "https://ia601808.us.archive.org/19/items/lucifer-ep-1x-2/Lucifer%20EP%201x2.mp4" }, { name: "O Quase Príncipe das Trevas", thumb: "https://occ-0-1123-1740.1.nflxso.net/dnm/api/v6/9pS1daC2n6UGc3dUogvWIPMR_OU/AAAABXSq46kA2hGSFkGmXLOwxylgADQy6p_10q18u1UT3xYNcVpSdJnJM-ZeFNSBB7Ys0zdNcugl25hC7p46TW3CyfI-y8Kkvi6f2OG4w8-nFeSTL5QlG877C8Wh.webp?r=5b4", link: "https://ia601806.us.archive.org/4/items/lucifer-ep-1x-3/Lucifer%20EP%201x3.mp4" },
+                    { name: "Novidades Masculinas", thumb: "https://occ-0-1123-1740.1.nflxso.net/dnm/api/v6/9pS1daC2n6UGc3dUogvWIPMR_OU/AAAABe9U3GsE-nFYZOpRtHMXOzvE6cWBjfnFEC9COAjHYKecUldEw13N-Bt9B0RjuHFPnyUBXNi3sImr287zQKJZkCkirpAERhQ2J4Rx87s-OWFTJAsLmTFdKmu7.webp?r=522", link: "https://ia600407.us.archive.org/10/items/lucifer-ep-1x-4/Lucifer%20EP%201x4.mp4" },
+                    { name: "Sapatos", thumb: "https://occ-0-1123-1740.1.nflxso.net/dnm/api/v6/9pS1daC2n6UGc3dUogvWIPMR_OU/AAAABU3pvUERoFKD6yWmnMEojDXy-pvgzpNxjrLq0nt3Z0BIQBVX1nNSxfrQ-XrZThBBVXk44gFEu4ePhtcBLq3y6VCnARHerSfqwnKhe2CZ-Kz9s5mS2qeUbNYQ.webp?r=dca", link: "https://ia601901.us.archive.org/18/items/lucifer-ep-1x-5/Lucifer%20EP%201x5.mp4" },{ name: "Filho Favorito", thumb: "https://occ-0-1123-1740.1.nflxso.net/dnm/api/v6/9pS1daC2n6UGc3dUogvWIPMR_OU/AAAABSioho7kZU2bdNxehjQySWqepyScQGD6NhlnSv2PY2xBg7GMfCfb70Dc4HBlH3XEvRw-4XOiBHjnzlpEHXZ0vFO0XE8u4lOh3RGhsrHZwH3lAe-LM_63llCB.webp?r=857", link: "https://ia801603.us.archive.org/14/items/lucifer-ep-1x-6/Lucifer%20EP%201x6.mp4" },
+                    { name: "Companheiro Alado", thumb: "https://occ-0-1123-1740.1.nflxso.net/dnm/api/v6/9pS1daC2n6UGc3dUogvWIPMR_OU/AAAABdyP2QmRYa0Jxc8VsDuDEkb52k8PBMXEx23ET6CvZrhI0bFMXd-iZgCHZ7s-5cM7Gn2SMijfr0cdqkIIV9NZCIlzLAmnrlDZN3tKH3TwguOqHT6IMLBsct9q.webp?r=a6a", link: "https://ia601501.us.archive.org/25/items/lucifer-ep-1x-7/Lucifer%20EP%201x7.mp4" },
+                    { name: "E Tu, Doutora?", thumb: "https://occ-0-1123-1740.1.nflxso.net/dnm/api/v6/9pS1daC2n6UGc3dUogvWIPMR_OU/AAAABXv0hA8WqnTSzUhsSMijS0ezQDLxXf1lTyYTajk2JWZVGv92Dqv2bFBJMfIpfWXORNjAT4VbUW67hEIOFlMK96MwcQ4A9LUQPOIha4OsfKIR0xVwwyIV5n_0.webp?r=ad0", link: "https://ia601902.us.archive.org/28/items/lucifer-ep-1x-8/Lucifer%20EP%201x8.mp4" },
+                    { name: "Um Padre Entra em um Bar", thumb: "https://occ-0-1123-1740.1.nflxso.net/dnm/api/v6/9pS1daC2n6UGc3dUogvWIPMR_OU/AAAABZxA4f3DkWj-JlMMxNl1A2l0LB0eEyKUIYc0wS3tInXas0bbHVF4RFUBXFOYeIFGaAkQUcMzR7f6ggcmw8biZp6mZ33hwEmF_fx1bNYf4VhbapVTBoVWE7NL.webp?r=cb5", link: "https://ia600800.us.archive.org/0/items/lucifer-ep-1x-9/Lucifer%20EP%201x9.mp4" },
+                    { name: "Pops", thumb: "https://occ-0-1123-1740.1.nflxso.net/dnm/api/v6/9pS1daC2n6UGc3dUogvWIPMR_OU/AAAABe-5_W4E4oLBDsWGLoP7JpIdihottp1WvgcuBSD7orFDInXX8ZYJ5ShZU853Xwi2TdAFJbjS9OyGgQd0A2KNwnjVYsQ_wQ_iuSQQxWox-RrmIO011RE0h-iD.webp?r=b37", link: "https://ia600902.us.archive.org/13/items/lucifer-ep-1x-10/Lucifer%20EP%201x10.mp4" },
+                    { name: "São Lúcifer", thumb: "https://via.placeholder.com/300x168", link: "https://ia600603.us.archive.org/1/items/lucifer-ep-1x-11/Lucifer%20EP%201x11.mp4" },
+                    { name: "#EquipeLucifer", thumb: "https://via.placeholder.com/300x168", link: "https://ia600103.us.archive.org/28/items/lucifer-ep-1x-12/Lucifer%20EP%201x12.mp4" },
+                    { name: "Me Leve de Volta ao Inferno", thumb: "https://via.placeholder.com/300x168", link: "https://ia601904.us.archive.org/13/items/lucifer-ep-1x-13/Lucifer%20EP%201x13.mp4" }] },
+                    { seasonNumber: 2, episodes: [ { name: "O Novo Mistério", thumb: "https://via.placeholder.com/300x168", link: defaultVideoLink }, { name: "Sombras do Passado", thumb: "https://via.placeholder.com/300x168", link: defaultVideoLink }, { name: "Lua Sangrenta", thumb: "https://via.placeholder.com/300x168", link: defaultVideoLink } ] }
+                ]
+            }
+        };
+
+        function generateGenericSeason(numEps) {
+            let eps = [];
+            for(let i=1; i<=numEps; i++) eps.push({ name: `Episódio ${i}`, thumb: "", link: defaultVideoLink });
+            return [{ seasonNumber: 1, episodes: eps }];
+        }
+
+        function reatribuirEventoCard(card) {
+            const originalClick = card.getAttribute('onclick');
+            if (originalClick && originalClick.includes('window.open')) return;
+
+            if (originalClick && originalClick.includes('player.html')) {
+                const match = originalClick.match(/title=([^&]+)&(?:url|src)=([^']+)/);
+                if (match) {
+                    const title = match[1]; const url = match[2];
+                    const imgSrc = card.querySelector('img') ? card.querySelector('img').src : '';
+                    
+                    // Suporta tanto o layout antigo quanto o novo com os span coloridos
+                    const genreText = card.querySelector('.card-info p')?.innerText || card.querySelector('.meta-left span')?.innerText || '';
+                    const isSerie = /série|anime|dorama|novela|desenho/i.test(genreText) || !!seriesData[title];
+                    const type = isSerie ? 'serie' : 'movie';
+                    
+                    const dateP = card.querySelector('.card-date')?.innerText || card.querySelector('.meta-data')?.innerText || '2026';
+
+                    card.removeAttribute('onclick');
+                    card.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        const dataObj = { type, title, url, cover: imgSrc, banner: imgSrc, genre: genreText, year: dateP };
+                        
+                        if (type === 'serie' && seriesData[title]) {
+                            dataObj.seriesInfo = seriesData[title];
+                        } else if (type === 'serie') {
+                            dataObj.seriesInfo = { seasons: generateGenericSeason(10) };
+                        }
+
+                        sessionStorage.setItem('currentMediaData', JSON.stringify(dataObj));
+
+                        let cwList = JSON.parse(localStorage.getItem('continueWatchingList') || '[]');
+                        cwList = cwList.filter(item => item.title !== title); 
+                        
+                        const stoppedAtSeconds = Math.floor(Math.random() * (7200 - 300)) + 300; 
+                        const realProgress = (stoppedAtSeconds / 7200) * 100;
+                        
+                        cwList.unshift({
+                            title: title,
+                            cover: imgSrc,
+                            type: type,
+                            year: dateP,
+                            season: 1, episode: 1,
+                            progress: realProgress,
+                            playerUrl: `player.html?title=${encodeURIComponent(title)}&url=${encodeURIComponent(url)}&t=${stoppedAtSeconds}`
+                        });
+                        
+                        if(cwList.length > 10) cwList.pop(); 
+                        localStorage.setItem('continueWatchingList', JSON.stringify(cwList));
+
+                        window.location.href = `detalhes.html`;
+                    });
+                }
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            loadContinueWatching();
+            document.querySelectorAll('main .card:not(.cw-card)').forEach(card => reatribuirEventoCard(card));
+            montarBancoDeDados();
+        });
+    </script>
+</body>
+</html>

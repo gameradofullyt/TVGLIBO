@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todos os Filmes | GAMERADOFLIX</title>
+    <style>
+        /* Estilos baseados na imagem enviada */
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #0b0f19;
+            color: white;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        /* Barra de navegação do topo (Paginação) */
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #121622;
+            padding: 12px 15px;
+            font-size: 13px;
+            font-weight: bold;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .nav-btn {
+            background-color: #1c2130;
+            color: #8c92a5;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+        }
+
+        .nav-btn:hover {
+            background-color: #2a3145;
+            color: white;
+        }
+
+        /* Botão desativado (quando não tem mais páginas pra frente) */
+        .nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .page-indicator {
+            color: #8c92a5;
+            font-size: 12px;
+        }
+
+        /* Grade de 3 colunas e 10 fileiras */
+        .grid-filmes {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            padding: 15px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* Estilo individual de cada card de filme */
+        .filme {
+            position: relative;
+            border-radius: 8px;
+            overflow: hidden;
+            aspect-ratio: 2 / 3;
+            background-color: #1a1f2e;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .filme:hover {
+            transform: scale(1.03);
+        }
+
+        .filme img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        /* Tags de DUB, HD, CAM */
+        .tags {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            display: flex;
+            gap: 4px;
+            z-index: 2;
+        }
+
+        .tag {
+            font-size: 9px;
+            font-weight: bold;
+            padding: 3px 5px;
+            border-radius: 3px;
+            letter-spacing: 0.5px;
+        }
+
+        .tag.dub { background-color: #1ba1e2; color: #fff; }
+        .tag.leg { background-color: #2d89ef; color: #fff; }
+        .tag.qual { background-color: #000; color: #fff; border: 1px solid #333; }
+
+        /* Informações na base do card */
+        .card-info {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 40px 10px 10px;
+            background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.7) 40%, transparent 100%);
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            z-index: 1;
+        }
+
+        .card-info h4 {
+            margin: 0;
+            font-size: 12px;
+            font-weight: bold;
+            line-height: 1.2;
+            color: #fff;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .card-details {
+            display: flex;
+            justify-content: space-between;
+            font-size: 10px;
+            color: #aaa;
+        }
+
+        /* Classe para esconder os filmes de outras páginas */
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+
+    <header class="top-bar">
+        <button class="nav-btn" id="btn-prev" onclick="voltarPagina()">&laquo; PREV</button>
+        <span class="page-indicator" id="page-info">Page 1 of 1</span>
+        <button class="nav-btn" id="btn-next" onclick="avancarPagina()">NEXT &raquo;</button>
+    </header>
+
+    <main class="content">
+        <div class="grid-filmes" id="lista-filmes">
+
+            <script>
+                for(let i = 1; i <= 1; i++) {
+                    document.write(`
+                    <div class="filme" onclick="window.location.href='player.html?title=Filme ${i}&url=https://playerflixapi.com/filme/${i}'">
+                        <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                        <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhDok1hK762JgecVlfdFLy8NWqmzo0aDLsORSvRE_ggxPMp7i3cfWvsAFSBvdSmBeNGXKA4iNIyyTcokVNyPZh-Ew5uMr-nK32uXWD8bpSihz38O-1bIlBwyDpsQ2d__TY2hUgwXmMT0HkxXnFv_EzQ4UNNcv0fwoZRcFZZTYXL7Qp2eP1IgvYOKNesZOk/s3000/Servi%253Fo_de_Entregas_da_Kiki.webp" alt="Capa">
+                        <div class="card-info">
+                            <h4>O Serviço de Entregas da Kiki</h4>
+                            <div class="card-details"><span>1989</span><span>1h 42min</span></div>
+                        </div>
+                    </div>`);
+                }
+            </script>
+
+            <div class="filme" onclick="window.location.href='player.html?title=Shin Godzilla&url=https://playerflixapi.com/filme/31'">
+                <div class="tags"><span class="tag leg">LEG</span><span class="tag qual">HD</span></div>
+                <img src="https://encrypted-tbn2.gstatic.com/images?q=tbn:ANd9GcQnkH6Gcwbl2DpUK1eMISeDUJ7VBDrQZL-clHixg1PhdBvZ-TVl" alt="Capa">
+                <div class="card-info">
+                    <h4>O Menino e a Garça</h4>
+                    <div class="card-details"><span>2023</span><span>2h 4min</span></div>
+                </div>
+            </div>
+
+            <div class="filme" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://br.web.img2.acsta.net/pictures/14/02/21/16/51/373214.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Vidas ao Vento</h4>
+                    <div class="card-details"><span>2013</span><span>2h 6min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" onclick="window.location.href='player.html?title=Shin Godzilla&url=https://playerflixapi.com/filme/31'">
+                <div class="tags"><span class="tag leg">LEG</span><span class="tag qual">HD</span></div>
+                <img src="https://encrypted-tbn3.gstatic.com/images?q=tbn:ANd9GcR0Pxx4UCeEGsmDi8Y13i1WhaY085t_cQu6CpohK0nyS8_I0zbz" alt="Capa">
+                <div class="card-info">
+                    <h4>O Castelo Animado</h4>
+                    <div class="card-details"><span>2004</span><span>1h 59min</span></div>
+                </div>
+            </div>
+
+            <div class="filme" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://image.tmdb.org/t/p/w500/6eGlig64s1MCv4GkaXeEDczEkRQ.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Busca Explosiva 2</h4>
+                    <div class="card-details"><span>2023</span><span>45min</span></div>
+                </div>
+            </div>
+
+<div class="filme" onclick="window.location.href='player.html?title=Shin Godzilla&url=https://playerflixapi.com/filme/31'">
+                <div class="tags"><span class="tag leg">LEG</span><span class="tag qual">HD</span></div>
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR1Fg2kThiuRSrGFeokAa0EXzxzgMH7bDkwj5i_1f2kVqALETPEPpbzlEeA&s=10" alt="Capa">
+                <div class="card-info">
+                    <h4>Tropa de Elite</h4>
+                    <div class="card-details"><span>2016</span><span>120min</span></div>
+                </div>
+            </div>
+
+            <div class="filme" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://image.tmdb.org/t/p/w220_and_h330_face/spLJTEsaQwlkXdfwvzrZJvq9qAp.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Panico no Lago 3</h4>
+                    <div class="card-details"><span>2023</span><span>45min</span></div>
+                </div>
+            </div>
+
+<div class="filme" onclick="window.location.href='player.html?title=Shin Godzilla&url=https://playerflixapi.com/filme/31'">
+                <div class="tags"><span class="tag leg">LEG</span><span class="tag qual">HD</span></div>
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR1Fg2kThiuRSrGFeokAa0EXzxzgMH7bDkwj5i_1f2kVqALETPEPpbzlEeA&s=10" alt="Capa">
+                <div class="card-info">
+                    <h4>Tubarão</h4>
+                    <div class="card-details"><span>2016</span><span>120min</span></div>
+                </div>
+            </div>
+
+            <div class="filme" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://image.tmdb.org/t/p/w220_and_h330_face/spLJTEsaQwlkXdfwvzrZJvq9qAp.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Anaconda 2</h4>
+                    <div class="card-details"><span>2023</span><span>45min</span></div>
+                </div>
+            </div>
+
+<div class="filme" onclick="window.location.href='player.html?title=Shin Godzilla&url=https://playerflixapi.com/filme/31'">
+                <div class="tags"><span class="tag leg">LEG</span><span class="tag qual">HD</span></div>
+                <img src="https://image.tmdb.org/t/p/w500/wjxjRlttamOJdGIPOJxLEhtno9V.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Quem Somos Nós</h4>
+                    <div class="card-details"><span>2016</span><span>120min</span></div>
+                </div>
+            </div>
+
+            <div class="filme" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://image.tmdb.org/t/p/w220_and_h330_face/spLJTEsaQwlkXdfwvzrZJvq9qAp.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Como Eu Era Antes de Voce</h4>
+                    <div class="card-details"><span>2023</span><span>45min</span></div>
+                </div>
+            </div>
+
+<div class="filme" onclick="window.location.href='player.html?title=Shin Godzilla&url=https://playerflixapi.com/filme/31'">
+                <div class="tags"><span class="tag leg">LEG</span><span class="tag qual">HD</span></div>
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR1Fg2kThiuRSrGFeokAa0EXzxzgMH7bDkwj5i_1f2kVqALETPEPpbzlEeA&s=10" alt="Capa">
+                <div class="card-info">
+                    <h4>Shin Godzilla</h4>
+                    <div class="card-details"><span>2016</span><span>120min</span></div>
+                </div>
+            </div>
+
+            <div class="filme" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://image.tmdb.org/t/p/w220_and_h330_face/spLJTEsaQwlkXdfwvzrZJvq9qAp.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Panico no Lago 2</h4>
+                    <div class="card-details"><span>2023</span><span>45min</span></div>
+                </div>
+            </div>
+
+<div class="filme" onclick="window.location.href='player.html?title=Shin Godzilla&url=https://playerflixapi.com/filme/31'">
+                <div class="tags"><span class="tag leg">LEG</span><span class="tag qual">HD</span></div>
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR1Fg2kThiuRSrGFeokAa0EXzxzgMH7bDkwj5i_1f2kVqALETPEPpbzlEeA&s=10" alt="Capa">
+                <div class="card-info">
+                    <h4>Shin Godzilla</h4>
+                    <div class="card-details"><span>2016</span><span>120min</span></div>
+                </div>
+            </div>
+
+            <div class="filme" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://image.tmdb.org/t/p/w220_and_h330_face/spLJTEsaQwlkXdfwvzrZJvq9qAp.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Panico no Lago 2</h4>
+                    <div class="card-details"><span>2023</span><span>45min</span></div>
+                </div>
+            </div>
+
+<div class="filme" onclick="window.location.href='player.html?title=Shin Godzilla&url=https://playerflixapi.com/filme/31'">
+                <div class="tags"><span class="tag leg">LEG</span><span class="tag qual">HD</span></div>
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR1Fg2kThiuRSrGFeokAa0EXzxzgMH7bDkwj5i_1f2kVqALETPEPpbzlEeA&s=10" alt="Capa">
+                <div class="card-info">
+                    <h4>Shin Godzilla</h4>
+                    <div class="card-details"><span>2016</span><span>120min</span></div>
+                </div>
+            </div>
+
+            <div class="filme" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://image.tmdb.org/t/p/w220_and_h330_face/spLJTEsaQwlkXdfwvzrZJvq9qAp.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Panico no Lago 2</h4>
+                    <div class="card-details"><span>2023</span><span>45min</span></div>
+                </div>
+            </div>
+
+<div class="filme" onclick="window.location.href='player.html?title=Shin Godzilla&url=https://playerflixapi.com/filme/31'">
+                <div class="tags"><span class="tag leg">LEG</span><span class="tag qual">HD</span></div>
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR1Fg2kThiuRSrGFeokAa0EXzxzgMH7bDkwj5i_1f2kVqALETPEPpbzlEeA&s=10" alt="Capa">
+                <div class="card-info">
+                    <h4>Shin Godzilla</h4>
+                    <div class="card-details"><span>2016</span><span>120min</span></div>
+                </div>
+            </div>
+
+            <div class="filme" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://image.tmdb.org/t/p/w220_and_h330_face/spLJTEsaQwlkXdfwvzrZJvq9qAp.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Panico no Lago 2</h4>
+                    <div class="card-details"><span>2023</span><span>45min</span></div>
+                </div>
+            </div>
+
+<div class="filme" onclick="window.location.href='player.html?title=Shin Godzilla&url=https://playerflixapi.com/filme/31'">
+                <div class="tags"><span class="tag leg">LEG</span><span class="tag qual">HD</span></div>
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR1Fg2kThiuRSrGFeokAa0EXzxzgMH7bDkwj5i_1f2kVqALETPEPpbzlEeA&s=10" alt="Capa">
+                <div class="card-info">
+                    <h4>Shin Godzilla</h4>
+                    <div class="card-details"><span>2016</span><span>120min</span></div>
+                </div>
+            </div>
+
+            <div class="filme" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://image.tmdb.org/t/p/w220_and_h330_face/spLJTEsaQwlkXdfwvzrZJvq9qAp.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Panico no Lago 2</h4>
+                    <div class="card-details"><span>2023</span><span>45min</span></div>
+                </div>
+            </div>
+
+<div class="filme" onclick="window.location.href='player.html?title=Shin Godzilla&url=https://playerflixapi.com/filme/31'">
+                <div class="tags"><span class="tag leg">LEG</span><span class="tag qual">HD</span></div>
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR1Fg2kThiuRSrGFeokAa0EXzxzgMH7bDkwj5i_1f2kVqALETPEPpbzlEeA&s=10" alt="Capa">
+                <div class="card-info">
+                    <h4>Shin Godzilla</h4>
+                    <div class="card-details"><span>2016</span><span>120min</span></div>
+                </div>
+            </div>
+
+            <div class="filme" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://image.tmdb.org/t/p/w220_and_h330_face/spLJTEsaQwlkXdfwvzrZJvq9qAp.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Panico no Lago 2</h4>
+                    <div class="card-details"><span>2023</span><span>45min</span></div>
+                </div>
+            </div>
+
+<div class="filme" onclick="window.location.href='player.html?title=Shin Godzilla&url=https://playerflixapi.com/filme/31'">
+                <div class="tags"><span class="tag leg">LEG</span><span class="tag qual">HD</span></div>
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR1Fg2kThiuRSrGFeokAa0EXzxzgMH7bDkwj5i_1f2kVqALETPEPpbzlEeA&s=10" alt="Capa">
+                <div class="card-info">
+                    <h4>Shin Godzilla</h4>
+                    <div class="card-details"><span>2016</span><span>120min</span></div>
+                </div>
+            </div>
+
+            <div class="filme" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://image.tmdb.org/t/p/w220_and_h330_face/spLJTEsaQwlkXdfwvzrZJvq9qAp.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Panico no Lago 2</h4>
+                    <div class="card-details"><span>2023</span><span>45min</span></div>
+                </div>
+            </div>
+
+<div class="filme" onclick="window.location.href='player.html?title=Shin Godzilla&url=https://playerflixapi.com/filme/31'">
+                <div class="tags"><span class="tag leg">LEG</span><span class="tag qual">HD</span></div>
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR1Fg2kThiuRSrGFeokAa0EXzxzgMH7bDkwj5i_1f2kVqALETPEPpbzlEeA&s=10" alt="Capa">
+                <div class="card-info">
+                    <h4>Shin Godzilla</h4>
+                    <div class="card-details"><span>2016</span><span>120min</span></div>
+                </div>
+            </div>
+
+            <div class="filme" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://image.tmdb.org/t/p/w220_and_h330_face/spLJTEsaQwlkXdfwvzrZJvq9qAp.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Panico no Lago 2</h4>
+                    <div class="card-details"><span>2023</span><span>45min</span></div>
+                </div>
+            </div>
+
+<div class="filme" onclick="window.location.href='player.html?title=Shin Godzilla&url=https://playerflixapi.com/filme/31'">
+                <div class="tags"><span class="tag leg">LEG</span><span class="tag qual">HD</span></div>
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR1Fg2kThiuRSrGFeokAa0EXzxzgMH7bDkwj5i_1f2kVqALETPEPpbzlEeA&s=10" alt="Capa">
+                <div class="card-info">
+                    <h4>Shin Godzilla</h4>
+                    <div class="card-details"><span>2016</span><span>120min</span></div>
+                </div>
+            </div>
+
+            <div class="filme" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://image.tmdb.org/t/p/w220_and_h330_face/spLJTEsaQwlkXdfwvzrZJvq9qAp.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Panico no Lago 2</h4>
+                    <div class="card-details"><span>2023</span><span>45min</span></div>
+                </div>
+            </div>
+
+<div class="filme" onclick="window.location.href='player.html?title=Shin Godzilla&url=https://playerflixapi.com/filme/31'">
+                <div class="tags"><span class="tag leg">LEG</span><span class="tag qual">HD</span></div>
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR1Fg2kThiuRSrGFeokAa0EXzxzgMH7bDkwj5i_1f2kVqALETPEPpbzlEeA&s=10" alt="Capa">
+                <div class="card-info">
+                    <h4>Shin Godzilla</h4>
+                    <div class="card-details"><span>2016</span><span>120min</span></div>
+                </div>
+            </div>
+
+            <div class="filme" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://image.tmdb.org/t/p/w220_and_h330_face/spLJTEsaQwlkXdfwvzrZJvq9qAp.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Panico no Lago 2</h4>
+                    <div class="card-details"><span>2023</span><span>45min</span></div>
+                </div>
+            </div>
+
+<div class="filme" onclick="window.location.href='player.html?title=Shin Godzilla&url=https://playerflixapi.com/filme/31'">
+                <div class="tags"><span class="tag leg">LEG</span><span class="tag qual">HD</span></div>
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR1Fg2kThiuRSrGFeokAa0EXzxzgMH7bDkwj5i_1f2kVqALETPEPpbzlEeA&s=10" alt="Capa">
+                <div class="card-info">
+                    <h4>Shin Godzilla</h4>
+                    <div class="card-details"><span>2016</span><span>120min</span></div>
+                </div>
+            </div>
+
+            <div class="filme" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://image.tmdb.org/t/p/w220_and_h330_face/spLJTEsaQwlkXdfwvzrZJvq9qAp.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Panico no Lago 2</h4>
+                    <div class="card-details"><span>2023</span><span>45min</span></div>
+                </div>
+            </div>
+
+<div class="filme" onclick="window.location.href='player.html?title=Shin Godzilla&url=https://playerflixapi.com/filme/31'">
+                <div class="tags"><span class="tag leg">LEG</span><span class="tag qual">HD</span></div>
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR1Fg2kThiuRSrGFeokAa0EXzxzgMH7bDkwj5i_1f2kVqALETPEPpbzlEeA&s=10" alt="Capa">
+                <div class="card-info">
+                    <h4>Shin Godzilla</h4>
+                    <div class="card-details"><span>2016</span><span>120min</span></div>
+                </div>
+            </div>
+
+            <div class="filme" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://image.tmdb.org/t/p/w220_and_h330_face/spLJTEsaQwlkXdfwvzrZJvq9qAp.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Panico no Lago 2</h4>
+                    <div class="card-details"><span>2023</span><span>45min</span></div>
+                </div>
+            </div>
+
+<div class="filme" onclick="window.location.href='player.html?title=Shin Godzilla&url=https://playerflixapi.com/filme/31'">
+                <div class="tags"><span class="tag leg">LEG</span><span class="tag qual">HD</span></div>
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR1Fg2kThiuRSrGFeokAa0EXzxzgMH7bDkwj5i_1f2kVqALETPEPpbzlEeA&s=10" alt="Capa">
+                <div class="card-info">
+                    <h4>Shin Godzilla</h4>
+                    <div class="card-details"><span>2016</span><span>120min</span></div>
+                </div>
+            </div>
+
+            <div class="filme" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://image.tmdb.org/t/p/w220_and_h330_face/spLJTEsaQwlkXdfwvzrZJvq9qAp.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Panico no Lago 2</h4>
+                    <div class="card-details"><span>2023</span><span>45min</span></div>
+                </div>
+            </div>
+
+<div class="filme" onclick="window.location.href='player.html?title=Shin Godzilla&url=https://playerflixapi.com/filme/31'">
+                <div class="tags"><span class="tag leg">LEG</span><span class="tag qual">HD</span></div>
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR1Fg2kThiuRSrGFeokAa0EXzxzgMH7bDkwj5i_1f2kVqALETPEPpbzlEeA&s=10" alt="Capa">
+                <div class="card-info">
+                    <h4>Shin Godzilla</h4>
+                    <div class="card-details"><span>2016</span><span>120min</span></div>
+                </div>
+            </div>
+
+            <div class="filme" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://image.tmdb.org/t/p/w220_and_h330_face/spLJTEsaQwlkXdfwvzrZJvq9qAp.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Panico no Lago 2</h4>
+                    <div class="card-details"><span>2023</span><span>45min</span></div>
+                </div>
+            </div>
+
+
+        </div>
+    </main>
+
+    <script>
+        const filmesPorPagina = 30; // Define o limite de filmes por página
+        let paginaAtual = 1;
+        let filmes = [];
+
+        // Inicializa o sistema de páginas quando a tela carregar
+        document.addEventListener("DOMContentLoaded", () => {
+            filmes = document.querySelectorAll(".filme");
+            atualizarVisualizacao();
+        });
+
+        function atualizarVisualizacao() {
+            const totalPaginas = Math.ceil(filmes.length / filmesPorPagina) || 1;
+            
+            // Atualiza o texto "Page X of Y"
+            document.getElementById("page-info").innerText = `Page ${paginaAtual} of ${totalPaginas}`;
+
+            // Controla o botão NEXT (Desativa se estiver na última página)
+            document.getElementById("btn-next").disabled = paginaAtual >= totalPaginas;
+
+            // Mostra apenas os filmes da página atual e esconde o resto
+            let inicio = (paginaAtual - 1) * filmesPorPagina;
+            let fim = inicio + filmesPorPagina;
+
+            filmes.forEach((filme, index) => {
+                if (index >= inicio && index < fim) {
+                    filme.classList.remove("hidden");
+                } else {
+                    filme.classList.add("hidden");
+                }
+            });
+
+            // Faz a tela rolar para o topo suavemente ao trocar de página
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function avancarPagina() {
+            const totalPaginas = Math.ceil(filmes.length / filmesPorPagina);
+            if (paginaAtual < totalPaginas) {
+                paginaAtual++;
+                atualizarVisualizacao();
+            }
+        }
+
+        function voltarPagina() {
+            if (paginaAtual > 1) {
+                // Se estiver na página 2 ou mais, volta uma página
+                paginaAtual--;
+                atualizarVisualizacao();
+            } else {
+                // Se estiver na página 1, volta para a tela inicial
+                window.location.href = 'index.html';
+            }
+        }
+    </script>
+</body>
+</html>

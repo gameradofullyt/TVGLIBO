@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ultimate Puzzle Simulator 3D</title>
+    <style>
+        :root {
+            --bg-color: #0f0f12;
+            --sidebar-bg: rgba(18, 18, 22, 0.95);
+            --accent: #7b61ff;
+            --accent-glow: rgba(123, 97, 255, 0.5);
+        }
+
+        body { 
+            margin: 0; overflow: hidden; 
+            background-color: var(--bg-color); 
+            font-family: 'Inter', 'Segoe UI', sans-serif; 
+            color: white; user-select: none;
+        }
+
+        /* === UI INTERFACE === */
+        #top-bar {
+            position: absolute; top: 0; left: 0; width: 100%;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 20px 40px; box-sizing: border-box; z-index: 100; pointer-events: none;
+        }
+
+        #menu-btn {
+            pointer-events: auto;
+            background: var(--sidebar-bg); border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px; width: 55px; height: 55px;
+            font-size: 28px; cursor: pointer; color: #fff;
+            backdrop-filter: blur(15px); transition: 0.3s;
+            display: flex; justify-content: center; align-items: center;
+        }
+        #menu-btn:hover { border-color: var(--accent); box-shadow: 0 0 20px var(--accent-glow); }
+
+        #timer {
+            font-size: 48px; font-weight: 900; font-variant-numeric: tabular-nums;
+            text-shadow: 0 0 20px rgba(0,0,0,0.5);
+            background: rgba(0,0,0,0.4); padding: 10px 30px; border-radius: 15px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        /* === SIDEBAR PROFISSIONAL === */
+        #sidebar {
+            position: absolute; top: 90px; left: 40px; width: 320px; max-height: calc(100vh - 150px);
+            background: var(--sidebar-bg); backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.1); border-radius: 20px;
+            padding: 25px 10px; overflow-y: auto; pointer-events: auto;
+            transform: translateX(-150%); transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            z-index: 99; box-shadow: 20px 20px 60px rgba(0,0,0,0.7);
+        }
+        #sidebar.open { transform: translateX(0); }
+        
+        .section-title { font-size: 12px; text-transform: uppercase; letter-spacing: 2px; color: #666; margin: 20px 15px 10px; }
+
+        .menu-item {
+            padding: 15px 20px; margin: 4px 10px; border-radius: 12px;
+            background: rgba(255,255,255,0.02); cursor: pointer; transition: 0.2s;
+            font-weight: 500; display: flex; align-items: center; justify-content: space-between;
+        }
+        .menu-item:hover { background: rgba(255,255,255,0.08); transform: scale(1.02); }
+        .menu-item.active { background: var(--accent); color: white; }
+        
+        /* Force Cube Selectors */
+        #force-colors { display: none; padding: 15px; gap: 12px; flex-wrap: wrap; justify-content: center; }
+        .color-dot { width: 35px; height: 35px; border-radius: 50%; border: 3px solid rgba(255,255,255,0.1); cursor: pointer; transition: 0.3s; }
+        .color-dot:hover { transform: translateY(-5px); border-color: white; }
+
+        /* === BOTTOM SHUFFLE === */
+        #bottom-bar { position: absolute; bottom: 50px; left: 50%; transform: translateX(-50%); z-index: 100; }
+        #shuffle-btn {
+            background: #fff; color: #000; border: none; padding: 18px 50px; border-radius: 40px;
+            font-size: 20px; font-weight: 800; cursor: pointer; transition: 0.3s;
+            box-shadow: 0 10px 40px rgba(255,255,255,0.2);
+        }
+        #shuffle-btn:hover { transform: translateY(-5px) scale(1.05); box-shadow: 0 15px 50px rgba(255,255,255,0.3); }
+
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 10px; }
+    </style>
+</head>
+<body>
+
+    <div id="top-bar">
+        <div id="menu-btn" onclick="toggleMenu()">☰</div>
+        <div id="timer">00:00.000</div>
+        <div style="width: 55px;"></div>
+    </div>
+
+    <div id="sidebar">
+        <div class="section-title">Cubic Puzzles</div>
+        <div id="cube-list"></div> <div class="section-title">Special Shapes</div>
+        <div class="menu-item" onclick="loadSpecial('pyraminx')">Pyraminx <span>▲</span></div>
+        <div class="menu-item" onclick="loadSpecial('megaminx')">Megaminx <span>⬢</span></div>
+        <div class="menu-item" onclick="loadSpecial('mastermorphix')">Mastermorphix 3x3</div>
+        <div class="menu-item" onclick="loadSpecial('gear')">Gear Cube</div>
+
+        <div class="section-title">Modificações</div>
+        <div class="menu-item" onclick="toggleForce()">Force Cube (Cor Única) ▼</div>
+        <div id="force-colors">
+            <div class="color-dot" style="background:#ffffff" onclick="buildCube(dimensions, 0xffffff)"></div>
+            <div class="color-dot" style="background:#ffd500" onclick="buildCube(dimensions, 0xffd500)"></div>
+            <div class="color-dot" style="background:#009e60" onclick="buildCube(dimensions, 0x009e60)"></div>
+            <div class="color-dot" style="background:#c41e3a" onclick="buildCube(dimensions, 0xc41e3a)"></div>
+            <div class="color-dot" style="background:#0051ba" onclick="buildCube(dimensions, 0x0051ba)"></div>
+        </div>
+    </div>
+
+    <div id="bottom-bar">
+        <button id="shuffle-btn" onclick="shuffleCube()">SHUFFLE</button>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tween.js/18.6.4/tween.umd.js"></script>
+
+    <script>
+        let scene, camera, renderer, controls, cubeGroup, activeGroup;
+        let dimensions = 3;
+        let isAnimating = false;
+        let allPieces = [];
+        let timerRunning = false, startTime = 0, timerInterval, isShuffled = false;
+
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+        let dragStart = null, intersectedPiece = null, intersectedNormal = null;
+
+        const colors = { R:0xc41e3a, L:0xff5800, U:0xffffff, D:0xffd500, F:0x009e60, B:0x0051ba, Core:0x111111 };
+
+        init();
+        animate();
+
+        function init() {
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x0f0f12);
+            camera = new THREE.PerspectiveCamera(45, window.innerWidth/window.innerHeight, 0.1, 1000);
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            document.body.appendChild(renderer.domElement);
+
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            
+            scene.add(new THREE.AmbientLight(0xffffff, 0.8));
+            let pLight = new THREE.PointLight(0xffffff, 0.5);
+            pLight.position.set(10, 20, 10);
+            scene.add(pLight);
+
+            cubeGroup = new THREE.Group();
+            activeGroup = new THREE.Group();
+            scene.add(cubeGroup, activeGroup);
+
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth/window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+
+            renderer.domElement.addEventListener('pointerdown', onDown);
+            renderer.domElement.addEventListener('pointermove', onMove);
+            renderer.domElement.addEventListener('pointerup', onUp);
+
+            genMenu();
+            buildCube(3);
+        }
+
+        function genMenu() {
+            const container = document.getElementById('cube-list');
+            for(let i=2; i<=21; i++) {
+                let div = document.createElement('div');
+                div.className = 'menu-item';
+                div.innerHTML = `${i}x${i} Cube`;
+                div.onclick = () => buildCube(i);
+                container.appendChild(div);
+            }
+        }
+
+        function buildCube(n, forceColor = null) {
+            dimensions = n;
+            allPieces = [];
+            isShuffled = false; resetTimer();
+            while(cubeGroup.children.length > 0) cubeGroup.remove(cubeGroup.children[0]);
+
+            const size = 1, space = 1.01, offset = (n-1)/2;
+            const geom = new THREE.BoxGeometry(size, size, size);
+
+            for(let x=0; x<n; x++) {
+                for(let y=0; y<n; y++) {
+                    for(let z=0; z<n; z++) {
+                        if(x>0 && x<n-1 && y>0 && y<n-1 && z>0 && z<n-1) continue;
+                        
+                        const mats = [
+                            new THREE.MeshLambertMaterial({color: x===n-1 ? (forceColor||colors.R) : colors.Core}),
+                            new THREE.MeshLambertMaterial({color: x===0 ? (forceColor||colors.L) : colors.Core}),
+                            new THREE.MeshLambertMaterial({color: y===n-1 ? (forceColor||colors.U) : colors.Core}),
+                            new THREE.MeshLambertMaterial({color: y===0 ? (forceColor||colors.D) : colors.Core}),
+                            new THREE.MeshLambertMaterial({color: z===n-1 ? (forceColor||colors.F) : colors.Core}),
+                            new THREE.MeshLambertMaterial({color: z===0 ? (forceColor||colors.B) : colors.Core})
+                        ];
+
+                        const mesh = new THREE.Mesh(geom, mats);
+                        mesh.position.set((x-offset)*space, (y-offset)*space, (z-offset)*space);
+                        
+                        // Bordas para definição em cubos grandes
+                        const edges = new THREE.EdgesGeometry(geom);
+                        mesh.add(new THREE.LineSegments(edges, new THREE.LineBasicMaterial({color:0x000000})));
+                        
+                        cubeGroup.add(mesh);
+                        allPieces.push(mesh);
+                    }
+                }
+            }
+            camera.position.set(n*2, n*1.5, n*2.5);
+            toggleMenu(false);
+        }
+
+        // Lógica de rotação (Raycasting)
+        function onDown(e) {
+            if(isAnimating) return;
+            mouse.x = (e.clientX/window.innerWidth)*2-1;
+            mouse.y = -(e.clientY/window.innerHeight)*2+1;
+            raycaster.setFromCamera(mouse, camera);
+            const hits = raycaster.intersectObjects(cubeGroup.children);
+            if(hits.length > 0) {
+                controls.enabled = false;
+                intersectedPiece = hits[0].object;
+                intersectedNormal = hits[0].face.normal.clone().transformDirection(intersectedPiece.matrixWorld).round();
+                dragStart = {x: e.clientX, y: e.clientY};
+            }
+        }
+
+        function onMove(e) {
+            if(!dragStart || isAnimating) return;
+            const dx = e.clientX - dragStart.x, dy = e.clientY - dragStart.y;
+            if(Math.abs(dx) > 15 || Math.abs(dy) > 15) {
+                calcRotation(dx, dy);
+                dragStart = null;
+            }
+        }
+
+        function onUp() { controls.enabled = true; dragStart = null; }
+
+        function calcRotation(dx, dy) {
+            let axis, dir, n = intersectedNormal;
+            if(Math.abs(n.x) > 0.5) { 
+                axis = Math.abs(dy)>Math.abs(dx)?'z':'y'; 
+                dir = axis==='z'?Math.sign(dy)*n.x : Math.sign(dx)*-n.x;
+            } else if(Math.abs(n.y) > 0.5) {
+                axis = Math.abs(dx)>Math.abs(dy)?'z':'x';
+                dir = axis==='z'?Math.sign(dx)*-n.y : Math.sign(dy)*n.y;
+            } else {
+                axis = Math.abs(dx)>Math.abs(dy)?'y':'x';
+                dir = axis==='y'?Math.sign(dx)*n.z : Math.sign(dy)*n.z;
+            }
+            
+            const p = new THREE.Vector3();
+            intersectedPiece.getWorldPosition(p);
+            rotateLayer(axis, p[axis], dir * Math.PI/2);
+        }
+
+        function rotateLayer(axis, slice, angle) {
+            if(isAnimating) return;
+            isAnimating = true;
+            if(isShuffled && !timerRunning) startTimer();
+
+            const targets = allPieces.filter(p => {
+                const pos = new THREE.Vector3();
+                p.getWorldPosition(pos);
+                return Math.abs(pos[axis] - slice) < 0.1;
+            });
+
+            targets.forEach(p => activeGroup.attach(p));
+            new TWEEN.Tween(activeGroup.rotation).to({[axis]: angle}, 300)
+                .easing(TWEEN.Easing.Quadratic.Out)
+                .onComplete(() => {
+                    targets.forEach(p => {
+                        cubeGroup.attach(p);
+                        p.position.round();
+                        p.rotation.set(Math.round(p.rotation.x/(Math.PI/2))*Math.PI/2, Math.round(p.rotation.y/(Math.PI/2))*Math.PI/2, Math.round(p.rotation.z/(Math.PI/2))*Math.PI/2);
+                    });
+                    activeGroup.rotation.set(0,0,0);
+                    isAnimating = false;
+                }).start();
+        }
+
+        function shuffleCube() {
+            let i = 0, max = dimensions * 5;
+            isShuffled = false; resetTimer();
+            function move() {
+                if(i < max) {
+                    const ax = ['x','y','z'][Math.floor(Math.random()*3)];
+                    const p = allPieces[Math.floor(Math.random()*allPieces.length)];
+                    const pos = new THREE.Vector3(); p.getWorldPosition(pos);
+                    rotateLayer(ax, pos[ax], Math.PI/2);
+                    setTimeout(move, 120); i++;
+                } else { isShuffled = true; }
+            }
+            move();
+        }
+
+        function startTimer() {
+            startTime = Date.now(); timerRunning = true;
+            timerInterval = setInterval(() => {
+                let d = Date.now() - startTime;
+                let ms = String(d % 1000).padStart(3,'0'), s = String(Math.floor(d/1000)%60).padStart(2,'0'), m = String(Math.floor(d/60000)).padStart(2,'0');
+                document.getElementById('timer').innerText = `${m}:${s}.${ms}`;
+            }, 10);
+        }
+
+        function resetTimer() { clearInterval(timerInterval); timerRunning = false; document.getElementById('timer').innerText = "00:00.000"; }
+        function toggleMenu(s) { document.getElementById('sidebar').classList.toggle('open', s); }
+        function toggleForce() { const f = document.getElementById('force-colors'); f.style.display = f.style.display==='flex'?'none':'flex'; }
+        function animate(t) { requestAnimationFrame(animate); TWEEN.update(t); controls.update(); renderer.render(scene, camera); }
+    </script>
+</body>
+</html>

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="pt-br" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <title>Player YouTube</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        body {
+            margin: 0;
+            background: #000;
+            font-family: Arial, sans-serif;
+            color: #fff;
+        }
+
+        .player-container {
+            width: 100%;
+            max-width: 1100px;
+            margin: 30px auto;
+            padding: 10px;
+        }
+
+        .video-wrapper {
+            position: relative;
+            padding-top: 56.25%;
+        }
+
+        .video-wrapper iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        h1 {
+            font-size: 1.4rem;
+            margin-bottom: 15px;
+        }
+
+        .back {
+            margin-top: 20px;
+            display: inline-block;
+            color: #e50914;
+            text-decoration: none;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="player-container">
+        <h1 id="videoTitle"></h1>
+
+        <div class="video-wrapper">
+            <iframe id="ytPlayer" allowfullscreen></iframe>
+        </div>
+
+        <a href="index.html" class="back">← Voltar</a>
+    </div>
+
+    <script>
+    const params = new URLSearchParams(window.location.search);
+    const title = params.get("title");
+    const videoUrl = params.get("url");
+    const playlist = params.get("playlist");
+
+    document.getElementById("videoTitle").textContent = title || "";
+
+    function getVideoId(link) {
+        if (!link) return "";
+        if (link.includes("youtu.be/")) {
+            return link.split("youtu.be/")[1].split("?")[0];
+        }
+        if (link.includes("watch?v=")) {
+            return link.split("watch?v=")[1].split("&")[0];
+        }
+        return link;
+    }
+
+    function getPlaylistId(link) {
+        if (link.includes("list=")) {
+            return link.split("list=")[1];
+        }
+        return link;
+    }
+
+    const iframe = document.getElementById("ytPlayer");
+
+    if (playlist) {
+        const playlistId = getPlaylistId(playlist);
+        iframe.src = `https://www.youtube.com/embed/videoseries?list=${playlistId}`;
+    } else if (videoUrl) {
+        const videoId = getVideoId(videoUrl);
+        iframe.src = `https://www.youtube.com/embed/${videoId}`;
+    }
+</script>
+
+</body>
+</html>

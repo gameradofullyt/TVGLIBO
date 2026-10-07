@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="pt-br" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <title>Gênero | GAMERADOFLIX</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header class="navbar">
+        <div class="logo">GAMERADOFLIX</div>
+        <nav><ul class="nav-links"><li><a href="index.html">Voltar</a></li></ul></nav>
+    </header>
+
+    <main class="content" style="padding-top: 100px;">
+        <h1 id="tituloCategoria">Gênero</h1>
+        <div class="grid-content" id="listaFiltrada">
+            </div>
+    </main>
+
+    <script>
+        // Esta lógica pega o nome da categoria na URL e filtra os filmes
+        const urlParams = new URLSearchParams(window.location.search);
+        const generoDesejado = urlParams.get('tipo'); // ex: acao
+        
+        document.getElementById('tituloCategoria').innerText = "Gênero: " + generoDesejado.toUpperCase();
+
+        // Aqui você simularia a busca no seu "Banco de Dados" (que são seus cards)
+        // No futuro, para ser automático, os filmes viriam de um arquivo JSON.
+    </script>
+</body>
+</html>

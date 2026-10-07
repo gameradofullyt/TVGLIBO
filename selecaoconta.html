@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quem está assistindo? | GAMERADOFLIX</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --dark: #040D12; --red: #C63C51; --light: #f3f3f3; --dark-gray: #1a1a1a; }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--dark);
+            color: var(--light);
+            height: 100vh;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow-x: hidden;
+        }
+        h1 { font-weight: 500; font-size: 2.5rem; margin-bottom: 40px; text-align: center; }
+        
+        .profiles-container { display: flex; gap: 30px; flex-wrap: wrap; justify-content: center; position: relative; z-index: 1;}
+        
+        .profile-wrapper {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .profile {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            transition: 0.3s;
+            width: 150px;
+        }
+        .profile:hover .profile-img { border-color: var(--light); }
+        .profile:hover .profile-name { color: var(--light); }
+        
+        .profile-img {
+            width: 150px; height: 150px;
+            border-radius: 10px;
+            object-fit: cover;
+            border: 4px solid transparent;
+            transition: 0.3s;
+            background-color: #333;
+        }
+        
+        .profile-name { margin-top: 15px; color: #aaa; font-size: 1.2rem; transition: 0.3s; text-align: center; }
+
+        /* Botão Lápis */
+        .edit-btn {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background-color: var(--dark);
+            border: 2px solid #888;
+            color: #888;
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: 0.3s;
+            z-index: 10;
+        }
+        .edit-btn:hover {
+            border-color: var(--light);
+            color: var(--light);
+            transform: scale(1.1);
+        }
+
+        /* Modo de Remoção */
+        .remove-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 150px; height: 150px;
+            background-color: rgba(0,0,0,0.7);
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 3rem;
+            color: var(--red);
+            opacity: 0;
+            transition: 0.3s;
+            pointer-events: none; /* Deixa o clique passar pro perfil */
+        }
+        .profile-wrapper.removing .remove-overlay {
+            opacity: 1;
+        }
+
+        .add-profile-btn {
+            width: 150px; height: 150px;
+            border-radius: 10px;
+            border: 4px solid transparent;
+            background-color: #111;
+            display: flex; justify-content: center; align-items: center;
+            font-size: 4rem; color: #888; cursor: pointer; transition: 0.3s;
+        }
+        .add-profile-btn:hover { background-color: var(--light); color: var(--dark); border-color: var(--light); }
+
+        .buttons-container {
+            margin-top: 60px;
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .manage-btn {
+            padding: 10px 30px;
+            background: transparent; border: 1px solid #888; color: #888;
+            font-size: 1rem; cursor: pointer; transition: 0.3s; text-transform: uppercase; letter-spacing: 2px;
+        }
+        .manage-btn:hover { color: var(--light); border-color: var(--light); }
+        .manage-btn.active { color: var(--dark); background: var(--light); border-color: var(--light); }
+        
+        .guest-warning { color: var(--red); margin-top: 20px; font-size: 0.9rem; display: none; text-align: center;}
+
+        /* MODAIS PERSONALIZADOS */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background-color: rgba(0,0,0,0.85);
+            display: flex; justify-content: center; align-items: center;
+            z-index: 100;
+            opacity: 0; pointer-events: none;
+            transition: 0.3s;
+        }
+        .modal-overlay.active { opacity: 1; pointer-events: auto; }
+
+        .modal-box {
+            background-color: var(--dark-gray);
+            padding: 40px;
+            border-radius: 8px;
+            width: 90%; max-width: 400px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            transform: translateY(-20px);
+            transition: 0.3s;
+        }
+        .modal-overlay.active .modal-box { transform: translateY(0); }
+
+        .modal-title { font-size: 1.5rem; margin-bottom: 20px; font-weight: 500; }
+        
+        .modal-input {
+            width: 100%; padding: 12px; margin-bottom: 20px;
+            background: #333; border: 1px solid #555; color: #fff;
+            border-radius: 4px; box-sizing: border-box; font-family: 'Poppins', sans-serif;
+        }
+        .modal-input:focus { outline: none; border-color: var(--light); }
+
+        .modal-buttons { display: flex; gap: 15px; justify-content: center; }
+        .modal-btn {
+            padding: 10px 20px; cursor: pointer; font-family: 'Poppins', sans-serif;
+            border: none; border-radius: 4px; font-size: 1rem; transition: 0.3s;
+            font-weight: 500; width: 100%;
+        }
+        .modal-btn-cancel { background: transparent; color: #aaa; border: 1px solid #555; }
+        .modal-btn-cancel:hover { background: #333; color: #fff; }
+        .modal-btn-confirm { background: var(--light); color: var(--dark); }
+        .modal-btn-confirm:hover { background: #fff; transform: scale(1.05); }
+
+    </style>
+</head>
+<body>
+
+    <h1 id="pageTitle">Quem está assistindo?</h1>
+
+    <div class="profiles-container" id="profilesList">
+        </div>
+
+    <p class="guest-warning" id="guestWarning">Modo Convidado ativo. Alterações e novos perfis não serão salvos.</p>
+
+    <div class="buttons-container">
+        <button class="manage-btn" id="btnRemoveMode" onclick="toggleRemoveMode()">Excluir Perfis</button>
+        <button class="manage-btn" onclick="trocarConta()">Trocar Conta</button>
+    </div>
+
+    <input type="file" id="imageUploader" accept="image/*" style="display: none;" onchange="processarImagem(event)">
+
+    <div class="modal-overlay" id="addProfileModal">
+        <div class="modal-box">
+            <div class="modal-title">Adicionar Perfil</div>
+            <input type="text" id="newProfileName" class="modal-input" placeholder="Nome do perfil" autocomplete="off">
+            <div class="modal-buttons">
+                <button class="modal-btn modal-btn-cancel" onclick="fecharModal('addProfileModal')">Cancelar</button>
+                <button class="modal-btn modal-btn-confirm" onclick="confirmarAdicaoPerfil()">Salvar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const isGuest = localStorage.getItem('gameradoflix_isGuest') === 'true';
+        const profilesList = document.getElementById('profilesList');
+        const guestWarning = document.getElementById('guestWarning');
+        const btnRemoveMode = document.getElementById('btnRemoveMode');
+
+        let isRemoveMode = false;
+        let editingProfileIndex = null;
+
+        // Imagem padrão
+        const defaultImage = "https://upload.wikimedia.org/wikipedia/commons/0/0b/Netflix-avatar.png";
+
+        // Carrega ou inicializa os perfis
+        let savedProfiles = JSON.parse(localStorage.getItem('gameradoflix_profiles')) || [
+            { name: "Gamerado", img: defaultImage }
+        ];
+
+        function renderProfiles() {
+            profilesList.innerHTML = ''; 
+
+            if (isGuest) {
+                guestWarning.style.display = 'block';
+                btnRemoveMode.style.display = 'none'; // Convidado não exclui
+                profilesList.innerHTML = `
+                    <div class="profile-wrapper">
+                        <div class="profile" onclick="entrarNaPlataforma('Convidado')">
+                            <img src="${defaultImage}" class="profile-img">
+                            <span class="profile-name">Convidado</span>
+                        </div>
+                    </div>
+                `;
+            } else {
+                btnRemoveMode.style.display = 'block';
+                
+                savedProfiles.forEach((profile, index) => {
+                    profilesList.innerHTML += `
+                        <div class="profile-wrapper ${isRemoveMode ? 'removing' : ''}">
+                            <div class="profile" onclick="handleProfileClick(${index})">
+                                <div style="position: relative;">
+                                    <img src="${profile.img}" class="profile-img">
+                                    <div class="remove-overlay">✕</div>
+                                </div>
+                                <span class="profile-name">${profile.name}</span>
+                            </div>
+                            <div class="edit-btn" style="display: ${isRemoveMode ? 'none' : 'flex'}" onclick="abrirSeletorArquivo(${index})">✎</div>
+                        </div>
+                    `;
+                });
+
+                if (savedProfiles.length < 4 && !isRemoveMode) {
+                    profilesList.innerHTML += `
+                        <div class="profile-wrapper">
+                            <div class="add-profile-btn" onclick="abrirModalAdicionar()">+</div>
+                            <span class="profile-name" style="margin-top: 15px;">Adicionar</span>
+                        </div>
+                    `;
+                }
+            }
+        }
+
+        // --- SISTEMA DE CLIQUES NOS PERFIS ---
+        function handleProfileClick(index) {
+            if (isRemoveMode) {
+                removerPerfil(index);
+            } else {
+                entrarNaPlataforma(savedProfiles[index].name);
+            }
+        }
+
+        // --- SISTEMA DE ENTRADA E TROCA DE CONTA ---
+        function entrarNaPlataforma(nomePerfil) {
+            sessionStorage.setItem('currentProfile', nomePerfil);
+            
+            // Simulação visual de carregamento (Opcional, deixa mais chique)
+            document.body.innerHTML = `<h1 style="margin-top: 40vh; color: var(--red);">GAMERADOFLIX</h1><p>Carregando ${nomePerfil}...</p>`;
+            
+            setTimeout(() => {
+                window.location.href = 'index.html'; 
+            }, 800);
+        }
+
+        function trocarConta() {
+            localStorage.removeItem('gameradoflix_currentUserEmail');
+            window.location.href = 'login.html';
+        }
+
+        // --- SISTEMA DE EXCLUSÃO (MODO REMOÇÃO) ---
+        function toggleRemoveMode() {
+            isRemoveMode = !isRemoveMode;
+            if (isRemoveMode) {
+                btnRemoveMode.innerText = "Concluído";
+                btnRemoveMode.classList.add('active');
+            } else {
+                btnRemoveMode.innerText = "Excluir Perfis";
+                btnRemoveMode.classList.remove('active');
+            }
+            renderProfiles();
+        }
+
+        function removerPerfil(index) {
+            savedProfiles.splice(index, 1);
+            localStorage.setItem('gameradoflix_profiles', JSON.stringify(savedProfiles));
+            
+            // Se apagar todos, sai do modo de remoção
+            if(savedProfiles.length === 0) {
+                toggleRemoveMode(); 
+            } else {
+                renderProfiles();
+            }
+        }
+
+        // --- SISTEMA DO MODAL DE ADICIONAR ---
+        function abrirModalAdicionar() {
+            document.getElementById('newProfileName').value = '';
+            document.getElementById('addProfileModal').classList.add('active');
+            document.getElementById('newProfileName').focus();
+        }
+
+        function fecharModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        function confirmarAdicaoPerfil() {
+            const novoNome = document.getElementById('newProfileName').value.trim();
+            if (!novoNome) {
+                // Pequena animação de erro se tiver vazio
+                document.getElementById('newProfileName').style.borderColor = 'var(--red)';
+                setTimeout(() => document.getElementById('newProfileName').style.borderColor = '#555', 1000);
+                return;
+            }
+
+            savedProfiles.push({ name: novoNome, img: defaultImage });
+            localStorage.setItem('gameradoflix_profiles', JSON.stringify(savedProfiles));
+            
+            fecharModal('addProfileModal');
+            renderProfiles();
+        }
+
+        // --- SISTEMA DE UPLOAD E COMPRESSÃO DE IMAGEM ---
+        function abrirSeletorArquivo(index) {
+            editingProfileIndex = index;
+            document.getElementById('imageUploader').click();
+        }
+
+        function processarImagem(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = function(e) {
+                const imgSource = e.target.result;
+                
+                // Sistema Profissional: Redimensiona a imagem para não estourar a memória do navegador
+                redimensionarImagem(imgSource, 300, function(imagemComprimida) {
+                    // Salva no perfil correto
+                    savedProfiles[editingProfileIndex].img = imagemComprimida;
+                    localStorage.setItem('gameradoflix_profiles', JSON.stringify(savedProfiles));
+                    
+                    // Limpa o input file para permitir enviar a mesma foto depois se quiser
+                    document.getElementById('imageUploader').value = '';
+                    
+                    renderProfiles();
+                });
+            };
+        }
+
+        // Função mágica que pega fotos de 10MB, 20MB e transforma em KB sem perder qualidade visível no perfil
+        function redimensionarImagem(base64Str, maxWidth, callback) {
+            const img = new Image();
+            img.src = base64Str;
+            img.onload = function() {
+                const canvas = document.createElement('canvas');
+                let width = img.width;
+                let height = img.height;
+
+                // Calcula a nova proporção
+                if (width > maxWidth) {
+                    height *= maxWidth / width;
+                    width = maxWidth;
+                }
+
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+                
+                // Exporta como JPEG com 80% de qualidade (Levíssimo e bonito)
+                callback(canvas.toDataURL('image/jpeg', 0.8));
+            };
+        }
+
+        // Inicia a renderização ao carregar a página
+        renderProfiles();
+    </script>
+
+</body>
+</html>

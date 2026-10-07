@@ -1,0 +1,1082 @@
+<!DOCTYPE html>
+<html lang="pt-br" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GAMERADO TV | Home</title>
+    
+    <script>
+        const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+        const currentProfile = sessionStorage.getItem('currentProfile');
+
+        if (!isLoggedIn) {
+            window.location.replace('login.html');
+        } else if (!currentProfile) {
+            window.location.replace('selecaoconta.html');
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .card-info h4 { font-size: 0.95rem; margin-bottom: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .card-info p { font-size: 0.75rem; opacity: 0.8; margin: 2px 0; }
+        .card-date { color: var(--primary-red, #e50914); font-weight: bold; }
+        body { padding-bottom: 60px; }
+        
+        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(15, 15, 15, 0.95); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); display: flex; justify-content: space-around; align-items: center; padding: 8px 0; border-top: 1px solid rgba(255, 255, 255, 0.05); z-index: 1000; box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.5); }
+        .bottom-nav .nav-item { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #888; font-size: 0.7rem; font-family: 'Poppins', sans-serif; transition: all 0.3s ease; position: relative; width: 20%; }
+        .bottom-nav .nav-item i { font-size: 1.2rem; margin-bottom: 4px; transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), color 0.3s; }
+        .bottom-nav .nav-item:hover i, .bottom-nav .nav-item.active i { transform: translateY(-4px) scale(1.1); color: var(--primary-red, #e50914); }
+        .bottom-nav .nav-item:hover span, .bottom-nav .nav-item.active span { color: white; font-weight: bold; }
+        .bottom-nav .nav-item.active::after { content: ''; position: absolute; bottom: -6px; width: 4px; height: 4px; background-color: var(--primary-red, #e50914); border-radius: 50%; animation: popIn 0.3s ease forwards; }
+        @keyframes popIn { 0% { transform: scale(0); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+
+        /* Estilos Novo Carrossel Hero */
+        .hero-carousel { position: relative; width: 100%; aspect-ratio: 16 / 9; max-height: 70vh; min-height: 250px; overflow: hidden; margin-bottom: 10px; cursor: grab; }
+        .hero-carousel:active { cursor: grabbing; }
+        .hero-track { width: 100%; height: 100%; position: relative; touch-action: pan-y; }
+        .hero-slide { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; transition: opacity 0.5s ease-in-out; z-index: 0; pointer-events: none; }
+        .hero-slide.active { opacity: 1; z-index: 1; pointer-events: auto; }
+        .hero-slide img { width: 100%; height: 100%; object-fit: cover; object-position: center; }
+        .hero-overlay { position: absolute; bottom: 0; left: 0; width: 100%; height: 100%; background: transparent; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; padding-bottom: 35px; pointer-events: none; }
+        .hero-play-btn { pointer-events: auto; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 60px; height: 60px; border: 2px solid var(--primary-red, #e50914); border-radius: 50%; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.5); cursor: pointer; color: white; font-size: 1.2rem; transition: transform 0.3s, background 0.3s; }
+        .hero-play-btn:hover { transform: translate(-50%, -50%) scale(1.15); background: var(--primary-red, #e50914); }
+        .hero-popular { font-size: 0.65rem; color: #fff; letter-spacing: 1px; margin-bottom: 5px; text-transform: uppercase; font-weight: bold; text-shadow: 2px 2px 5px rgba(0,0,0,1), -1px -1px 5px rgba(0,0,0,1); }
+        .hero-title { font-size: 1.3rem; font-weight: bold; color: white; margin-bottom: 15px; text-align: center; padding: 0 15px; text-shadow: 2px 2px 8px rgba(0,0,0,1), -1px -1px 8px rgba(0,0,0,1); }
+        .hero-dots { position: absolute; bottom: 15px; left: 50%; transform: translateX(-50%); display: flex; gap: 6px; z-index: 2; pointer-events: auto; }
+        .hero-dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.5); cursor: pointer; transition: all 0.3s; }
+        .hero-dot.active { width: 18px; border-radius: 4px; background: var(--primary-red, #e50914); }
+
+        /* Estilos Continuar Assistindo AUMENTADO */
+        #continue-watching-section { margin-bottom: 10px; }
+        .cw-track .cw-card { width: 300px; flex: 0 0 auto; margin-right: 15px; cursor: pointer; position: relative; background: transparent; border: none; }
+        .cw-thumb-container { position: relative; width: 100%; height: 168px; border-radius: 6px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+        .cw-thumb-container img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s; }
+        .cw-card:hover .cw-thumb-container img { transform: scale(1.05); }
+        .cw-progress-bar { position: absolute; bottom: 0; left: 0; width: 100%; height: 4px; background: rgba(255,255,255,0.3); }
+        .cw-progress-fill { height: 100%; background: var(--primary-red, #e50914); transition: width 0.3s; }
+        .cw-remove-btn { position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.7); color: white; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; cursor: pointer; z-index: 2; transition: background 0.3s; }
+        .cw-remove-btn:hover { background: var(--primary-red, #e50914); }
+        .cw-info { padding-top: 10px; text-align: left; }
+        .cw-info h4 { font-size: 1rem; margin: 0; color: white; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .cw-info p { font-size: 0.8rem; color: #aaa; margin: 3px 0 0 0; }
+
+        /* Deixar pesquisa bem maior */
+        #resultados-grid .card { width: 100%; height: 100%; margin: 0; flex: none; }
+        #resultados-grid .card img { width: 100%; height: 280px; object-fit: cover; }
+
+        /* TELA INTERNA CONTINUE ASSISTINDO (VER MAIS) */
+        #tela-cw-completa { display: none; padding: 80px 15px 80px 15px; }
+        .cw-header-bar { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; }
+        .btn-voltar { background: transparent; color: white; border: none; font-size: 1.5rem; cursor: pointer; }
+        .grid-2-col { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
+        .grid-2-col .cw-card { width: 100%; margin: 0; }
+        .grid-2-col .cw-thumb-container { height: 100px; } /* Altura ajustada para 2 colunas */
+
+        /* ========================================================================= */
+        /* NOVOS ESTILOS: BADGES E INFORMAÇÕES DE CATEGORIA (RESPEITANDO TAMANHO ORIGINAL) */
+        /* ========================================================================= */
+        
+        /* Apenas adicionamos position relative e overflow para segurar o degradê, sem forçar tamanho */
+        .card { position: relative; overflow: hidden; border-radius: 6px; }
+        
+        /* Degradê para o texto aparecer bem (EXCETO PARA OUTROS CONTEÚDOS) */
+        .card::after { content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 65%; background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.7) 30%, rgba(0,0,0,0) 100%); pointer-events: none; z-index: 1; }
+
+        .badges-container { position: absolute; top: 5px; left: 5px; z-index: 2; display: flex; gap: 4px; pointer-events: none; }
+        .badge { padding: 2px 5px; border-radius: 4px; font-size: 0.65rem; font-weight: bold; color: white; font-family: 'Poppins', sans-serif; box-shadow: 1px 1px 4px rgba(0,0,0,0.5); }
+        .badge.dub { background-color: #1e88e5; }
+        .badge.classificacao[data-class="L"] { background-color: #0c940c; }
+        .badge.classificacao[data-class="+10"] { background-color: #0f6bb5; }
+        .badge.classificacao[data-class="+12"] { background-color: #d1a800; color: #000; }
+        .badge.classificacao[data-class="+14"] { background-color: #d66b00; }
+        .badge.classificacao[data-class="+16"] { background-color: #c90000; }
+        .badge.classificacao[data-class="+18"] { background-color: #e50914; }
+
+        /* Ajustes no texto sobreposto */
+        .card-info { position: absolute; bottom: 0; left: 0; width: 100%; padding: 10px 10px 8px 10px; z-index: 2; display: flex; flex-direction: column; align-items: flex-start; }
+        .card-info h4 { font-size: 0.95rem; color: #fff; margin: 0 0 4px 0; padding: 0; font-weight: 800; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; text-shadow: 2px 2px 4px rgba(0,0,0,1); text-align: left; }
+        .meta-info { font-size: 0.75rem; display: flex; align-items: center; justify-content: flex-start; gap: 5px; margin: 0; padding: 0; font-weight: 800; text-shadow: 1px 1px 3px rgba(0,0,0,0.9); }
+        .meta-separator { color: #888; font-size: 0.7rem; }
+
+        /* Cores Automáticas por Tipo - Vibrantes */
+        .media-type[data-type="Filme"] { color: #FF4D4D; }     
+        .media-type[data-type="Série"] { color: #00E5FF; }     
+        .media-type[data-type="Dorama"] { color: #00FF66; }    
+        .media-type[data-type="Desenho"] { color: #FFE600; }   
+        .media-type[data-type="Animação"] { color: #CC66FF; }  
+        .media-type[data-type="Anime"] { color: #FF9900; }     
+        .media-type[data-type="Novela"] { color: #FF33CC; }    
+
+        /* ========================================================
+           REVERSÃO DO "OUTROS CONTEÚDOS" PARA O ESTILO ANTIGO
+           ======================================================== */
+        #outros-section .card::after { display: none !important; } /* Remove o degradê */
+        #outros-section .badges-container { display: none !important; } /* Remove Badges se existirem */
+        #outros-section .card-info { position: relative; bottom: auto; left: auto; background: transparent; padding: 5px; align-items: center; text-align: center; display: block; } /* Volta para baixo da imagem */
+        #outros-section .card-info h4 { font-size: 0.95rem; white-space: normal; text-shadow: none; font-weight: normal; margin-bottom: 2px; text-transform: none; text-align: center; }
+        #outros-section .card-info p { font-size: 0.75rem; opacity: 0.8; margin: 2px 0; color: white; font-weight: normal; text-shadow: none; display: block; }
+        #outros-section .card-info .card-date { color: var(--primary-red); font-weight: bold; font-size: 0.75rem; display: block; }
+    </style>
+</head>
+<body>
+
+    <header class="navbar">
+        <h1 class="logo-rgb">🍿 CINEMA </h1>
+        <div class="search-container">
+            <i class="fas fa-search search-icon"></i>
+            <input type="text" id="searchInput" class="search-input" placeholder="Pesquisar em todo o site...">
+        </div>
+    </header>
+
+    <div id="tela-pesquisa" class="tela-pesquisa hidden" style="display: none; padding-top: 80px;">
+        <h2 class="category-title" style="padding: 0 20px;">
+            Resultado da pesquisa... <span class="emoji-animado">📀</span>
+        </h2>
+        <div id="resultados-grid" class="grid-filmes" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 20px; padding: 20px;"></div>
+        <p id="mensagem-vazia" class="hidden" style="text-align: center; width: 100%; margin-top: 40px; color: #888;">
+            Nenhum filme ou série encontrado para esta pesquisa.
+        </p>
+    </div>
+
+    <div id="tela-cw-completa">
+        <div class="cw-header-bar">
+            <button class="btn-voltar" onclick="fecharTelaCW()"><i class="fas fa-arrow-left"></i></button>
+            <h2 class="category-title" style="margin: 0;">Continuar Assistindo</h2>
+        </div>
+        <div class="grid-2-col" id="cw-grid-completo">
+            </div>
+    </div>
+
+    <main class="content" id="conteudo-principal">
+        
+        <section class="hero-carousel" id="hero-carousel-container">
+            <div class="hero-track" id="hero-track">
+                <div class="hero-slide active">
+                    <img src="https://img.odcdn.com.br/wp-content/uploads/2023/08/one-piece-live-action-1.jpg" alt="Peaky Blinders">
+                    <div class="hero-overlay">
+                        <div class="hero-play-btn" onclick="window.location.href='player.html?title=Peaky Blinders&url=#'"><i class="fas fa-play"></i></div>
+                        <p class="hero-popular">POPULAR HOJE</p>
+                        <h2 class="hero-title">One Piece: A Série</h2>
+                    </div>
+                </div>
+                <div class="hero-slide">
+                    <img src="https://i.imgur.com/XOMp45F.jpeg" alt="Vingadores">
+                    <div class="hero-overlay">
+                        <div class="hero-play-btn" onclick="window.location.href='playeryt.html?title=Vingadores: Doomsday Trailer Vazado&url=https://youtu.be/Kwzsg8Wkoz0'"><i class="fas fa-play"></i></div>
+                        <p class="hero-popular">POPULAR HOJE</p>
+                        <h2 class="hero-title">Peaky Blinders: O Homem Imortal</h2>
+                    </div>
+                </div>
+                <div class="hero-slide">
+                    <img src="https://image.tmdb.org/t/p/original/9yBVqNruk6Ykrwc32qrK2TIE5xw.jpg" alt="Mortal Kombat">
+                    <div class="hero-overlay">
+                        <div class="hero-play-btn" onclick="window.location.href='player.html?title=Mortal Kombat 2&url=#'"><i class="fas fa-play"></i></div>
+                        <p class="hero-popular">POPULAR HOJE</p>
+                        <h2 class="hero-title">Mortal Kombat 2</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="hero-dots" id="hero-dots"></div>
+        </section>
+
+        <section class="category-slider" id="continue-watching-section" style="display: none;">
+            <h2 class="category-title">
+                Continuar Assistindo
+                <a href="#" class="ver-mais-h2" onclick="abrirTelaCW(event)">Ver Mais ></a>
+            </h2>
+            <div class="slider-wrapper">
+                <button class="slider-arrow prev" onclick="scrollSlider(this, -1)">&#10094;</button>
+                <div class="slider-track cw-track" id="cw-track"></div>
+                <button class="slider-arrow next" onclick="scrollSlider(this, 1)">&#10095;</button>
+            </div>
+        </section>
+
+        <div class="category-divider"><span class="rgb-outline">🍿 MAXIMUS PLAY 🍿</span></div>
+
+        <section class="category-slider" data-random="false">
+            <h2 class="category-title">
+                FOOTBOL <span class="emoji-animado">📀</span>
+                <a href="lista-filmes.html" class="ver-mais-h2">Ver Mais ></a>
+            </h2>
+            <div class="slider-wrapper">
+                <button class="slider-arrow prev" onclick="scrollSlider(this, -1)">&#10094;</button>
+                <div class="slider-track">
+                  
+                  <div class="card" onclick="window.location.href='player.html?title=Força Tática&url=https://myembed.biz/filme/tt1266027'">
+                      <div class="badges-container"><span class="badge dub">DUB</span><span class="badge classificacao" data-class="+16">+16</span></div>
+                      <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRAvcwPlrFO132trG7wCUGgwpVOTl9XrlEnztohv0BFFrj_biiZHfteA0zE&s=10">
+                      <div class="card-info">
+                          <h4>Força Tática</h4>
+                          <div class="meta-info"><span class="media-type" data-type="Filme">Filme</span> <span class="meta-separator">|</span> <span class="card-date">2011</span></div>
+                      </div>
+                  </div>
+
+                  <div class="card" onclick="window.location.href='player.html?title=Busca Explosiva 2&url=https://playerflixapi.com/filme/tt1266027'">
+                      <div class="badges-container"><span class="badge dub">DUB</span><span class="badge classificacao" data-class="+14">+14</span></div>
+                      <img src="https://image.tmdb.org/t/p/w500/6eGlig64s1MCv4GkaXeEDczEkRQ.jpg">
+                      <div class="card-info">
+                          <h4>Busca Explosiva 2</h4>
+                          <div class="meta-info"><span class="media-type" data-type="Filme">Filme</span> <span class="meta-separator">|</span> <span class="card-date">2007</span></div>
+                      </div>
+                  </div>
+
+                  <div class="card" onclick="window.location.href='player.html?title=Tropa de Elite&url=https://myembed.biz/filme/tt0861739'">
+                      <div class="badges-container"><span class="badge dub">DUB</span><span class="badge classificacao" data-class="+18">+18</span></div>
+                      <img src="https://image.tmdb.org/t/p/w220_and_h330_face/atl4a9VFVP7JYvk4GeSgqhLOfjC.jpg">
+                      <div class="card-info">
+                          <h4>Tropa de Elite</h4>
+                          <div class="meta-info"><span class="media-type" data-type="Filme">Filme</span> <span class="meta-separator">|</span> <span class="card-date">2007</span></div>
+                      </div>
+                  </div>
+
+                  <div class="card" onclick="window.location.href='player.html?title=Godzilla&url=https://playerflixapi.com/filme/tt0831387'">
+                      <div class="badges-container"><span class="badge dub">DUB</span><span class="badge classificacao" data-class="+12">+12</span></div>
+                      <img src="https://image.tmdb.org/t/p/w220_and_h330_face/9dyFXQwmFHI1gMn2JEczgKD1hwO.jpg">
+                      <div class="card-info">
+                          <h4>Godzilla</h4>
+                          <div class="meta-info"><span class="media-type" data-type="Filme">Filme</span> <span class="meta-separator">|</span> <span class="card-date">2014</span></div>
+                      </div>
+                  </div>
+
+                  <div class="card" onclick="window.location.href='player.html?title=Cidade de Deus&url=https://playerflixapi.com/filme/tt0317248'">
+                      <div class="badges-container"><span class="badge dub">DUB</span><span class="badge classificacao" data-class="+18">+18</span></div>
+                      <img src="https://image.tmdb.org/t/p/w220_and_h330_face/gfnXixcGC060QcG6JPxN6AMdVsq.jpg">
+                      <div class="card-info">
+                          <h4>Cidade de Deus</h4>
+                          <div class="meta-info"><span class="media-type" data-type="Filme">Filme</span> <span class="meta-separator">|</span> <span class="card-date">2002</span></div>
+                      </div>
+                  </div>
+
+                  <div class="card" onclick="window.location.href='player.html?title=Godzilla Minus One&url=https://playerflixapi.com/filme/tt23289160'">
+                      <div class="badges-container"><span class="badge dub">DUB</span><span class="badge classificacao" data-class="+14">+14</span></div>
+                      <img src="https://image.tmdb.org/t/p/w220_and_h330_face/9XSOyim1pivuSHQqlrDj5gj2J5w.jpg">
+                      <div class="card-info">
+                          <h4>Godzilla Minus One</h4>
+                          <div class="meta-info"><span class="media-type" data-type="Filme">Filme</span> <span class="meta-separator">|</span> <span class="card-date">2023</span></div>
+                      </div>
+                  </div>
+
+                  <div class="card" onclick="window.location.href='player.html?title=Olhos Famintos 2&url=https://playerflixapi.com/filme/tt0301470'">
+                      <div class="badges-container"><span class="badge dub">DUB</span><span class="badge classificacao" data-class="+16">+16</span></div>
+                      <img src="https://image.tmdb.org/t/p/w220_and_h330_face/aRK3qCe5FtTK6W3STgPihEhgpxA.jpg">
+                      <div class="card-info">
+                          <h4>Olhos Famintos 2</h4>
+                          <div class="meta-info"><span class="media-type" data-type="Filme">Filme</span> <span class="meta-separator">|</span> <span class="card-date">2003</span></div>
+                      </div>
+                  </div>
+
+                  <div class="card" onclick="window.location.href='player.html?title=Tubarão&url=https://playerflixapi.com/filme/tt0073195'">
+                      <div class="badges-container"><span class="badge dub">DUB</span><span class="badge classificacao" data-class="+14">+14</span></div>
+                      <img src="https://image.tmdb.org/t/p/w220_and_h330_face/iD2XVowFgHngYGamCAdq2T44gMr.jpg">
+                      <div class="card-info">
+                          <h4>Tubarão</h4>
+                          <div class="meta-info"><span class="media-type" data-type="Filme">Filme</span> <span class="meta-separator">|</span> <span class="card-date">1975</span></div>
+                      </div>
+                  </div>
+
+                  <div class="card" onclick="window.location.href='player.html?title=Tropa de Elite 2: O Inimigo Agora É Outro&url=https://playerflixapi.com/filme/tt1555149'">
+                      <div class="badges-container"><span class="badge dub">DUB</span><span class="badge classificacao" data-class="+16">+16</span></div>
+                      <img src="https://image.tmdb.org/t/p/w220_and_h330_face/ldCCmRdBPk5FR13W975zXAM1dGi.jpg">
+                      <div class="card-info">
+                          <h4>Tropa de Elite 2<br>O Inimigo Agora é Outro</h4>
+                          <div class="meta-info"><span class="media-type" data-type="Filme">Filme</span> <span class="meta-separator">|</span> <span class="card-date">2010</span></div>
+                      </div>
+                  </div>
+
+                  <div class="card" onclick="window.location.href='player.html?title=Godzilla II: Rei dos Monstros&url=https://playerflixapi.com/filme/tt3741700'">
+                      <div class="badges-container"><span class="badge dub">DUB</span><span class="badge classificacao" data-class="+12">+12</span></div>
+                      <img src="https://upload.wikimedia.org/wikipedia/pt/7/7e/Godzilla_King_of_the_Monsters.jpg">
+                      <div class="card-info">
+                          <h4>Godzilla II:<br>Rei dos Monstros</h4>
+                          <div class="meta-info"><span class="media-type" data-type="Filme">Filme</span> <span class="meta-separator">|</span> <span class="card-date">2019</span></div>
+                      </div>
+                  </div>
+
+                  <div class="card" onclick="window.location.href='player.html?title=+Velozes +Furiosos&url=https://playerflixapi.com/filme/tt0322259'">
+                      <div class="badges-container"><span class="badge dub">DUB</span><span class="badge classificacao" data-class="+14">+14</span></div>
+                      <img src="https://m.media-amazon.com/images/I/61KK4JhRfVL._AC_UF894,1000_QL80_.jpg">
+                      <div class="card-info">
+                          <h4>+Velozes +Furiosos</h4>
+                          <div class="meta-info"><span class="media-type" data-type="Filme">Filme</span> <span class="meta-separator">|</span> <span class="card-date">2003</span></div>
+                      </div>
+                  </div>
+
+                  <div class="card" onclick="window.location.href='player.html?title=Transformers: O Início&url=https://playerflixapi.com/filme/tt8864596'">
+                      <div class="badges-container"><span class="badge dub">DUB</span><span class="badge classificacao" data-class="+10">+10</span></div>
+                      <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRcLm0SoPjI_HREf0n3pgjy4ssvONALiOe2PXyVNo-i4Q&s=10">
+                      <div class="card-info">
+                          <h4>Transformers: O Início</h4>
+                          <div class="meta-info"><span class="media-type" data-type="Filme">Filme</span> <span class="meta-separator">|</span> <span class="card-date">2024</span></div>
+                      </div>
+                  </div>
+
+                  <div class="card" onclick="window.location.href='player.html?title=Titanic&url=https://playerflixapi.com/filme/tt0120338'">
+                      <div class="badges-container"><span class="badge dub">DUB</span><span class="badge classificacao" data-class="+12">+12</span></div>
+                      <img src="https://upload.wikimedia.org/wikipedia/pt/2/22/Titanic_poster.jpg">
+                      <div class="card-info">
+                          <h4>Titanic</h4>
+                          <div class="meta-info"><span class="media-type" data-type="Filme">Filme</span> <span class="meta-separator">|</span> <span class="card-date">1997</span></div>
+                      </div>
+                  </div>
+
+                  <div class="card" onclick="window.location.href='player.html?title=Interestelar&url=https://playerflixapi.com/filme/tt0816692'">
+                      <div class="badges-container"><span class="badge dub">DUB</span><span class="badge classificacao" data-class="+10">+10</span></div>
+                      <img src="https://upload.wikimedia.org/wikipedia/pt/3/3a/Interstellar_Filme.png">
+                      <div class="card-info">
+                          <h4>Interestelar</h4>
+                          <div class="meta-info"><span class="media-type" data-type="Filme">Filme</span> <span class="meta-separator">|</span> <span class="card-date">2014</span></div>
+                      </div>
+                  </div>
+
+                  <div class="card" onclick="window.location.href='player.html?title=Morte Súbita&url=https://ia601606.us.archive.org/12/items/mortesubita2007/Morte.S%C3%BAbita.2007.1080p.BluRay.x264.DUAL-WWW.BLUDV.COM.mp4'">
+                      <div class="badges-container"><span class="badge dub">DUB</span><span class="badge classificacao" data-class="+16">+16</span></div>
+                      <img src="https://image.tmdb.org/t/p/original/ip7nVBDhT9J9blktI3WGWMWCWco.jpg">
+                      <div class="card-info">
+                          <h4>Morte Súbita</h4>
+                          <div class="meta-info"><span class="media-type" data-type="Filme">Filme</span> <span class="meta-separator">|</span> <span class="card-date">2007</span></div>
+                      </div>
+                  </div>
+
+                  <div class="card" onclick="window.location.href='player.html?title=Caçados&url=https://playerflixapi.com/filme/tt0468536'">
+                      <div class="badges-container"><span class="badge dub">DUB</span><span class="badge classificacao" data-class="+14">+14</span></div>
+                      <img src="https://cdn.fstatic.com/media/movies/covers/2013/09/cacados_t1491.jpg">
+                      <div class="card-info">
+                          <h4>Caçados</h4>
+                          <div class="meta-info"><span class="media-type" data-type="Filme">Filme</span> <span class="meta-separator">|</span> <span class="card-date">2007</span></div>
+                      </div>
+                  </div>
+
+                  <div class="card" onclick="window.location.href='player.html?title=Cães Assassinos&url=https://ia801609.us.archive.org/18/items/filme-caes-assassinos-720-p-hd-1/Filme%20c%C3%A3es%20assassinos%28720P_HD%29_1.mp4'">
+                      <div class="badges-container"><span class="badge dub">DUB</span><span class="badge classificacao" data-class="+16">+16</span></div>
+                      <img src="https://cdn.awsli.com.br/600x700/1181/1181256/produto/463538256b71b12cc4.jpg">
+                      <div class="card-info">
+                          <h4>Cães Assassinos</h4>
+                          <div class="meta-info"><span class="media-type" data-type="Filme">Filme</span> <span class="meta-separator">|</span> <span class="card-date">2006</span></div>
+                      </div>
+                  </div>
+
+                  <div class="card" onclick="window.location.href='player.html?title=Godzilla 2000&url=https://playerflixapi.com/filme/tt0188640'">
+                      <div class="badges-container"><span class="badge dub">DUB</span><span class="badge classificacao" data-class="+12">+12</span></div>
+                      <img src="https://upload.wikimedia.org/wikipedia/en/thumb/f/f0/Godzilla2000jap.jpg/250px-Godzilla2000jap.jpg">
+                      <div class="card-info">
+                          <h4>Godzilla 2000</h4>
+                          <div class="meta-info"><span class="media-type" data-type="Filme">Filme</span> <span class="meta-separator">|</span> <span class="card-date">1999</span></div>
+                      </div>
+                  </div>
+
+                  <div class="card" onclick="window.location.href='player.html?title=Guerra Primitiva&url=https://playerflixapi.com/filme/tt18312380'">
+                      <div class="badges-container"><span class="badge dub">DUB</span><span class="badge classificacao" data-class="+16">+16</span></div>
+                      <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSKEGXzV-NRtKG4ajQWBOhJ8mltJHLyvBTSHWJdwhEFzpQ1MOJtBp0rB6c&s=10">
+                      <div class="card-info">
+                          <h4>Guerra Primitiva</h4>
+                          <div class="meta-info"><span class="media-type" data-type="Filme">Filme</span> <span class="meta-separator">|</span> <span class="card-date">2025</span></div>
+                      </div>
+                  </div>
+
+                  <div class="card" onclick="window.location.href='player.html?title=Five Nights at Freddy\\'s 2&url=https://ia601708.us.archive.org/11/items/godzillavs-biollante/GodzillavsBiollante.mp4'">
+                      <div class="badges-container"><span class="badge dub">DUB</span><span class="badge classificacao" data-class="+14">+14</span></div>
+                      <img src="https://image.tmdb.org/t/p/w220_and_h330_face/brJkq22WjpLnCuYEEId89FC3NXZ.jpg">
+                      <div class="card-info">
+                          <h4>Five Nights at <br>Freddy's 2</h4>
+                          <div class="meta-info"><span class="media-type" data-type="Filme">Filme</span> <span class="meta-separator">|</span> <span class="card-date">2025</span></div>
+                      </div>
+                  </div>
+
+                </div>
+                <button class="slider-arrow next" onclick="scrollSlider(this, 1)">&#10095;</button>
+            </div>
+        </section>
+
+        <section class="category-slider">
+            <h2>Séries Recentes 🎬 <a href="lista-series.html" class="ver-mais-h2">Ver Mais ></a></h2>
+            <div class="slider-wrapper">
+                <button class="slider-arrow prev" onclick="scrollSlider(this, -1)">&#10094;</button>
+                <div class="slider-track">
+                  
+                  <div class="card" onclick="window.location.href='player.html?title=Percy Jackson e os Olimpianos&url=https://playerflixapi.com/serie/103540'">
+                      <div class="badges-container"><span class="badge dub">DUB</span><span class="badge classificacao" data-class="+10">+10</span></div>
+                      <img src="https://image.tmdb.org/t/p/w220_and_h330_face/63zVMAA4oxz9N8EnkNdR8gpyjKf.jpg">
+                      <div class="card-info">
+                          <h4>Percy Jackson e<br>os Olimpianos</h4>
+                          <div class="meta-info"><span class="media-type" data-type="Série">Série</span> <span class="meta-separator">|</span> <span class="card-date">2023</span></div>
+                      </div>
+                  </div>
+
+                  <div class="card" onclick="window.location.href='player.html?title=The Walking Dead&url=https://playerflixapi.com/serie/1402'">
+                      <div class="badges-container"><span class="badge dub">DUB</span><span class="badge classificacao" data-class="+16">+16</span></div>
+                      <img src="https://i.imgur.com/TD0ia7L.jpeg">
+                      <div class="card-info">
+                          <h4>The Walking Dead</h4>
+                          <div class="meta-info"><span class="media-type" data-type="Série">Série</span> <span class="meta-separator">|</span> <span class="card-date">2010</span></div>
+                      </div>
+                  </div>
+
+                  <div class="card" onclick="window.location.href='player.html?title=Breaking Bad&url=https://playerflixapi.com/serie/1396'">
+                      <div class="badges-container"><span class="badge dub">DUB</span><span class="badge classificacao" data-class="+16">+16</span></div>
+                      <img src="https://m.media-amazon.com/images/M/MV5BMzU5ZGYzNmQtMTdhYy00OGRiLTg0NmQtYjVjNzliZTg1ZGE4XkEyXkFqcGc@._V1_QL75_UX190_CR0,2,190,281_.jpg">
+                      <div class="card-info">
+                          <h4>Breaking Bad</h4>
+                          <div class="meta-info"><span class="media-type" data-type="Série">Série</span> <span class="meta-separator">|</span> <span class="card-date">2006</span></div>
+                      </div>
+                  </div>
+
+                  <div class="card" onclick="window.location.href='player.html?title=Stranger Things&url=https://playerflixapi.com/serie/66732'">
+                      <div class="badges-container"><span class="badge dub">DUB</span><span class="badge classificacao" data-class="+16">+16</span></div>
+                      <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTaAqcG1OaxUfvY_gPTQeCOju0AFvtFZgozxGfqI8aMM0wgnsbd0vW32Ub5&s=10">
+                      <div class="card-info">
+                          <h4>Stranger Things</h4>
+                          <div class="meta-info"><span class="media-type" data-type="Série">Série</span> <span class="meta-separator">|</span> <span class="card-date">2016</span></div>
+                      </div>
+                  </div>
+
+                  <div class="card" onclick="window.location.href='player.html?title=Sobrenatural&url=https://playerflixapi.com/serie/1622'">
+                      <div class="badges-container"><span class="badge dub">DUB</span><span class="badge classificacao" data-class="+14">+14</span></div>
+                      <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTSmWDBJZcVtx0n8PdG7Kjal9_T67kM7yPjRG_HFevBnA&s=10">
+                      <div class="card-info">
+                          <h4>Sobrenatural</h4>
+                          <div class="meta-info"><span class="media-type" data-type="Série">Série</span> <span class="meta-separator">|</span> <span class="card-date">2005</span></div>
+                      </div>
+                  </div>
+
+                  <div class="card" onclick="window.location.href='player.html?title=It: Bem-Vindos a Derry&url=https://playerflixapi.com/serie/200875'">
+                      <div class="badges-container"><span class="badge dub">DUB</span><span class="badge classificacao" data-class="+18">+18</span></div>
+                      <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTNgIF4xlDsJuKFyynRq2jajDFd5e3Tq23KRM0AgDNr3g&s=10">
+                      <div class="card-info">
+                          <h4>It: Bem-Vindos a Derry</h4>
+                          <div class="meta-info"><span class="media-type" data-type="Série">Série</span> <span class="meta-separator">|</span> <span class="card-date">2025</span></div>
+                      </div>
+                  </div>
+
+                  <div class="card" onclick="window.location.href='player.html?title=Diários de Um Vampiro&url=https://playerflixapi.com/serie/18165'">
+                      <div class="badges-container"><span class="badge dub">DUB</span><span class="badge classificacao" data-class="+14">+14</span></div>
+                      <img src="https://images.justwatch.com/poster/176980279/s718/diarios-de-um-vampiro.jpg">
+                      <div class="card-info">
+                          <h4>Diários de Um<br>Vampiro</h4>
+                          <div class="meta-info"><span class="media-type" data-type="Série">Série</span> <span class="meta-separator">|</span> <span class="card-date">2009</span></div>
+                      </div>
+                  </div>
+
+                  <div class="card" onclick="window.location.href='player.html?title=Lúcifer&url=https://playerflixapi.com/serie/63174'">
+                      <div class="badges-container"><span class="badge dub">DUB</span><span class="badge classificacao" data-class="+14">+14</span></div>
+                      <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQDy-5PgPJuw6RHPJR_qGvL56ZkI0GEg27wtJXqQjsmGFjTaYqrNOqRki0&s=10">
+                      <div class="card-info">
+                          <h4>Lúcifer</h4>
+                          <div class="meta-info"><span class="media-type" data-type="Série">Série</span> <span class="meta-separator">|</span> <span class="card-date">2016</span></div>
+                      </div>
+                  </div>
+
+                  <div class="card" onclick="window.location.href='player.html?title=Os Originais&url=https://playerflixapi.com/serie/46896'">
+                      <div class="badges-container"><span class="badge dub">DUB</span><span class="badge classificacao" data-class="+16">+16</span></div>
+                      <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSbYtXYz7IBKfG7CArcy_0f6nIN0_1wvWXANrvVdWbxBHYRbmB5RUL1GkOdk1Tl2ORYPTlgxO56s_nchPvBW6Jq6lG7JRnT6fnpVnlNrg&s=10">
+                      <div class="card-info">
+                          <h4>Os Originais</h4>
+                          <div class="meta-info"><span class="media-type" data-type="Série">Série</span> <span class="meta-separator">|</span> <span class="card-date">2013</span></div>
+                      </div>
+                  </div>
+
+                  <div class="card" onclick="window.location.href='player.html?title=Arcanjo Renegado&url=https://playerflixapi.com/serie/99125'">
+                      <div class="badges-container"><span class="badge dub">DUB</span><span class="badge classificacao" data-class="+16">+16</span></div>
+                      <img src="https://image.tmdb.org/t/p/w220_and_h330_face/htQ7JUhr477DjWapcDVQc9gRUQ.jpg">
+                      <div class="card-info">
+                          <h4>Arcanjo Renegado</h4>
+                          <div class="meta-info"><span class="media-type" data-type="Série">Série</span> <span class="meta-separator">|</span> <span class="card-date">2020</span></div>
+                      </div>
+                  </div>
+
+                  <div class="card" onclick="window.location.href='player.html?title=Peaky Blinders&url=https://playerflixapi.com/serie/60574'">
+                      <div class="badges-container"><span class="badge dub">DUB</span><span class="badge classificacao" data-class="+16">+16</span></div>
+                      <img src="https://image.tmdb.org/t/p/w220_and_h330_face/i0uajcHH9yogXMfDHpOXexIukG9.jpg">
+                      <div class="card-info">
+                          <h4>Peaky Blinders</h4>
+                          <div class="meta-info"><span class="media-type" data-type="Série">Série</span> <span class="meta-separator">|</span> <span class="card-date">2013</span></div>
+                      </div>
+                  </div>
+
+                  <div class="card" onclick="window.location.href='player.html?title=Round 6&url=https://playerflixapi.com/serie/93405'">
+                      <div class="badges-container"><span class="badge dub">DUB</span><span class="badge classificacao" data-class="+16">+16</span></div>
+                      <img src="https://i.imgur.com/GoLyX8y.jpeg">
+                      <div class="card-info">
+                          <h4>Round 6</h4>
+                          <div class="meta-info"><span class="media-type" data-type="Série">Série</span> <span class="meta-separator">|</span> <span class="card-date">2021</span></div>
+                      </div>
+                  </div>
+
+                  <div class="card" onclick="window.location.href='player.html?title=Prison Break&url=https://playerflixapi.com/serie/2288'">
+                      <div class="badges-container"><span class="badge dub">DUB</span><span class="badge classificacao" data-class="+14">+14</span></div>
+                      <img src="https://media.themoviedb.org/t/p/w220_and_h330_face/rK3Vwe0Wm0VXxf4IJCdlHeEREYx.jpg">
+                      <div class="card-info">
+                          <h4>Prison Break</h4>
+                          <div class="meta-info"><span class="media-type" data-type="Série">Série</span> <span class="meta-separator">|</span> <span class="card-date">2005</span></div>
+                      </div>
+                  </div>
+
+                  <div class="card" onclick="window.location.href='player.html?title=Stranger Things&url=https://playerflixapi.com/serie/66732'">
+                      <div class="badges-container"><span class="badge dub">DUB</span><span class="badge classificacao" data-class="+14">+14</span></div>
+                      <img src="https://i.pinimg.com/474x/3f/d2/ff/3fd2fff8dd27ac8e9393b79d1094f680.jpg">
+                      <div class="card-info">
+                          <h4>Grey's Anatomy</h4>
+                          <div class="meta-info"><span class="media-type" data-type="Série">Série</span> <span class="meta-separator">|</span> <span class="card-date">2005</span></div>
+                      </div>
+                  </div>
+
+                  <div class="card" onclick="window.location.href='player.html?title=Teen Wolf&url=https://playerflixapi.com/serie/34524'">
+                      <div class="badges-container"><span class="badge dub">DUB</span><span class="badge classificacao" data-class="+14">+14</span></div>
+                      <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR8W1QC0M5NtFH-SwE2PJqfFGdfXWd8SUNHy9x0EGRZanDGr7B-HtTCV7Y&s=10">
+                      <div class="card-info">
+                          <h4>Teen Wolf</h4>
+                          <div class="meta-info"><span class="media-type" data-type="Série">Série</span> <span class="meta-separator">|</span> <span class="card-date">2011</span></div>
+                      </div>
+                  </div>
+
+                  <div class="card" onclick="window.location.href='player.html?title=Wandinha&url=https://playerflixapi.com/serie/119051'">
+                      <div class="badges-container"><span class="badge dub">DUB</span><span class="badge classificacao" data-class="+14">+14</span></div>
+                      <img src="https://image.tmdb.org/t/p/w220_and_h330_face/vz2oBcS23lZ35LmDC7mQqThrg8v.jpg">
+                      <div class="card-info">
+                          <h4>Wandinha</h4>
+                          <div class="meta-info"><span class="media-type" data-type="Série">Série</span> <span class="meta-separator">|</span> <span class="card-date">2022</span></div>
+                      </div>
+                  </div>
+
+                  <div class="card" onclick="window.location.href='player.html?title=Game of Thrones&url=https://playerflixapi.com/serie/1399'">
+                      <div class="badges-container"><span class="badge dub">DUB</span><span class="badge classificacao" data-class="+18">+18</span></div>
+                      <img src="https://i.imgur.com/lVrIjQC.jpeg">
+                      <div class="card-info">
+                          <h4>Game of Thrones</h4>
+                          <div class="meta-info"><span class="media-type" data-type="Série">Série</span> <span class="meta-separator">|</span> <span class="card-date">2011</span></div>
+                      </div>
+                  </div>
+
+                </div>
+                <button class="slider-arrow next" onclick="scrollSlider(this, 1)">&#10095;</button>
+            </div>
+        </section>
+
+        <section class="category-slider">
+            <h2>Animes em Alta ⛩️ <a href="explorar.html" class="ver-mais-h2">Ver Mais ></a></h2>
+            <div class="slider-wrapper">
+                <button class="slider-arrow prev" onclick="scrollSlider(this, -1)">&#10094;</button>
+                <div class="slider-track">
+                    
+                    <div class="card" onclick="window.location.href='player.html?title=Solo Leveling&url=https://playerflixapi.com/serie/127532'">
+                        <div class="badges-container"><span class="badge dub">DUB</span><span class="badge classificacao" data-class="+14">+14</span></div>
+                        <img src="https://images.justwatch.com/poster/310154566/s332/temporada-1">
+                        <div class="card-info">
+                            <h4>Solo Leveling</h4>
+                            <div class="meta-info"><span class="media-type" data-type="Anime">Anime</span> <span class="meta-separator">|</span> <span class="card-date">2024</span></div>
+                        </div>
+                    </div>
+
+                    <div class="card" onclick="window.location.href='player.html?title=Spy × Family&url=https://playerflixapi.com/serie/120089'">
+                        <div class="badges-container"><span class="badge dub">DUB</span><span class="badge classificacao" data-class="+12">+12</span></div>
+                        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQQAwpkTd0GA7vph_2KeNhUEOxqlFs3JH3BE89VtI4Dyg&s=10">
+                        <div class="card-info">
+                            <h4>Spy × Family</h4>
+                            <div class="meta-info"><span class="media-type" data-type="Anime">Anime</span> <span class="meta-separator">|</span> <span class="card-date">2022</span></div>
+                        </div>
+                    </div>
+
+                    <div class="card" onclick="window.location.href='player.html?title=Saga of Tanya the Evil&url=https://playerflixapi.com/serie/69346'">
+                        <div class="badges-container"><span class="badge dub">DUB</span><span class="badge classificacao" data-class="+14">+14</span></div>
+                        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTftodYymspyzYJJd4GEAZHJZOYWFGJgds11SdwtytyEpz4g2mSmmLWNtg&s=10">
+                        <div class="card-info">
+                            <h4>Saga of Tanya the Evil</h4>
+                            <div class="meta-info"><span class="media-type" data-type="Anime">Anime</span> <span class="meta-separator">|</span> <span class="card-date">2017</span></div>
+                        </div>
+                    </div>
+
+                    <div class="card" onclick="window.location.href='player.html?title=Arcane&url=https://playerflixapi.com/serie/94605'">
+                        <div class="badges-container"><span class="badge dub">DUB</span><span class="badge classificacao" data-class="+14">+14</span></div>
+                        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQzj0j76VtUiluleIfAU2dUyQv6u1P3wuERmc-atS5oFw&s=10">
+                        <div class="card-info">
+                            <h4>Arcane</h4>
+                            <div class="meta-info"><span class="media-type" data-type="Animação">Animação</span> <span class="meta-separator">|</span> <span class="card-date">2021</span></div>
+                        </div>
+                    </div>
+
+                    <div class="card" onclick="window.location.href='player.html?title=My Hero Academia&url=https://playerflixapi.com/serie/65930'">
+                        <div class="badges-container"><span class="badge dub">DUB</span><span class="badge classificacao" data-class="+12">+12</span></div>
+                        <img src="https://media.themoviedb.org/t/p/w500/cfESQ8y8oNAeLuRbs7NkW7Qjwhy.jpg">
+                        <div class="card-info">
+                            <h4>My Hero Academia</h4>
+                            <div class="meta-info"><span class="media-type" data-type="Anime">Anime</span> <span class="meta-separator">|</span> <span class="card-date">2016</span></div>
+                        </div>
+                    </div>
+
+                    <div class="card" onclick="window.location.href='player.html?title=Naruto&url=https://playerflixapi.com/serie/46260'">
+                        <div class="badges-container"><span class="badge dub">DUB</span><span class="badge classificacao" data-class="+10">+10</span></div>
+                        <img src="https://media.themoviedb.org/t/p/w220_and_h330_face/9ptbVZpKNy5NY9D4zq4KGiYWRQY.jpg">
+                        <div class="card-info">
+                            <h4>Naruto</h4>
+                            <div class="meta-info"><span class="media-type" data-type="Anime">Anime</span> <span class="meta-separator">|</span> <span class="card-date">2002</span></div>
+                        </div>
+                    </div>
+
+                    <div class="card" onclick="window.location.href='player.html?title=Dragon Ball Z&url=https://playerflixapi.com/serie/12971'">
+                        <div class="badges-container"><span class="badge dub">DUB</span><span class="badge classificacao" data-class="+10">+10</span></div>
+                        <img src="https://image.tmdb.org/t/p/w220_and_h330_face/f2zhRLqwRLrKhEMeIM7Z5buJFo3.jpg">
+                        <div class="card-info">
+                            <h4>Dragon Ball Z</h4>
+                            <div class="meta-info"><span class="media-type" data-type="Anime">Anime</span> <span class="meta-separator">|</span> <span class="card-date">1989</span></div>
+                        </div>
+                    </div>
+
+                </div>
+                <button class="slider-arrow next" onclick="scrollSlider(this, 1)">&#10095;</button>
+            </div>
+        </section>
+
+        <section class="category-slider">
+            <h2 class="category-title netflix-style">Doramas 🎎 <a href="lista-doramas.html" class="ver-mais-h2">Ver Mais ></a></h2>
+            <div class="slider-wrapper">
+                <button class="slider-arrow prev" onclick="scrollSlider(this, -1)">&#10094;</button>
+                <div class="slider-track">
+                    
+                    <div class="card" onclick="window.location.href='player.html?title=Round 6&src=https://playerflixapi.com/serie/93405'">
+                        <div class="badges-container"><span class="badge dub">DUB</span><span class="badge classificacao" data-class="+16">+16</span></div>
+                        <img src="https://image.tmdb.org/t/p/w220_and_h330_face/6gcHdboppvplmBWxvROc96NJnmm.jpg">
+                        <div class="card-info">
+                            <h4>Round 6</h4>
+                            <div class="meta-info"><span class="media-type" data-type="Dorama">Dorama</span> <span class="meta-separator">|</span> <span class="card-date">2021</span></div>
+                        </div>
+                    </div>
+
+                    <div class="card" onclick="window.location.href='player.html?title=All of Us Are Dead&src=https://playerflixapi.com/serie/99966'">
+                        <div class="badges-container"><span class="badge dub">DUB</span><span class="badge classificacao" data-class="+18">+18</span></div>
+                        <img src="https://media.themoviedb.org/t/p/w220_and_h330_face/d9yefq8dNke4UbuqStBtUcO9TxD.jpg">
+                        <div class="card-info">
+                            <h4>All of Us Are Dead</h4>
+                            <div class="meta-info"><span class="media-type" data-type="Dorama">Dorama</span> <span class="meta-separator">|</span> <span class="card-date">2022</span></div>
+                        </div>
+                    </div>
+
+                    <div class="card" onclick="window.location.href='player.html?title=Alice in Borderland&src=https://playerflixapi.com/serie/110316'">
+                        <div class="badges-container"><span class="badge dub">DUB</span><span class="badge classificacao" data-class="+16">+16</span></div>
+                        <img src="https://image.tmdb.org/t/p/w220_and_h330_face/i0i7kGDrArtM1sCd8niZDC7iboV.jpg">
+                        <div class="card-info">
+                            <h4>Alice in Borderland</h4>
+                            <div class="meta-info"><span class="media-type" data-type="Dorama">Dorama</span> <span class="meta-separator">|</span> <span class="card-date">2020</span></div>
+                        </div>
+                    </div>
+
+                </div>
+                <button class="slider-arrow next" onclick="scrollSlider(this, 1)">&#10095;</button>
+            </div>
+        </section>
+
+        <section class="category-slider">
+            <h2>Novelas Clássicas 🎭 <a href="lista-novelas.html" class="ver-mais-h2">Ver Mais ></a></h2>
+            <div class="slider-wrapper">
+                <button class="slider-arrow prev" onclick="scrollSlider(this, -1)">&#10094;</button>
+                <div class="slider-track">
+                    
+                    <div class="card" onclick="window.location.href='player.html?title=Avenida Brasil&url=LINK_AQUI'">
+                        <div class="badges-container"><span class="badge dub">DUB</span><span class="badge classificacao" data-class="+12">+12</span></div>
+                        <img src="https://s2-globo-play.glbimg.com/hdHaWl1s_zWf2MBusOG8MobU2_s=/362x536/https://s2-globo-play.glbimg.com/K7XRERYEbzvibXuWsD-21hBsxmE=/https://s2.glbimg.com/ShzVF6GoqIfy6Mx40xz5sxlLYVw=/i.s3.glbimg.com/v1/AUTH_c3c606ff68e7478091d1ca496f9c5625/internal_photos/bs/2022/M/0/14Kmz1RRADfg8KTiwFJQ/2022-3283-avenida-brasil-poster.jpg">
+                        <div class="card-info">
+                            <h4>Avenida Brasil</h4>
+                            <div class="meta-info"><span class="media-type" data-type="Novela">Novela</span> <span class="meta-separator">|</span> <span class="card-date">2012</span></div>
+                        </div>
+                    </div>
+
+                    <div class="card" onclick="window.location.href='player.html?title=O Sétimo Guardião&url=LINK_AQUI'">
+                        <div class="badges-container"><span class="badge dub">DUB</span><span class="badge classificacao" data-class="+14">+14</span></div>
+                        <img src="https://bancodeseries.com.br/images/posters/24826.jpg">
+                        <div class="card-info">
+                            <h4>O Sétimo Guardião</h4>
+                            <div class="meta-info"><span class="media-type" data-type="Novela">Novela</span> <span class="meta-separator">|</span> <span class="card-date">2018</span></div>
+                        </div>
+                    </div>
+
+                    <div class="card" onclick="window.location.href='player.html?title=Êta Mundo Bom!&url=LINK_AQUI'">
+                        <div class="badges-container"><span class="badge dub">DUB</span><span class="badge classificacao" data-class="L">L</span></div>
+                        <img src="https://s2-globo-play.glbimg.com/u9gywSXefUskxedV-41Bjm9E-pU=/362x536/https://s2-globo-play.glbimg.com/TTTw_1bAEupiySosOchUzncqd54=/https://s2.glbimg.com/aA10O2_A7BfN4-rGTQso_XlfsfU=/s3.glbimg.com/v1/AUTH_180b9dd048d9434295d27c4b6dadc248/media_kit/f2/9e/b6b93ac8d350e7291f66ea012bd2.jpg">
+                        <div class="card-info">
+                            <h4>Êta Mundo Bom!</h4>
+                            <div class="meta-info"><span class="media-type" data-type="Novela">Novela</span> <span class="meta-separator">|</span> <span class="card-date">2016</span></div>
+                        </div>
+                    </div>
+
+                </div>
+                <button class="slider-arrow next" onclick="scrollSlider(this, 1)">&#10095;</button>
+            </div>
+        </section>
+
+        <section class="category-slider">
+            <h2>Desenhos Animados 📺 <a href="lista-desenhos.html" class="ver-mais-h2">Ver Mais ></a></h2>
+            <div class="slider-wrapper">
+                <button class="slider-arrow prev" onclick="scrollSlider(this, -1)">&#10094;</button>
+                <div class="slider-track">
+                  
+                  <div class="card" onclick="window.location.href='player.html?title=Que Monstro te Mordeu?&url=https://playerflixapi.com/serie/9980'">
+                      <div class="badges-container"><span class="badge dub">DUB</span><span class="badge classificacao" data-class="L">L</span></div>
+                      <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRVwOPxpRoRVISD2M7BE6f4UHfhVXA8q_FPQjASpMAFtQ&s=10">
+                      <div class="card-info">
+                          <h4>Que Monstro te Mordeu?</h4>
+                          <div class="meta-info"><span class="media-type" data-type="Desenho">Desenho</span> <span class="meta-separator">|</span> <span class="card-date">2014</span></div>
+                      </div>
+                  </div>
+
+                  <div class="card" onclick="window.location.href='player.html?title=Ben 10&url=https://playerflixapi.com/serie/4686'">
+                      <div class="badges-container"><span class="badge dub">DUB</span><span class="badge classificacao" data-class="L">L</span></div>
+                      <img src="https://i.pinimg.com/474x/b9/0f/3e/b90f3efdb34c68e171731b3e0687f934.jpg">
+                      <div class="card-info">
+                          <h4>Ben 10</h4>
+                          <div class="meta-info"><span class="media-type" data-type="Desenho">Desenho</span> <span class="meta-separator">|</span> <span class="card-date">2005</span></div>
+                      </div>
+                  </div>
+
+                  <div class="card" onclick="window.location.href='player.html?title=Tom e Jerry&url=https://playerflixapi.com/serie/47480'">
+                      <div class="badges-container"><span class="badge dub">DUB</span><span class="badge classificacao" data-class="L">L</span></div>
+                      <img src="https://i.pinimg.com/originals/e2/32/f6/e232f6d8ed8ba9df4dea3e483d0c0625.jpg">
+                      <div class="card-info">
+                          <h4>Tom e Jerry</h4>
+                          <div class="meta-info"><span class="media-type" data-type="Desenho">Desenho</span> <span class="meta-separator">|</span> <span class="card-date">1940</span></div>
+                      </div>
+                  </div>
+
+                </div>
+                <button class="slider-arrow next" onclick="scrollSlider(this, 1)">&#10095;</button>
+            </div>
+        </section>
+        
+        <section class="category-slider" id="outros-section">
+            <h2 class="category-title netflix-style">Outros Conteúdos 🍿</h2>
+            <div class="slider-wrapper">
+                <button class="slider-arrow prev" onclick="scrollSlider(this, -1)">&#10094;</button>
+                <div class="slider-track">
+                    <div class="card" onclick="window.open('https://livrosdogamerado.netlify.app/', '_blank')">
+                        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRSRF4ni2WHlfeOpr-sxCdKojN6yEVWms__twKw9CEJwIrZrDhyV7Fmml0&s=10">
+                        <div class="card-info"><h4>Biblioteca</h4><p>Leia/Baixe Livros</p><p class="card-date">Online</p></div>
+                    </div>
+                    <div class="card" onclick="window.open('https://livrosdogamerado.netlify.app/', '_blank')">
+                        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRSRF4ni2WHlfeOpr-sxCdKojN6yEVWms__twKw9CEJwIrZrDhyV7Fmml0&s=10">
+                        <div class="card-info"><h4>Biblioteca</h4><p>Leia/Baixe Livros</p><p class="card-date">Online</p></div>
+                    </div>
+                    <div class="card" onclick="window.open('https://livrosdogamerado.netlify.app/', '_blank')">
+                        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRSRF4ni2WHlfeOpr-sxCdKojN6yEVWms__twKw9CEJwIrZrDhyV7Fmml0&s=10">
+                        <div class="card-info"><h4>Biblioteca</h4><p>Leia/Baixe Livros</p><p class="card-date">Online</p></div>
+                    </div>
+                    <div class="card" onclick="window.open('https://livrosdogamerado.netlify.app/', '_blank')">
+                        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRSRF4ni2WHlfeOpr-sxCdKojN6yEVWms__twKw9CEJwIrZrDhyV7Fmml0&s=10">
+                        <div class="card-info"><h4>Biblioteca</h4><p>Leia/Baixe Livros</p><p class="card-date">Online</p></div>
+                    </div>
+                    <div class="card" onclick="window.open('https://livrosdogamerado.netlify.app/', '_blank')">
+                        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRSRF4ni2WHlfeOpr-sxCdKojN6yEVWms__twKw9CEJwIrZrDhyV7Fmml0&s=10">
+                        <div class="card-info"><h4>Biblioteca</h4><p>Leia/Baixe Livros</p><p class="card-date">Online</p></div>
+                    </div>
+                    <div class="card" onclick="window.open('https://livrosdogamerado.netlify.app/', '_blank')">
+                        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRSRF4ni2WHlfeOpr-sxCdKojN6yEVWms__twKw9CEJwIrZrDhyV7Fmml0&s=10">
+                        <div class="card-info"><h4>Biblioteca</h4><p>Leia/Baixe Livros</p><p class="card-date">Online</p></div>
+                    </div>
+                    <div class="card" onclick="window.open('https://livrosdogamerado.netlify.app/', '_blank')">
+                        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRSRF4ni2WHlfeOpr-sxCdKojN6yEVWms__twKw9CEJwIrZrDhyV7Fmml0&s=10">
+                        <div class="card-info"><h4>Biblioteca</h4><p>Leia/Baixe Livros</p><p class="card-date">Online</p></div>
+                    </div>
+                    <div class="card" onclick="window.open('https://livrosdogamerado.netlify.app/', '_blank')">
+                        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRSRF4ni2WHlfeOpr-sxCdKojN6yEVWms__twKw9CEJwIrZrDhyV7Fmml0&s=10">
+                        <div class="card-info"><h4>Biblioteca</h4><p>Leia/Baixe Livros</p><p class="card-date">Online</p></div>
+                    </div>
+                </div>
+                <button class="slider-arrow next" onclick="scrollSlider(this, 1)">&#10095;</button>
+            </div>
+        </section>
+
+    </main>
+
+    <nav class="bottom-nav">
+        <a href="#" class="nav-item active"><i class="fas fa-home"></i><span>Início</span></a>
+        <a href="generos.html" class="nav-item"><i class="fas fa-th-large"></i><span>Gêneros</span></a>
+        <a href="extras.html" class="nav-item"><i class="fas fa-plus-circle"></i><span>Extras</span></a>
+        <a href="explorar.html" class="nav-item"><i class="fas fa-compass"></i><span>Explorar</span></a>
+        <a href="conta.html" class="nav-item" id="btn-conta"><i class="fas fa-user"></i><span>Conta</span></a>
+    </nav>
+    
+    <script src="script.js"></script>
+
+    <script>
+        const defaultVideoLink = "https://ia801609.us.archive.org/18/items/filme-caes-assassinos-720-p-hd-1/Filme%20c%C3%A3es%20assassinos%28720P_HD%29_1.mp4";
+        
+        let heroCurrentIndex = 0;
+        const heroSlides = document.querySelectorAll('.hero-slide');
+        const heroDotsContainer = document.getElementById('hero-dots');
+        let heroInterval;
+
+        function renderHeroDots() {
+            heroDotsContainer.innerHTML = '';
+            const total = heroSlides.length;
+            if(total === 0) return;
+            const maxVisible = 10;
+            let start = 0, end = total;
+
+            if (total > maxVisible) {
+                start = heroCurrentIndex - Math.floor(maxVisible / 2);
+                start = Math.max(0, start); 
+                end = start + maxVisible;
+                if (end > total) { end = total; start = total - maxVisible; }
+            }
+
+            for (let i = start; i < end; i++) {
+                const dot = document.createElement('div');
+                dot.className = 'hero-dot' + (i === heroCurrentIndex ? ' active' : '');
+                dot.onclick = () => setHero(i);
+                heroDotsContainer.appendChild(dot);
+            }
+        }
+
+        function updateHeroUI() {
+            heroSlides.forEach((slide, idx) => {
+                if(idx === heroCurrentIndex) slide.classList.add('active');
+                else slide.classList.remove('active');
+            });
+            renderHeroDots();
+        }
+
+        function startHeroAutoPlay() {
+            heroInterval = setInterval(() => { moveHero(1); }, 5000);
+        }
+
+        function resetHeroAutoPlay() {
+            clearInterval(heroInterval);
+            startHeroAutoPlay();
+        }
+
+        function moveHero(step) {
+            heroCurrentIndex = (heroCurrentIndex + step + heroSlides.length) % heroSlides.length;
+            updateHeroUI();
+            resetHeroAutoPlay();
+        }
+
+        function setHero(index) {
+            heroCurrentIndex = index;
+            updateHeroUI();
+            resetHeroAutoPlay();
+        }
+
+        if (heroSlides.length > 0) {
+            renderHeroDots();
+            startHeroAutoPlay();
+        }
+
+        // ==========================================
+        // LÓGICA DO CONTINUE ASSISTINDO
+        // ==========================================
+        
+        function abrirTelaCW(event) {
+            event.preventDefault();
+            document.getElementById('conteudo-principal').style.display = 'none';
+            document.getElementById('tela-cw-completa').style.display = 'block';
+            window.scrollTo(0, 0);
+        }
+
+        function fecharTelaCW() {
+            document.getElementById('tela-cw-completa').style.display = 'none';
+            document.getElementById('conteudo-principal').style.display = 'block';
+        }
+
+        function loadContinueWatching() {
+            const cwSection = document.getElementById('continue-watching-section');
+            const cwTrack = document.getElementById('cw-track');
+            const cwGridCompleto = document.getElementById('cw-grid-completo');
+            
+            let cwList = JSON.parse(localStorage.getItem('continueWatchingList') || '[]');
+
+            if (cwList.length > 0) {
+                cwSection.style.display = 'block';
+                cwTrack.innerHTML = '';
+                cwGridCompleto.innerHTML = '';
+                
+                cwList.forEach((item, index) => {
+                    const subtitle = item.type === 'serie' ? `EP ${item.season}x${item.episode}` : (item.year || '2026');
+                    const playerLink = item.playerUrl || `player.html?title=${encodeURIComponent(item.title)}`;
+                    
+                    const cardHtml = `
+                        <div class="cw-card" data-index="${index}">
+                            <div class="cw-remove-btn" onclick="removeCW(event, ${index})"><i class="fas fa-times"></i></div>
+                            <div class="cw-thumb-container" onclick="window.location.href='${playerLink}'">
+                                <img src="${item.cover}" alt="${item.title}">
+                                <div class="cw-progress-bar">
+                                    <div class="cw-progress-fill" style="width: ${item.progress}%"></div>
+                                </div>
+                            </div>
+                            <div class="cw-info" onclick="window.location.href='${playerLink}'">
+                                <h4>${item.title}</h4>
+                                <p>${subtitle}</p>
+                            </div>
+                        </div>
+                    `;
+                    cwTrack.innerHTML += cardHtml;
+                    cwGridCompleto.innerHTML += cardHtml; 
+                });
+            } else {
+                cwSection.style.display = 'none';
+                cwGridCompleto.innerHTML = '<p style="text-align:center; color:#888; width: 100%; grid-column: span 2;">O seu histórico está vazio.</p>';
+            }
+        }
+
+        function removeCW(event, index) {
+            event.stopPropagation();
+            let cwList = JSON.parse(localStorage.getItem('continueWatchingList') || '[]');
+            cwList.splice(index, 1);
+            localStorage.setItem('continueWatchingList', JSON.stringify(cwList));
+            loadContinueWatching();
+        }
+
+        // ==========================================
+        // SISTEMA DE PESQUISA GLOBAL (SCRAPER INTERNO)
+        // ==========================================
+        const paginasExternas = ['lista-filmes.html', 'lista-series.html', 'studioghibli.html', 'comedia.html'];
+        let bancoDeFilmesGlobal = [];
+
+        async function montarBancoDeDados() {
+            document.querySelectorAll('main .card:not(.cw-card)').forEach(card => adicionarAoBanco(card));
+
+            for (let pagina of paginasExternas) {
+                try {
+                    const response = await fetch(pagina);
+                    if (response.ok) {
+                        const htmlTexto = await response.text();
+                        const parser = new DOMParser();
+                        const docExternal = parser.parseFromString(htmlTexto, 'text/html');
+                        docExternal.querySelectorAll('.card:not(.cw-card)').forEach(card => adicionarAoBanco(card));
+                    }
+                } catch (erro) {
+                    console.log(`Página ${pagina} ignorada na pesquisa.`);
+                }
+            }
+        }
+
+        function adicionarAoBanco(cardElement) {
+            const tituloElemento = cardElement.querySelector('.card-info h4');
+            if (!tituloElemento) return;
+            
+            const titulo = tituloElemento.innerText.trim();
+            if (!bancoDeFilmesGlobal.some(item => item.titulo === titulo)) {
+                bancoDeFilmesGlobal.push({
+                    titulo: titulo,
+                    tituloLowerCase: titulo.toLowerCase(),
+                    htmlNode: cardElement.cloneNode(true)
+                });
+            }
+        }
+
+        const searchInput = document.getElementById('searchInput');
+        const telaPesquisa = document.getElementById('tela-pesquisa');
+        const gridResultados = document.getElementById('resultados-grid');
+        const msgVazia = document.getElementById('mensagem-vazia');
+        const conteudoPrincipal = document.getElementById('conteudo-principal');
+
+        searchInput.addEventListener('input', (e) => {
+            const termoBusca = e.target.value.toLowerCase().trim();
+
+            if (termoBusca.length > 0) {
+                telaPesquisa.style.display = 'block';
+                conteudoPrincipal.style.display = 'none';
+                if(document.getElementById('tela-cw-completa')) document.getElementById('tela-cw-completa').style.display = 'none';
+                gridResultados.innerHTML = '';
+                
+                const resultados = bancoDeFilmesGlobal.filter(item => 
+                    item.tituloLowerCase.includes(termoBusca)
+                );
+
+                if (resultados.length > 0) {
+                    msgVazia.style.display = 'none';
+                    resultados.forEach(item => {
+                        const novoCard = item.htmlNode.cloneNode(true);
+                        reatribuirEventoCard(novoCard);
+                        gridResultados.appendChild(novoCard);
+                    });
+                } else {
+                    msgVazia.style.display = 'block';
+                }
+            } else {
+                telaPesquisa.style.display = 'none';
+                conteudoPrincipal.style.display = 'block';
+            }
+        });
+
+        const seriesData = {
+            "Lúcifer": {
+                seasons: [{ seasonNumber: 1, episodes: [
+                    { name: "Piloto", thumb: "https://image.tmdb.org/t/p/w300/6vSgHjSUnHhXGv9T8ZSTp9T7YUn.jpg", link: defaultVideoLink }
+                ]}]
+            }
+        };
+
+        function generateGenericSeason(numEps) {
+            let eps = [];
+            for(let i=1; i<=numEps; i++) eps.push({ name: `Episódio ${i}`, thumb: "", link: defaultVideoLink });
+            return [{ seasonNumber: 1, episodes: eps }];
+        }
+
+        const outrasSeries = { "The Walking Dead": 6, "Stranger Things": 8, "Round 6": 9, "Percy Jackson e os Olimpianos": 8 };
+        for (const [serie, eps] of Object.entries(outrasSeries)) {
+            if (!seriesData[serie]) seriesData[serie] = { seasons: generateGenericSeason(eps) };
+        }
+
+        function reatribuirEventoCard(card) {
+            const originalClick = card.getAttribute('onclick');
+            if (originalClick && originalClick.includes('window.open')) return;
+
+            if (originalClick && originalClick.includes('player.html')) {
+                const match = originalClick.match(/title=([^&]+)&(?:url|src)=([^']+)/);
+                if (match) {
+                    const title = match[1]; const url = match[2];
+                    const imgSrc = card.querySelector('img') ? card.querySelector('img').src : '';
+                    
+                    const genreText = card.querySelector('.media-type')?.getAttribute('data-type') || card.querySelector('.card-info p')?.innerText || '';
+                    const isSerie = /série|anime|dorama|novela|desenho/i.test(genreText) || Object.keys(outrasSeries).includes(title) || title === "Lúcifer";
+                    const type = isSerie ? 'serie' : 'movie';
+                    
+                    const dateP = card.querySelector('.card-date') ? card.querySelector('.card-date').innerText : '2026';
+
+                    card.removeAttribute('onclick');
+                    card.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        const dataObj = { type, title, url, cover: imgSrc, banner: imgSrc, genre: genreText, year: dateP };
+                        if (type === 'serie' && seriesData[title]) dataObj.seriesInfo = seriesData[title];
+                        else if (type === 'serie') dataObj.seriesInfo = { seasons: generateGenericSeason(10) };
+
+                        sessionStorage.setItem('currentMediaData', JSON.stringify(dataObj));
+
+                        let cwList = JSON.parse(localStorage.getItem('continueWatchingList') || '[]');
+                        let existingItemIndex = cwList.findIndex(item => item.title === title);
+                        
+                        let realProgress = 0;
+                        if(existingItemIndex !== -1) {
+                            realProgress = cwList[existingItemIndex].progress;
+                            cwList.splice(existingItemIndex, 1); 
+                        }
+
+                        let seasonNum = 1, epNum = 1;
+                        if(type === 'serie') { seasonNum = 1; epNum = 1; }
+                        
+                        cwList.unshift({
+                            title: title,
+                            cover: imgSrc,
+                            type: type,
+                            year: dateP,
+                            season: seasonNum,
+                            episode: epNum,
+                            progress: realProgress,
+                            playerUrl: `player.html?title=${encodeURIComponent(title)}&url=${encodeURIComponent(url)}`
+                        });
+                        
+                        if(cwList.length > 40) cwList.pop(); 
+                        localStorage.setItem('continueWatchingList', JSON.stringify(cwList));
+
+                        window.location.href = `detalhes.html`;
+                    });
+                }
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            loadContinueWatching();
+            document.querySelectorAll('main .card:not(.cw-card):not(#outros-section .card)').forEach(card => reatribuirEventoCard(card));
+            montarBancoDeDados();
+        });
+    </script>
+</body>
+</html>

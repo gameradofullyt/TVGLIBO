@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Explorar</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-color: #0b0d12;
+            --text-main: #ffffff;
+            --text-muted: #888888;
+            --accent-yellow: #d4a345;
+            --btn-red: #a81d33; /* Vermelho vinho usado no botão de filtro */
+            --tag-dub: #3bb2d0;
+            --tag-cam: #111111;
+            --primary-red: #e50914;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            padding: 15px;
+            overflow-x: hidden;
+            padding-bottom: 60px; /* Espaço para o menu inferior */
+        }
+
+        /* --- Header --- */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        header h1 {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .header-icons {
+            display: flex;
+            gap: 15px;
+        }
+
+        .header-icons svg {
+            fill: var(--text-main);
+            width: 22px;
+            height: 22px;
+            cursor: pointer;
+        }
+
+        /* --- Barra de Pesquisa --- */
+        #search-container {
+            display: none;
+            margin-bottom: 20px;
+        }
+        
+        #search-input {
+            width: 100%;
+            padding: 12px 15px;
+            border-radius: 8px;
+            border: 1px solid #333;
+            background-color: #1a1c23;
+            color: white;
+            font-size: 14px;
+            outline: none;
+        }
+
+        /* --- Filters --- */
+        .filters {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .filter-btn {
+            flex: 1;
+            background-color: var(--btn-red);
+            color: var(--text-main);
+            border: none;
+            padding: 12px 15px;
+            border-radius: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .filter-btn svg {
+            fill: var(--text-main);
+            width: 12px;
+            height: 12px;
+        }
+
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            top: 100%;
+            background-color: #1a1c23;
+            width: calc(50% - 5px);
+            max-height: 200px;
+            overflow-y: auto;
+            border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+            z-index: 100;
+            margin-top: 5px;
+        }
+        .dropdown-menu.active { display: block; }
+        .dropdown-menu.right { right: 0; }
+        .dropdown-menu.left { left: 0; }
+        .dropdown-item {
+            padding: 10px 15px;
+            font-size: 14px;
+            cursor: pointer;
+            border-bottom: 1px solid #222;
+        }
+        .dropdown-item:hover { background-color: #2a2c33; }
+
+        /* --- Sections common --- */
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            border-top: 1px solid #1a1c23;
+            padding-top: 15px;
+        }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .section-title::before {
+            content: "";
+            display: inline-block;
+            width: 3px;
+            height: 16px;
+            background-color: var(--accent-yellow);
+            margin-right: 8px;
+            border-radius: 2px;
+        }
+
+        .title-icon {
+            fill: var(--text-muted);
+            width: 18px;
+            height: 18px;
+            margin-left: 10px;
+            cursor: pointer;
+            transition: fill 0.2s;
+        }
+        .title-icon:hover { fill: var(--text-main); }
+
+        .view-more {
+            font-size: 12px;
+            background-color: var(--btn-red);
+            color: #ffffff;
+            text-decoration: none;
+            font-weight: 500;
+            cursor: pointer;
+            padding: 5px 12px;
+            border-radius: 4px;
+        }
+
+        /* --- Carousels --- */
+        .carousel-wrapper {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .carousel-container {
+            display: flex;
+            gap: 20px;
+            overflow-x: auto;
+            scroll-behavior: smooth;
+            padding-bottom: 10px;
+            scrollbar-width: none;
+        }
+        .carousel-container::-webkit-scrollbar { display: none; }
+
+        .carousel-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 100px;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .circle-img {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 8px;
+            background-color: #222;
+            border: 2px solid transparent;
+        }
+        .carousel-item:hover .circle-img { border-color: var(--accent-yellow); }
+
+        .item-name {
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 2px;
+            line-height: 1.2;
+        }
+
+        .nav-btn {
+            position: absolute;
+            top: 50px;
+            transform: translateY(-50%);
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            z-index: 10;
+        }
+        .nav-btn:hover { background: rgba(255, 255, 255, 0.2); }
+        .nav-btn.left { left: -5px; }
+        .nav-btn.right { right: -5px; }
+
+        /* --- Grid Filmes --- */
+        .grid-filmes {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            padding-bottom: 20px;
+        }
+
+        .filme {
+            position: relative;
+            border-radius: 6px;
+            overflow: hidden;
+            cursor: pointer;
+            aspect-ratio: 2 / 3;
+            background-color: #1a1c23;
+            transition: transform 0.2s;
+        }
+        .filme:hover { transform: scale(1.02); }
+
+        .filme img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .tags {
+            position: absolute;
+            top: 6px;
+            left: 6px;
+            display: flex;
+            gap: 4px;
+            z-index: 2;
+        }
+
+        .tag {
+            font-size: 9px;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+
+        .tag.dub { background-color: var(--tag-dub); color: white; }
+        .tag.qual { background-color: var(--tag-cam); color: white; border: 1px solid #333; }
+
+        .card-info {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 30px 6px 6px 6px;
+            background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.7) 40%, transparent 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+        }
+
+        .card-info h4 {
+            font-size: 11px;
+            font-weight: 600;
+            margin-bottom: 4px;
+            line-height: 1.2;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .card-details {
+            display: flex;
+            justify-content: space-between;
+            font-size: 9px;
+            color: #ccc;
+        }
+
+        /* --- Tela de Histórico --- */
+        #history-screen {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: var(--bg-color);
+            z-index: 2000;
+            padding: 15px;
+            overflow-y: auto;
+        }
+
+        .history-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .history-header svg {
+            fill: var(--text-main);
+            width: 24px;
+            height: 24px;
+            margin-right: 15px;
+            cursor: pointer;
+        }
+
+        .history-header h1 {
+            font-size: 20px;
+        }
+
+        .history-item {
+            display: flex;
+            align-items: center;
+            background-color: #1a1c23;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            cursor: pointer;
+        }
+
+        .history-item img {
+            width: 60px;
+            height: 60px;
+            border-radius: 6px;
+            object-fit: cover;
+            margin-right: 15px;
+        }
+        
+        .history-item img.circle {
+            border-radius: 50%;
+        }
+
+        .history-item-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .history-item-info h4 {
+            font-size: 15px;
+            margin-bottom: 4px;
+            color: var(--text-main);
+        }
+
+        .history-item-info span {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        /* --- MENU INFERIOR (ESTILO DINÂMICO) --- */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(15, 15, 15, 0.95);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 8px 0; /* Diminuído */
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            z-index: 3000;
+            box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.5);
+        }
+
+        .bottom-nav .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            color: #888;
+            font-size: 0.7rem; /* Diminuído */
+            transition: all 0.3s ease;
+            position: relative;
+            width: 80px;
+        }
+
+        .bottom-nav .nav-item i {
+            font-size: 1.2rem; /* Diminuído */
+            margin-bottom: 4px;
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), color 0.3s;
+        }
+
+        .bottom-nav .nav-item:hover i,
+        .bottom-nav .nav-item.active i {
+            transform: translateY(-4px) scale(1.1); /* Ajustado */
+            color: var(--primary-red);
+        }
+
+        .bottom-nav .nav-item:hover span,
+        .bottom-nav .nav-item.active span {
+            color: white;
+            font-weight: bold;
+        }
+
+        .bottom-nav .nav-item.active::after {
+            content: '';
+            position: absolute;
+            bottom: -6px; /* Ajustado */
+            width: 4px; /* Ajustado */
+            height: 4px; /* Ajustado */
+            background-color: var(--primary-red);
+            border-radius: 50%;
+            animation: popIn 0.3s ease forwards;
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        #search-results-area { display: none; }
+        #main-content { display: block; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Explorar</h1>
+        <div class="header-icons">
+            <svg onclick="toggleHistoryScreen()" viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67V7z"/></svg>
+            <svg onclick="toggleSearch()" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+        </div>
+    </header>
+
+    <div id="search-container">
+        <input type="text" id="search-input" placeholder="Pesquisar..." onkeyup="handleSearch()">
+    </div>
+
+    <div id="main-content">
+        <div class="filters">
+            <button class="filter-btn" onclick="toggleDropdown('tipo-menu')">
+                <span id="tipo-label">Tipo</span>
+                <svg viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg>
+            </button>
+            <div id="tipo-menu" class="dropdown-menu left">
+                <div class="dropdown-item" onclick="selectFilter('tipo', 'Todos')">Todos</div>
+                <div class="dropdown-item" onclick="selectFilter('tipo', 'Recentes')">Recentes</div>
+                <div class="dropdown-item" onclick="selectFilter('tipo', 'Qualificado')">Qualificado</div>
+            </div>
+
+            <button class="filter-btn" onclick="toggleDropdown('ano-menu')">
+                <span id="ano-label">Ano</span>
+                <svg viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg>
+            </button>
+            <div id="ano-menu" class="dropdown-menu right">
+                </div>
+        </div>
+
+        <div class="section-header">
+            <div class="section-title">
+                <span id="ator-title-text">Atrizes/Atores</span>
+                <svg class="title-icon" onclick="toggleActorFilter()" viewBox="0 0 24 24" title="Filtrar Gênero">
+                    <path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z"/>
+                </svg>
+            </div>
+            <a href="atuar.html" class="view-more">Ver mais</a>
+        </div>
+        <div class="carousel-wrapper">
+            <button class="nav-btn left" onclick="scrollCarousel('atores-carousel', -150)">&#10094;</button>
+            <div class="carousel-container" id="atores-carousel">
+                </div>
+            <button class="nav-btn right" onclick="scrollCarousel('atores-carousel', 150)">&#10095;</button>
+        </div>
+
+        <div class="section-header">
+            <div class="section-title">Gêneros</div>
+            <a href="generos.html" class="view-more">Ver mais</a>
+        </div>
+        <div class="carousel-wrapper">
+            <button class="nav-btn left" onclick="scrollCarousel('generos-carousel', -150)">&#10094;</button>
+            <div class="carousel-container" id="generos-carousel">
+                </div>
+            <button class="nav-btn right" onclick="scrollCarousel('generos-carousel', 150)">&#10095;</button>
+        </div>
+
+        <div class="section-header">
+            <div class="section-title">Produtoras</div>
+            <a href="produtoras.html" class="view-more">Ver mais</a>
+        </div>
+        <div class="carousel-wrapper">
+            <button class="nav-btn left" onclick="scrollCarousel('produtoras-carousel', -150)">&#10094;</button>
+            <div class="carousel-container" id="produtoras-carousel">
+                </div>
+            <button class="nav-btn right" onclick="scrollCarousel('produtoras-carousel', 150)">&#10095;</button>
+        </div>
+
+        <div class="section-header">
+            <div class="section-title">Sagas</div>
+            <a href="sagas.html" class="view-more">Ver mais</a>
+        </div>
+        <div class="carousel-wrapper">
+            <button class="nav-btn left" onclick="scrollCarousel('sagas-carousel', -150)">&#10094;</button>
+            <div class="carousel-container" id="sagas-carousel">
+                </div>
+            <button class="nav-btn right" onclick="scrollCarousel('sagas-carousel', 150)">&#10095;</button>
+        </div>
+
+        <div class="section-header">
+            <div class="section-title">Mais itens semelhantes</div>
+        </div>
+        <div class="grid-filmes" id="filmes-grid">
+            </div>
+    </div>
+
+    <div id="search-results-area">
+        <div class="section-header">
+            <div class="section-title">Resultados da Pesquisa</div>
+        </div>
+        <h4 style="margin-bottom: 10px; font-size: 14px; color: var(--accent-yellow);">Atores, Gêneros & Outros</h4>
+        <div class="carousel-container" id="search-carousel" style="margin-bottom: 20px;"></div>
+        
+        <h4 style="margin-bottom: 10px; font-size: 14px; color: var(--accent-yellow);">Itens</h4>
+        <div class="grid-filmes" id="search-grid"></div>
+    </div>
+
+    <div id="history-screen">
+        <div class="history-header">
+            <svg onclick="toggleHistoryScreen()" viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+            <h1>Últimos Acessados</h1>
+        </div>
+        
+        <div id="history-list-container">
+            </div>
+    </div>
+
+    <nav class="bottom-nav">
+        <a href="index.html" class="nav-item">
+            <i class="fas fa-home"></i>
+            <span>Início</span>
+        </a>
+        <a href="generos.html" class="nav-item">
+            <i class="fas fa-th-large"></i>
+            <span>Gêneros</span>
+        </a>
+        <a href="#" class="nav-item active">
+            <i class="fas fa-compass"></i>
+            <span>Explorar</span>
+        </a>
+        <a href="conta.html" class="nav-item active">
+            <i class="fas fa-user"></i>
+            <span>Conta</span>
+        </a>
+    </nav>
+
+    <script>
+        const dbAtores = [
+            { name: "Leah Jeffries", gender: "F", img: "https://br.web.img3.acsta.net/c_310_420/pictures/22/05/11/19/26/4061616.jpg", link: "leahjeffries.html" },
+            { name: "Walker Scobell", gender: "M", img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRWHza8BVt2ypJa8ATCLUO_afEYzwbixYoks5mhIws4D-nz7x7HxR3XQDk&s=10", link: "walkerscobell.html" },
+            { name: "Jenna Ortega", gender: "F", img: "https://i.imgur.com/msqePQQ.png", link: "jenna.html" },
+            { name: "Melissa Barrera", gender: "F", img: "https://revistaforum.com.br/wp-content/uploads/2023/11/117897.png", link: "melissabarrera.html" },
+            { name: "Sylvester Stallone", gender: "M", img: "https://cinemaweb.com.br/wp-content/uploads/2024/05/sylvester-stallone-tulsa-king-1024x580.jpg?x36069", link: "sylvester.html" },
+            { name: "Jason Statham", gender: "M", img: "https://i.imgur.com/4J2hom4.jpeg", link: "jason.html" },
+            { name: "Billie Eilish", gender: "F", img: "https://i.imgur.com/MA5Gvj7.jpeg", link: "billieeilish.html" },
+            { name: "Sydney Sweeney", gender: "F", img: "https://f.i.uol.com.br/fotografia/2025/12/16/17659170086941c1507f949_1765917008_3x2_rt.jpg", link: "jenna.html" },
+            { name: "Chuck Norris", gender: "M", img: "https://admin.cnnbrasil.com.br/wp-content/uploads/sites/12/2026/03/Chuck-Norris-morreu-aos-86-anos.jpg?w=1200&h=1200&crop=1", link: "chucknorris.html" },
+            { name: "Lauren Cohan", gender: "F", img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTKD5pH351WtvSIIf6UGSdj2zEQY3bhy2YQ_u4wK6vGD56yAzptwGUyTLg&s=10", link: "laurencohan.html" },
+            { name: "Tom Cruise", gender: "M", img: "https://goldenglobes.com/wp-content/uploads/2023/10/17-tomcruiseag.jpg?w=600?w=600", link: "tom.html" },
+            { name: "Isabela Merced", gender: "F", img: "https://cdn.mos.cms.futurecdn.net/v2/t:0,l:280,cw:720,ch:720,q:80,w:720/SYeDGtde7uSadD9YjRCrZB.png", link: "isabela.html" },
+            { name: "Scarlett Johansson", gender: "F", img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQDOT1IbuKX22WMe7K1eO1i4efLsx8tmpBVTPepok3VOMob39vmFDvnpk4&s=10", link: "scarlett.html" },
+            { name: "Florinda Meza", gender: "F", img: "https://i.imgur.com/msqePQQ.png", link: "jenna.html" },
+            { name: "Leonardo DiCaprio", gender: "M", img: "https://media.fstatic.com/GwIhFYzO-kJ5_wENv2RD8W4Dh-w=/full-fit-in/629x300/media/articles/main/2016/11/21/leonardo_dicaprio-2902592656.jpg", link: "leo.html" },
+            { name: "Margot Robbie", gender: "F", img: "https://www.estrelando.com.br/uploads/2023/03/05/margot-robbie-thumb-1678036039.jpg", link: "margot.html" },
+            { name: "Denzel Washington", gender: "M", img: "https://conteudo.imguol.com.br/c/splash/45/2025/01/08/denzel-washington-1736386870220_v2_1x1.jpg", link: "denzel.html" },
+            { name: "Zendaya", gender: "F", img: "https://i.imgur.com/hHYXH5Z.png", link: "zendaya.html" },
+            { name: "Keanu Reeves", gender: "M", img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT4Rm4c6WIQjTl2UiJMrJFOukNZ45PD4qp8gkrw30HIIKPfo9Vk4_zjniZS&s=10", link: "keanu.html" },
+            { name: "Nina Dobrev", gender: "F", img: "https://imagem.natelinha.uol.com.br/tudo-sobre/bolanos_1892.jpeg", link: "nina.html" },
+            { name: "Roberto Gómez Bolaños", gender: "M", img: "https://i.imgur.com/msqePQQ.png", link: "jenna.html" },
+            { name: "Tony Jaa", gender: "M", img: "https://i.imgur.com/msqePQQ.png", link: "jenna.html" },
+            { name: "Steve Austin", gender: "M", img: "https://mn2s.com/wp-content/uploads/2023/09/Stone-Cold-Steve-Austin.png", link: "jenna.html" },
+            { name: "Maria Antonieta", gender: "F", img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTqOmDk75NHnrvT322ezoWwaBFEoYXLJIVQHx71ok2PJwfBgg7l90v8atc&s=10", link: "jenna.html" },
+            { name: "Angelina Jolie", gender: "F", img: "https://harpersbazaar.uol.com.br/wp-content/uploads/2024/08/angelina-jolie-tom-ford-beauty-harpers-bazaar-brasil-768x960.jpg", link: "jenna.html" },
+            { name: "Charlie Chaplin", gender: "M", img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSVJ5PHkKk2KtvS5UMI16Y4DDcBA5Zyeu7vrlxVFUcEhQ&s=10", link: "jenna.html" },
+        ];
+
+        const dbGeneros = [
+            { name: "Ação", img: "https://www.guiadasemana.com.br/contentFiles/system/pictures/2012/8/57297/original/the-expendables-2-wallpapers-15.jpg", link: "acao.html" },
+            { name: "Action & Adventure", img: "https://c4.wallpaperflare.com/wallpaper/874/68/2/video-game-one-piece-pirate-warriors-3-wallpaper-preview.jpg", link: "action.html" },
+            { name: "Desenho", img: "https://aventurasnahistoria.com.br/wp-content/uploads/2024/03/simpsons-3.jpg", link: "lista-desenho.html" },
+            { name: "Aventura", img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTf-5xVvMOS833fFdkEOFIQVFYcMzXn1V8-0eU2JWMMzKnZSPayUOMekUOl&s=10", link: "aventura.html" },
+            { name: "Animação", img: "https://lunetas.com.br/wp-content/uploads/2023/07/5-brincadeiras-inspiradas-em-filmes-para-fazer-com-as-criancas-portal-lunetas.jpg", link: "animacao.html" },
+            { name: "Comédia", img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTbG_iUuEsgkH6Lj1-Fbb3iLp8mil_M6NJqlNdghLCDiCpK5-OyQXudMmc&s=10", link: "terror.html" },
+            { name: "Romance", img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRhrIgKP9wfR72iT4W3m2p8TJY0xgdRZs66ppBQTLVl54WF8JPepeaa3WM&s=10", link: "romance.html" },
+            { name: "Ficção Cientifica", img: "https://br.web.img3.acsta.net/img/9e/e3/9ee301b1d8a7d6e89929b1ec2d8dcbf3.jpg", link: "ficcao.html" },
+            { name: "Studio Ghibli", img: "https://rollingstone.com.br/wp-content/uploads/2025/07/studio-ghibli-ganhara-festival-em-celebracao-aos-seus-40-anos.jpg", link: "ghibli.html" },
+            { name: "Slasher", img: "https://img.band.com.br/image/2025/10/30/os-filmes-de-terror-mais-buscados-para-voce-entrar-no-clima-do-halloween-14187.jpg", link: "slasher.html" },
+            { name: "Analog Horror", img: "https://i.ytimg.com/vi/H4dGpz6cnHo/maxresdefault.jpg", link: "analog.html" }
+        ];
+
+        const dbProdutoras = [
+            { name: "Marvel", img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRD7p7KLssUGfxLJNCN03LvR9gsDrShqLdrsdK4FTyLZxVQmvEmzjPtggc&s=10", link: "marvel.html" },
+            { name: "DC", img: "https://poltronanerd.com.br/wp-content/uploads/2020/05/Screenshot_2020-05-13-The-History-Of-The-DC-Comics-Logo.png", link: "dc.html" },
+            { name: "Disney", img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSGDspn_60OCckU9uRa6ULxfM2fn1FFR1ZIAl0V-pdXBA&s=10", link: "sw.html" },
+            { name: "Warner", img: "https://cdn.esbrasil.com.br/wp-content/uploads/2023/04/warner-bros.jpg", link: "warner.html" },
+            { name: "Universal", img: "https://yt3.googleusercontent.com/Zv1sgTKGHaMS-19sptlneB4jKXUU5WzmZFsAycEVsbBokkN5Q3SGiEgpPsAthPZJI13q016huA=s900-c-k-c0x00ffffff-no-rj", link: "universal.html" },
+            { name: "Netflix", img: "https://yt3.googleusercontent.com/nX8usifjzfbUVuHCkaMIkR_lsH5A9q2Ha9RRi1JJesAhb2AHfC3-OuSiswQc7gZghgKHb4ZAa0A=s900-c-k-c0x00ffffff-no-rj", link: "netflix.html" }
+        ];
+
+        const dbSagas = [
+          { name: "Monstros Gigantes", img: "https://image.tmdb.org/t/p/w220_and_h330_face/eV7UPWWoHS1dpIcAgiFxp7xdJdt.jpg", link: "sw.html" },
+            { name: "Macroverso", img: "https://image.tmdb.org/t/p/w220_and_h330_face/gMTfrLvrDaD0zrhpLZ7zXIIpKfJ.jpg", link: "hp.html" },
+            { name: "Era Showa", img: "https://i.imgur.com/YkDNc38.jpeg", link: "sw.html" },
+            { name: "InvocaVerso", img: "https://nsc-total-wp.s3.sa-east-1.amazonaws.com/wp-content/uploads/legacy/s3fs-public/graphql-upload-files/a%20freira%20historia_2.jpg", link: "sw.html" },
+            { name: "Godzilla", img: "https://i.imgur.com/HbC35kR.jpeg", link: "vf.html" },
+            { name: "Gamera", img: "https://www.planocritico.com/wp-content/uploads/2023/11/gamera-renascimento-1-temporada.jpg", link: "vf.html" },
+            { name: "Vingadores", img: "https://wallpapersok.com/images/high/4k-marvel-fan-art-tgvzg8ruybgha265.jpg", link: "avengers.html" }
+        ];
+
+        const dbFilmes = [
+            { title: "O Imbativel III: Redenção", year: 2010, time: "1h 36min", dub: "DUB", qual: "HD", img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRQIj5mTlo20BEwR8f2IX9vhtmh4XTUhTdvjGvRakTPpuMbphafVlIm4Uf7akAiQbqdcSt8&s", url: "cara" },
+            { title: "O Massacre da Serra</p>Elétrica: O Início", year: 2006, time: "1h 31min", dub: "DUB", qual: "HD", img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRdz3KUju6nUOLniNOCD-WVln0RSFlVtrYx8e4C5jAuSHRUEMshQcvwA-G1ZfZOY-mz2j2n&s", url: "patrulha" },
+            { title: "Tropa de Elite", year: 2007, time: "1h 55min", dub: "DUB", qual: "HD", img: "https://image.tmdb.org/t/p/w220_and_h330_face/atl4a9VFVP7JYvk4GeSgqhLOfjC.jpg", url: "cara" },
+            { title: "Como Eu Era Antes de Você", year: 2016, time: "1h 50min", dub: "DUB", qual: "HD", img: "https://image.tmdb.org/t/p/w500/1a60KPNTC4JKYphNQveAB37Lyif.jpg", url: "patrulha" },
+            { title: "Como Se Fosse a Ptimeira Vez", year: 2004, time: "1h 39min", dub: "DUB", qual: "HD", img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTZAB-Qo12qgbJSAWz9LMNJR6jR0CEyYxelNLSsdQ-Wv-VTB-vtUaWGCs3p8RhYkNQvvhRayg&s", url: "agente" },
+            { title: "Lúcifer", year: 2016, time: "6 temporadas", dub: "DUB", qual: "HD", img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQDy-5PgPJuw6RHPJR_qGvL56ZkI0GEg27wtJXqQjsmGFjTaYqrNOqRki0&s=10", url: "batalha" },
+            { title: "Pecadores", year: 2025, time: "2h 17min", dub: "DUB", qual: "HD", img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT4xEb2QkvnFiwZUVuiWVBgQarLLYHnV1mCQCwK7Wpr1KnCMa-ZKLrvKiGO4qlCf3DaSS4Pfg&s", url: "pecadores" },
+            { title: "O Uivo", year: 2015, time: "1h 32min", dub: "DUB", qual: "HD", img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRTZCPIxfOmTRvcTOfkmaobB-MwT77t6HXcbchUaMrMMSvU4C9l_7GkhApSJj5xn95A-FaI&s", url: "selva" },
+            { title: "Godzilla Ressurge", year: 2016, time: "2 horas", dub: "DUB", qual: "HD", img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR1Fg2kThiuRSrGFeokAa0EXzxzgMH7bDkwj5i_1f2kVqALETPEPpbzlEeA&s=10", url: "cyberpunk" },
+            { title: "A Bruxa de Blair", year: 1999, time: "1h 18min", dub: "DUB", qual: "SD", img: "https://br.web.img2.acsta.net/medias/nmedia/18/93/98/96/20293294.jpg", url: "bruxa" },
+            { title: "Pânico na Floresta", year: 2003, time: "1h 24min", dub: "DUB", qual: "HD", img: "https://upload.wikimedia.org/wikipedia/pt/thumb/8/85/Wrong_Turn_movie.jpg/250px-Wrong_Turn_movie.jpg", url: "cara" },
+            { title: "Jurassic Park: O Parque</p>dos Dinossauros", year: 1993, time: "2h 2min", dub: "DUB", qual: "HD", img: "https://image.tmdb.org/t/p/w500/mgjJ7FH4V3exsmoHwXrmsUhn0h1.jpg", url: "patrulha" },
+            { title: "50 Tons de Cinza", year: 2016, time: "2h 5min", dub: "DUB", qual: "HD", img: "https://image.tmdb.org/t/p/w500/t4kR6H71anOV85qzjOLlr9uVdFJ.jpg", url: "cara" },
+            { title: "Titanic", year: 1997, time: "3h 14min", dub: "DUB", qual: "HD", img: "https://upload.wikimedia.org/wikipedia/pt/2/22/Titanic_poster.jpg", url: "patrulha" },
+            { title: "Olhos Famintos 2", year: 2003, time: "1h 46min", dub: "DUB", qual: "HD", img: "https://image.tmdb.org/t/p/w220_and_h330_face/aRK3qCe5FtTK6W3STgPihEhgpxA.jpg", url: "agente" },
+            { title: "Pânico no Lago", year: 1999, time: "1h 32min", dub: "DUB", qual: "HD", img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQbqxSSq1LqrBMZBuHysniHa5EHxJAF71VNRqpHd6kBuWs5rPVAMoUzOdihawugiZCQabSyCG2y5c8l6h6koL7m1ij37AW0Quj3CMvYG64&s=10", url: "batalha" },
+            { title: "Cães Assasinos", year: 2006, time: "1h 48min", dub: "DUB", qual: "HD", img: "https://cdn.awsli.com.br/600x700/1181/1181256/produto/463538256b71b12cc4.jpg", url: "pecadores" },
+            { title: "Caçados", year: 2007, time: "1h 32min", dub: "DUB", qual: "HD", img: "https://cdn.fstatic.com/media/movies/covers/2013/09/cacados_t1491.jpg", url: "selva" },
+            { title: "Morte Súbita", year: 2007, time: "1h 40min", dub: "DUB", qual: "HD", img: "https://image.tmdb.org/t/p/original/ip7nVBDhT9J9blktI3WGWMWCWco.jpg", url: "cyberpunk" },
+            { title: "Terror na Água 3D", year: 2011, time: "1h 30min", dub: "DUB", qual: "SD", img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSJfLLY8eIkON3AMztI2ZknZ4XiWRka3m-mLxI6XVP3hryReg2l_asI0hM891wrCcqviJsJ&s", url: "bruxa" }
+        ];
+
+        const dbHistorico = [
+            { title: "Jenna Ortega", type: "Atriz", img: "https://ui-avatars.com/api/?name=Jenna+Ortega&background=222&color=fff", link: "jenna.html", isPerson: true },
+            { title: "Terror", type: "Gênero", img: "https://ui-avatars.com/api/?name=Terror&background=111&color=fff", link: "terror.html", isPerson: false },
+            { title: "Patrulha Noturna", type: "Filme", img: "https://br.web.img2.acsta.net/medias/nmedia/18/93/98/96/20293294.jpg", link: "player.html?title=Patrulha Noturna", isPerson: false },
+            { title: "Marvel", type: "Produtora", img: "https://ui-avatars.com/api/?name=Marvel&background=e23636&color=fff", link: "marvel.html", isPerson: false },
+            { title: "Sylvester Stallone", type: "Ator", img: "https://ui-avatars.com/api/?name=Sylvester+Stallone&background=222&color=fff", link: "sylvester.html", isPerson: true }
+        ];
+
+        let filterActorState = 0; 
+
+        function createCarouselItem(data) {
+            return `
+                <div class="carousel-item" onclick="window.location.href='${data.link}'">
+                    <img src="${data.img}" alt="${data.name}" class="circle-img">
+                    <span class="item-name">${data.name}</span>
+                </div>
+            `;
+        }
+
+        function createFilmeItem(data) {
+            return `
+                <div class="filme" onclick="window.location.href='player.html?title=${encodeURIComponent(data.title)}&url=https://playerflixapi.com/serie/${data.url}'">
+                    <div class="tags"><span class="tag dub">${data.dub}</span><span class="tag qual">${data.qual}</span></div>
+                    <img src="${data.img}" alt="Capa">
+                    <div class="card-info">
+                        <h4>${data.title}</h4>
+                        <div class="card-details"><span>${data.year}</span><span>${data.time}</span></div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function createHistoryItem(data) {
+            return `
+                <div class="history-item" onclick="window.location.href='${data.link}'">
+                    <img src="${data.img}" alt="${data.title}" class="${data.isPerson ? 'circle' : ''}">
+                    <div class="history-item-info">
+                        <h4>${data.title}</h4>
+                        <span>${data.type}</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        function initPage() {
+            renderAtores();
+            document.getElementById('generos-carousel').innerHTML = dbGeneros.map(g => createCarouselItem(g)).join('');
+            document.getElementById('produtoras-carousel').innerHTML = dbProdutoras.map(p => createCarouselItem(p)).join('');
+            document.getElementById('sagas-carousel').innerHTML = dbSagas.map(s => createCarouselItem(s)).join('');
+            document.getElementById('filmes-grid').innerHTML = dbFilmes.map(f => createFilmeItem(f)).join('');
+            document.getElementById('history-list-container').innerHTML = dbHistorico.map(h => createHistoryItem(h)).join('');
+
+            let anoMenu = document.getElementById('ano-menu');
+            anoMenu.innerHTML = `<div class="dropdown-item" onclick="selectFilter('ano', 'Todos')">Todos os Anos</div>`;
+            for(let i = 2026; i >= 1926; i--) {
+                anoMenu.innerHTML += `<div class="dropdown-item" onclick="selectFilter('ano', '${i}')">${i}</div>`;
+            }
+        }
+
+        function renderAtores() {
+            let filtered = dbAtores;
+            let label = "Atrizes/Atores";
+            
+            if (filterActorState === 1) {
+                filtered = dbAtores.filter(a => a.gender === "F");
+                label = "Atrizes";
+            } else if (filterActorState === 2) {
+                filtered = dbAtores.filter(a => a.gender === "M");
+                label = "Atores";
+            }
+
+            document.getElementById('ator-title-text').innerText = label;
+            document.getElementById('atores-carousel').innerHTML = filtered.map(a => createCarouselItem(a)).join('');
+        }
+
+        function toggleActorFilter() {
+            filterActorState = (filterActorState + 1) % 3; 
+            renderAtores();
+        }
+
+        function scrollCarousel(containerId, offset) {
+            document.getElementById(containerId).scrollBy({ left: offset, behavior: 'smooth' });
+        }
+
+        function toggleDropdown(id) {
+            document.getElementById(id).classList.toggle('active');
+        }
+
+        function selectFilter(tipo, valor) {
+            document.getElementById(`${tipo}-label`).innerText = valor === 'Todos' ? (tipo === 'ano' ? 'Ano' : 'Tipo') : valor;
+            document.getElementById(`${tipo}-menu`).classList.remove('active');
+            
+            if(tipo === 'ano') {
+                const grid = document.getElementById('filmes-grid');
+                if(valor === 'Todos') {
+                    grid.innerHTML = dbFilmes.map(f => createFilmeItem(f)).join('');
+                } else {
+                    const filteredFilmes = dbFilmes.filter(f => f.year == valor);
+                    if(filteredFilmes.length > 0) {
+                        grid.innerHTML = filteredFilmes.map(f => createFilmeItem(f)).join('');
+                    } else {
+                        grid.innerHTML = `<p style="grid-column: span 4; text-align: center; color: var(--text-muted); padding: 20px 0;">Nenhum conteúdo encontrado para o ano de ${valor}.</p>`;
+                    }
+                }
+            }
+        }
+
+        function toggleHistoryScreen() {
+            const screen = document.getElementById('history-screen');
+            screen.style.display = screen.style.display === 'block' ? 'none' : 'block';
+        }
+
+        function toggleSearch() {
+            const container = document.getElementById('search-container');
+            container.style.display = container.style.display === 'block' ? 'none' : 'block';
+            if (container.style.display === 'block') {
+                document.getElementById('search-input').focus();
+            } else {
+                document.getElementById('search-input').value = '';
+                handleSearch();
+            }
+        }
+
+        function handleSearch() {
+            const query = document.getElementById('search-input').value.toLowerCase();
+            const mainContent = document.getElementById('main-content');
+            const searchArea = document.getElementById('search-results-area');
+
+            if (query.trim() === '') {
+                mainContent.style.display = 'block';
+                searchArea.style.display = 'none';
+                return;
+            }
+
+            mainContent.style.display = 'none';
+            searchArea.style.display = 'block';
+
+            const resAtores = dbAtores.filter(a => a.name.toLowerCase().includes(query));
+            const resGeneros = dbGeneros.filter(g => g.name.toLowerCase().includes(query));
+            const resProd = dbProdutoras.filter(p => p.name.toLowerCase().includes(query));
+            const resSagas = dbSagas.filter(s => s.name.toLowerCase().includes(query));
+            const resFilmes = dbFilmes.filter(f => f.title.toLowerCase().includes(query) || f.year.toString().includes(query));
+
+            const combinedCarousel = [
+                ...resAtores.map(a => createCarouselItem(a)), 
+                ...resGeneros.map(g => createCarouselItem(g)),
+                ...resProd.map(p => createCarouselItem(p)),
+                ...resSagas.map(s => createCarouselItem(s))
+            ];
+            
+            document.getElementById('search-carousel').innerHTML = combinedCarousel.length ? combinedCarousel.join('') : '<span style="font-size: 12px; color: #888;">Nenhum resultado nas categorias.</span>';
+            document.getElementById('search-grid').innerHTML = resFilmes.length ? resFilmes.map(f => createFilmeItem(f)).join('') : '<span style="font-size: 12px; color: #888; grid-column: span 4;">Nenhum item encontrado.</span>';
+        }
+
+        initPage();
+        
+        window.onclick = function(event) {
+            if (!event.target.closest('.filter-btn')) {
+                document.querySelectorAll('.dropdown-menu').forEach(menu => menu.classList.remove('active'));
+            }
+        }
+    </script>
+</body>
+</html>

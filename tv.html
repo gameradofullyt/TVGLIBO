@@ -1,0 +1,1048 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <title>GAMERADO TV</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"
+          rel="stylesheet">
+
+    <style>
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            background: #000;
+            color: #fff;
+            font-family: 'Poppins', sans-serif;
+            overflow: hidden;
+        }
+
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #player {
+            width: 100vw;
+            height: 100vh;
+            background: #000;
+
+            position: relative;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        iframe,
+        video {
+            width: 100%;
+            height: 100%;
+
+            border: none;
+
+            object-fit: contain;
+
+            background: #000;
+        }
+
+
+        /* =========================
+           BOTÃO VOLTAR
+        ========================= */
+
+        .back-btn {
+
+            position: fixed;
+
+            top: 18px;
+            left: 18px;
+
+            z-index: 1000;
+
+            width: 45px;
+            height: 45px;
+
+            border: none;
+            border-radius: 50%;
+
+            background: rgba(0, 0, 0, 0.65);
+
+            color: #fff;
+
+            font-size: 30px;
+
+            cursor: pointer;
+
+            backdrop-filter: blur(8px);
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+
+        /* =========================
+           NOME DO CANAL
+        ========================= */
+
+        .channel-name {
+
+            position: fixed;
+
+            top: 20px;
+            left: 75px;
+
+            z-index: 1000;
+
+            font-size: 18px;
+            font-weight: 600;
+
+            text-shadow: 0 2px 5px #000;
+        }
+
+        .live {
+
+            color: #e50914;
+
+            margin-right: 6px;
+        }
+
+
+        /* =========================
+           CARREGANDO
+        ========================= */
+
+        .loading {
+
+            position: absolute;
+
+            z-index: 50;
+
+            display: flex;
+
+            flex-direction: column;
+
+            align-items: center;
+
+            gap: 12px;
+
+            font-size: 14px;
+        }
+
+        .spinner {
+
+            width: 45px;
+            height: 45px;
+
+            border: 4px solid rgba(255,255,255,0.2);
+
+            border-top-color: #e50914;
+
+            border-radius: 50%;
+
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+
+            to {
+                transform: rotate(360deg);
+            }
+
+        }
+
+
+        /* =========================
+           ERRO
+        ========================= */
+
+        .error {
+
+            display: none;
+
+            position: absolute;
+
+            z-index: 100;
+
+            text-align: center;
+
+            padding: 25px;
+
+            max-width: 450px;
+        }
+
+        .error h2 {
+
+            margin-bottom: 10px;
+        }
+
+        .error p {
+
+            color: #bbb;
+
+            margin-bottom: 20px;
+        }
+
+
+        /* =========================
+           BOTÕES
+        ========================= */
+
+        .external-btn,
+        .fullscreen-btn {
+
+            border: none;
+
+            padding: 12px 20px;
+
+            border-radius: 8px;
+
+            background: #e50914;
+
+            color: #fff;
+
+            font-family: inherit;
+
+            font-weight: 600;
+
+            cursor: pointer;
+        }
+
+
+        /* =========================
+           BOTÃO FULLSCREEN
+        ========================= */
+
+        .fullscreen-btn {
+
+            position: fixed;
+
+            bottom: 25px;
+            left: 50%;
+
+            transform: translateX(-50%);
+
+            z-index: 2000;
+
+            display: none;
+
+            background: rgba(229, 9, 20, 0.95);
+        }
+
+
+        /* =========================
+           FULLSCREEN
+        ========================= */
+
+        :fullscreen {
+
+            width: 100vw;
+            height: 100vh;
+
+            background: #000;
+        }
+
+
+        /* =========================
+           CELULAR VERTICAL
+        ========================= */
+
+        @media (orientation: portrait) {
+
+            #player {
+
+                width: 100vw;
+                height: 100vh;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+    <div id="player">
+
+
+        <!-- VOLTAR -->
+
+        <button
+            class="back-btn"
+            onclick="voltar()">
+
+            ‹
+
+        </button>
+
+
+        <!-- NOME DO CANAL -->
+
+        <div class="channel-name">
+
+            <span class="live">●</span>
+
+            <span id="channelName">
+                TV
+            </span>
+
+        </div>
+
+
+        <!-- LOADING -->
+
+        <div
+            class="loading"
+            id="loading">
+
+            <div class="spinner"></div>
+
+            <span>
+                Carregando transmissão...
+            </span>
+
+        </div>
+
+
+        <!-- ERRO -->
+
+        <div
+            class="error"
+            id="error">
+
+            <h2>
+                Não foi possível abrir a transmissão
+            </h2>
+
+            <p>
+                O canal pode não permitir reprodução incorporada.
+            </p>
+
+            <button
+                class="external-btn"
+                id="externalBtn">
+
+                Abrir transmissão
+
+            </button>
+
+        </div>
+
+
+        <!-- BOTÃO DE FULLSCREEN -->
+
+        <button
+            class="fullscreen-btn"
+            id="fullscreenBtn">
+
+            ⛶ Entrar em tela cheia
+
+        </button>
+
+    </div>
+
+
+<script>
+
+
+/* =========================================================
+   CONFIGURAÇÕES
+========================================================= */
+
+const params =
+    new URLSearchParams(
+        window.location.search
+    );
+
+
+const tipo =
+    params.get("tipo") || "iframe";
+
+
+const nome =
+    params.get("nome") || "TV";
+
+
+const url =
+    params.get("url") || "";
+
+
+const player =
+    document.getElementById("player");
+
+
+const loading =
+    document.getElementById("loading");
+
+
+const errorBox =
+    document.getElementById("error");
+
+
+const channelName =
+    document.getElementById("channelName");
+
+
+const externalBtn =
+    document.getElementById("externalBtn");
+
+
+const fullscreenBtn =
+    document.getElementById("fullscreenBtn");
+
+
+channelName.textContent = nome;
+
+
+
+/* =========================================================
+   FULLSCREEN + TELA HORIZONTAL
+========================================================= */
+
+async function ativarModoHorizontal() {
+
+    try {
+
+        /*
+         * Entra em tela cheia.
+         */
+
+        if (!document.fullscreenElement) {
+
+            await player.requestFullscreen();
+
+        }
+
+    } catch (erro) {
+
+        console.log(
+            "Fullscreen bloqueado pelo navegador.",
+            erro
+        );
+
+        fullscreenBtn.style.display =
+            "block";
+
+    }
+
+
+    /*
+     * Tenta bloquear a orientação
+     * na horizontal.
+     */
+
+    try {
+
+        if (
+            screen.orientation &&
+            screen.orientation.lock
+        ) {
+
+            await screen.orientation.lock(
+                "landscape"
+            );
+
+            console.log(
+                "Tela colocada na horizontal."
+            );
+
+        }
+
+    } catch (erro) {
+
+        console.log(
+            "Orientação horizontal bloqueada.",
+            erro
+        );
+
+    }
+
+}
+
+
+
+/* =========================================================
+   BOTÃO MANUAL DE FULLSCREEN
+========================================================= */
+
+fullscreenBtn.addEventListener(
+    "click",
+    async () => {
+
+        fullscreenBtn.style.display =
+            "none";
+
+        await ativarModoHorizontal();
+
+    }
+);
+
+
+
+/* =========================================================
+   ESCONDER LOADING
+========================================================= */
+
+function esconderLoading() {
+
+    setTimeout(() => {
+
+        loading.style.display =
+            "none";
+
+    }, 1200);
+
+}
+
+
+
+/* =========================================================
+   IFRAME
+========================================================= */
+
+function criarIframe() {
+
+    if (!url) {
+
+        mostrarErro();
+
+        return;
+
+    }
+
+
+    const iframe =
+        document.createElement("iframe");
+
+
+    iframe.src = url;
+
+
+    iframe.allow =
+        "autoplay; fullscreen; encrypted-media; picture-in-picture";
+
+
+    iframe.allowFullscreen = true;
+
+
+    iframe.setAttribute(
+        "allow",
+        "autoplay; fullscreen; encrypted-media; picture-in-picture"
+    );
+
+
+    iframe.setAttribute(
+        "referrerpolicy",
+        "strict-origin-when-cross-origin"
+    );
+
+
+    iframe.onload = function () {
+
+        esconderLoading();
+
+    };
+
+
+    iframe.onerror = function () {
+
+        mostrarErro();
+
+    };
+
+
+    player.appendChild(iframe);
+
+
+    /*
+     * Não conseguimos verificar o conteúdo
+     * interno de um iframe externo.
+     */
+
+    setTimeout(() => {
+
+        loading.style.display =
+            "none";
+
+    }, 7000);
+
+}
+
+
+
+/* =========================================================
+   YOUTUBE
+========================================================= */
+
+function criarYouTube() {
+
+    let videoId = "";
+
+
+    try {
+
+        const urlObj =
+            new URL(url);
+
+
+        if (
+            urlObj.hostname.includes(
+                "youtu.be"
+            )
+        ) {
+
+            videoId =
+                urlObj.pathname.substring(1);
+
+        } else {
+
+            videoId =
+                urlObj.searchParams.get("v");
+
+        }
+
+    } catch (e) {
+
+        mostrarErro();
+
+        return;
+
+    }
+
+
+    if (!videoId) {
+
+        mostrarErro();
+
+        return;
+
+    }
+
+
+    const iframe =
+        document.createElement("iframe");
+
+
+    iframe.src =
+        "https://www.youtube.com/embed/" +
+        videoId +
+        "?autoplay=1&mute=0&playsinline=1&rel=0";
+
+
+    iframe.allow =
+        "autoplay; fullscreen; encrypted-media; picture-in-picture";
+
+
+    iframe.allowFullscreen = true;
+
+
+    iframe.onload = function () {
+
+        esconderLoading();
+
+    };
+
+
+    player.appendChild(iframe);
+
+
+    setTimeout(() => {
+
+        loading.style.display =
+            "none";
+
+    }, 5000);
+
+}
+
+
+
+/* =========================================================
+   HLS
+========================================================= */
+
+function criarHLS() {
+
+    const video =
+        document.createElement("video");
+
+
+    video.controls = true;
+
+    video.autoplay = true;
+
+    video.muted = false;
+
+    video.playsInline = true;
+
+
+    video.setAttribute(
+        "playsinline",
+        ""
+    );
+
+
+    video.setAttribute(
+        "webkit-playsinline",
+        ""
+    );
+
+
+    player.appendChild(video);
+
+
+
+    /*
+     * Safari / iPhone / iPad
+     */
+
+    if (
+        video.canPlayType(
+            "application/vnd.apple.mpegurl"
+        )
+    ) {
+
+        video.src = url;
+
+
+        video.addEventListener(
+            "loadedmetadata",
+            () => {
+
+                video.play().catch(() => {
+
+                    console.log(
+                        "Autoplay bloqueado."
+                    );
+
+                });
+
+
+                esconderLoading();
+
+            }
+        );
+
+    }
+
+
+    /*
+     * Chrome / Edge / Firefox
+     */
+
+    else {
+
+        const script =
+            document.createElement("script");
+
+
+        script.src =
+            "https://cdn.jsdelivr.net/npm/hls.js@latest";
+
+
+        script.onload =
+            function () {
+
+                if (Hls.isSupported()) {
+
+                    const hls =
+                        new Hls();
+
+
+                    hls.loadSource(url);
+
+
+                    hls.attachMedia(video);
+
+
+                    hls.on(
+                        Hls.Events.MANIFEST_PARSED,
+                        function () {
+
+                            video.play()
+                                .catch(() => {
+
+                                    console.log(
+                                        "Autoplay bloqueado."
+                                    );
+
+                                });
+
+
+                            esconderLoading();
+
+                        }
+                    );
+
+                } else {
+
+                    mostrarErro();
+
+                }
+
+            };
+
+
+        document.head.appendChild(
+            script
+        );
+
+    }
+
+}
+
+
+
+/* =========================================================
+   EXTERNO
+========================================================= */
+
+function criarExterno() {
+
+    loading.style.display =
+        "none";
+
+
+    errorBox.style.display =
+        "block";
+
+
+    externalBtn.onclick =
+        function () {
+
+            window.location.href =
+                url;
+
+        };
+
+}
+
+
+
+/* =========================================================
+   ERRO
+========================================================= */
+
+function mostrarErro() {
+
+    loading.style.display =
+        "none";
+
+
+    errorBox.style.display =
+        "block";
+
+}
+
+
+
+/* =========================================================
+   VOLTAR
+========================================================= */
+
+function voltar() {
+
+    /*
+     * Sai do fullscreen antes de voltar.
+     */
+
+    if (document.fullscreenElement) {
+
+        document.exitFullscreen()
+            .catch(() => {});
+
+    }
+
+
+    /*
+     * Volta para a página anterior.
+     */
+
+    if (document.referrer) {
+
+        history.back();
+
+    } else {
+
+        window.location.href =
+            "index.html";
+
+    }
+
+}
+
+
+
+/* =========================================================
+   ESCOLHER TIPO DE PLAYER
+========================================================= */
+
+if (tipo === "iframe") {
+
+    criarIframe();
+
+}
+
+else if (tipo === "youtube") {
+
+    criarYouTube();
+
+}
+
+else if (tipo === "hls") {
+
+    criarHLS();
+
+}
+
+else if (tipo === "external") {
+
+    criarExterno();
+
+}
+
+else {
+
+    criarIframe();
+
+}
+
+
+
+/* =========================================================
+   TENTA FULLSCREEN AUTOMATICAMENTE
+   AO ABRIR
+========================================================= */
+
+window.addEventListener(
+    "load",
+    () => {
+
+        setTimeout(() => {
+
+            ativarModoHorizontal();
+
+        }, 300);
+
+    }
+);
+
+
+
+/* =========================================================
+   PRIMEIRO TOQUE DO USUÁRIO
+========================================================= */
+
+let primeiroToque =
+    false;
+
+
+function toqueUsuario() {
+
+    if (primeiroToque) {
+
+        return;
+
+    }
+
+
+    primeiroToque =
+        true;
+
+
+    /*
+     * Como agora temos uma ação
+     * real do usuário, o navegador
+     * normalmente permite fullscreen
+     * e orientação.
+     */
+
+    ativarModoHorizontal();
+
+}
+
+
+
+/*
+ * Celular
+ */
+
+document.addEventListener(
+    "touchend",
+    toqueUsuario,
+    {
+        passive: true,
+        once: true
+    }
+);
+
+
+
+/*
+ * Computador
+ */
+
+document.addEventListener(
+    "click",
+    toqueUsuario,
+    {
+        passive: true,
+        once: true
+    }
+);
+
+
+
+/* =========================================================
+   SE ENTRAR EM FULLSCREEN,
+   TENTA NOVAMENTE DEITAR A TELA
+========================================================= */
+
+document.addEventListener(
+    "fullscreenchange",
+    () => {
+
+        if (
+            document.fullscreenElement
+        ) {
+
+            try {
+
+                if (
+                    screen.orientation &&
+                    screen.orientation.lock
+                ) {
+
+                    screen.orientation
+                        .lock("landscape")
+                        .catch(() => {});
+
+                }
+
+            } catch (e) {}
+
+        }
+
+    }
+);
+
+</script>
+
+</body>
+</html>

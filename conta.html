@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sua Conta | GAMERADO TV</title>
+
+    <!-- Tags obrigatórias do PWA -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0a0a0c">
+    <link rel="apple-touch-icon" href="https://i.imgur.com/igkHLpV.png">
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* --- ESTILOS GERAIS & TEMA ESCURO --- */
+        :root {
+            --bg-body: #0a0a0c; 
+            --bg-card: #141417; 
+            --bg-banner: #111113;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0a5;
+            --accent-pink: #ff5e99; 
+            --accent-pink-hover: #ff3c84;
+            --border-color: rgba(255, 255, 255, 0.08);
+            --shadow-card: 0 10px 30px rgba(0,0,0,0.5);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; outline: none; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            line-height: 1.6;
+            padding-bottom: 80px; 
+        }
+
+        /* --- BOTÃO DE INSTALAÇÃO PWA --- */
+        .btn-pwa {
+            position: fixed;
+            bottom: 80px; /* Fica logo acima do menu inferior */
+            right: 20px;
+            background-color: var(--accent-pink, #ff5e99);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            z-index: 9999;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(255, 94, 153, 0.4);
+            transition: transform 0.3s ease;
+        }
+        .btn-pwa:hover {
+            transform: scale(1.05);
+        }
+        .btn-pwa.hidden {
+            display: none !important;
+        }
+
+        .main-container { max-width: 800px; margin: 0 auto; }
+
+        /* --- CABEÇALHO DO PERFIL PROFISSIONAL --- */
+        .profile-header { position: relative; border-bottom: 1px solid var(--border-color); padding-bottom: 25px; }
+
+        .settings-btn-top {
+            position: absolute; top: 20px; left: 20px;
+            background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(255,255,255,0.2);
+            color: white; width: 45px; height: 45px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 18px; cursor: pointer; backdrop-filter: blur(8px); z-index: 10;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5); transition: var(--transition);
+        }
+        .settings-btn-top:hover { transform: scale(1.05); background: var(--accent-pink); border-color: var(--accent-pink); }
+
+        .banner {
+            height: 220px; background-color: #111; background-size: cover; background-position: center; background-repeat: no-repeat;
+            position: relative; cursor: pointer; transition: opacity 0.3s;
+        }
+        .banner::after { content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 50%; background: linear-gradient(to top, var(--bg-body), transparent); pointer-events: none; }
+        .banner:hover { opacity: 0.9; }
+
+        .change-cover-btn {
+            position: absolute; top: 20px; right: 20px; background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 8px; backdrop-filter: blur(8px); transition: var(--transition); z-index: 10;
+        }
+        .change-cover-btn:hover { background: rgba(0, 0, 0, 0.8); border-color: white; }
+
+        /* Área do Avatar e Informações */
+        .profile-content-wrapper { position: relative; margin-top: -70px; display: flex; flex-direction: column; align-items: center; padding: 0 20px; z-index: 5; }
+        
+        .avatar-wrapper { position: relative; cursor: pointer; margin-bottom: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.6); border-radius: 50%; }
+        .avatar { width: 140px; height: 140px; border-radius: 50%; background-color: #2a2a2e; border: 4px solid var(--bg-body); background-size: cover; background-position: center; transition: var(--transition); }
+        .avatar-wrapper:hover .avatar { filter: brightness(0.7); }
+
+        .change-avatar-icon { position: absolute; bottom: 5px; right: 5px; background-color: var(--accent-pink); width: 36px; height: 36px; border-radius: 50%; border: 3px solid var(--bg-body); display: flex; align-items: center; justify-content: center; color: white; font-size: 14px; pointer-events: none; }
+
+        .info-card { text-align: center; background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); padding: 20px 30px; border-radius: 24px; backdrop-filter: blur(10px); width: 100%; max-width: 450px; box-shadow: 0 8px 32px rgba(0,0,0,0.2); }
+        .user-name { font-size: 26px; font-weight: 700; margin-bottom: 2px; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+        
+        .user-handle-container { display: inline-flex; align-items: center; justify-content: center; gap: 8px; color: var(--accent-pink); font-size: 15px; margin-bottom: 15px; cursor: pointer; transition: var(--transition); padding: 4px 12px; border-radius: 12px; background: rgba(255,94,153,0.1); }
+        .user-handle-container:hover { background: rgba(255,94,153,0.2); }
+        .user-handle { font-weight: 600; }
+        
+        .profile-stats { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+        .stat-badge { background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); padding: 8px 16px; border-radius: 12px; font-size: 13px; color: var(--text-secondary); display: flex; align-items: center; gap: 8px; }
+        .stat-badge i { color: #fff; }
+        .stat-badge.highlight { border-color: rgba(255,94,153,0.3); color: white; font-weight: 600; background: linear-gradient(45deg, rgba(255,94,153,0.15), rgba(0,0,0,0.5)); }
+        .stat-badge.highlight i { color: var(--accent-pink); }
+
+        /* --- CARROSSEIS (MINHA LISTA & FAVORITOS) --- */
+        .lists-area { padding: 20px 0; }
+        .carousel-section { margin-bottom: 25px; padding: 0 20px; }
+        .carousel-header { display: flex; align-items: center; margin-bottom: 15px; }
+        .carousel-header h2 { font-size: 1.2rem; font-weight: 600; color: white; display: flex; align-items: center; gap: 10px; }
+        .carousel-count { background: var(--accent-pink); color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.8rem; font-weight: 700; }
+        
+        .carousel-track { display: flex; overflow-x: auto; gap: 15px; padding-bottom: 15px; scrollbar-width: none; scroll-behavior: smooth; }
+        .carousel-track::-webkit-scrollbar { display: none; }
+        
+        .carousel-card { flex: 0 0 145px; position: relative; border-radius: 8px; overflow: hidden; cursor: pointer; transition: transform 0.3s; box-shadow: 0 6px 15px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.05); background: #1a1a1a; }
+        .carousel-card:hover { transform: scale(1.05); z-index: 2; border-color: rgba(255,255,255,0.2); }
+        .carousel-card img { width: 100%; height: 215px; object-fit: cover; display: block; }
+        .empty-msg { color: #666; font-size: 0.95rem; font-style: italic; padding: 10px 0; }
+
+        /* --- MENU INFERIOR (Estilo Index.html) --- */
+        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(15, 15, 15, 0.95); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); display: flex; justify-content: space-around; align-items: center; padding: 8px 0; border-top: 1px solid rgba(255, 255, 255, 0.05); z-index: 1000; box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.5); padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px)); }
+        .bottom-nav .nav-item { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #888; font-size: 0.7rem; font-family: 'Poppins', sans-serif; transition: all 0.3s ease; position: relative; width: 80px; }
+        .bottom-nav .nav-item i { font-size: 1.2rem; margin-bottom: 4px; transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), color 0.3s; }
+        .bottom-nav .nav-item:hover i, .bottom-nav .nav-item.active i { transform: translateY(-4px) scale(1.1); color: var(--accent-pink); }
+        .bottom-nav .nav-item:hover span, .bottom-nav .nav-item.active span { color: white; font-weight: bold; }
+        .bottom-nav .nav-item.active::after { content: ''; position: absolute; bottom: -6px; width: 4px; height: 4px; background-color: var(--accent-pink); border-radius: 50%; animation: popIn 0.3s ease forwards; }
+        @keyframes popIn { 0% { transform: scale(0); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+
+        /* --- MODAL CONFIGURAÇÕES COMPLETAS --- */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(5px); z-index: 2000; display: flex; align-items: center; justify-content: center; opacity: 0; visibility: hidden; transition: var(--transition); }
+        .modal-overlay.active { opacity: 1; visibility: visible; }
+        
+        .modal-content-settings { background-color: var(--bg-body); width: 100%; height: 100%; overflow-y: auto; padding: 20px; position: relative; transform: translateY(20px); transition: var(--transition); }
+        @media (min-width: 800px) {
+            .modal-content-settings { max-width: 800px; height: 90vh; border-radius: 20px; border: 1px solid var(--border-color); box-shadow: 0 20px 50px rgba(0,0,0,0.8); }
+        }
+        .modal-overlay.active .modal-content-settings { transform: translateY(0); }
+
+        .settings-modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; padding-bottom: 15px; border-bottom: 1px solid var(--border-color); position: sticky; top: 0; background: var(--bg-body); z-index: 10; padding-top: 10px; }
+        .settings-modal-header h2 { font-size: 24px; font-weight: 700; }
+        .close-settings-btn { background: rgba(255,255,255,0.1); border: none; color: white; width: 36px; height: 36px; border-radius: 50%; font-size: 18px; cursor: pointer; transition: var(--transition); display: flex; justify-content: center; align-items: center;}
+        .close-settings-btn:hover { background: var(--accent-pink); }
+
+        /* Estilos Internos das Configurações */
+        .settings-cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; padding-bottom: 40px; }
+        .settings-card { background-color: var(--bg-card); border-radius: 20px; padding: 25px; border: 1px solid var(--border-color); }
+        .card-header { font-size: 17px; font-weight: 600; color: var(--text-primary); margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; gap: 10px; }
+        .card-header i { color: var(--accent-pink); font-size: 16px; }
+        .settings-item { display: flex; align-items: center; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .settings-item:last-child { border-bottom: none; }
+        .item-label { display: flex; align-items: center; gap: 15px; font-size: 14px; font-weight: 500; }
+        .item-label i { color: var(--text-secondary); font-size: 16px; width: 20px; text-align: center; }
+        .item-subtext { display: block; font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+        
+        /* Controles */
+        .switch { position: relative; display: inline-block; width: 44px; height: 24px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #333; transition: .4s; border-radius: 34px; }
+        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--accent-pink); }
+        input:checked + .slider:before { transform: translateX(20px); }
+        .action-btn { background: transparent; border: 1px solid rgba(255,255,255,0.1); color: white; padding: 8px 14px; border-radius: 10px; font-size: 12px; cursor: pointer; transition: 0.3s; }
+        .action-btn:hover { background: rgba(255,255,255,0.1); }
+        .logout-btn { background-color: rgba(255, 94, 153, 0.1); color: var(--accent-pink); border: 1px solid rgba(255, 94, 153, 0.3); padding: 12px 30px; border-radius: 12px; font-size: 15px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 10px; margin: 20px auto 0; transition: var(--transition); }
+        .logout-btn:hover { background-color: var(--accent-pink); color: white; }
+
+        /* Pequenos Modais (Handle e Senha) */
+        .small-modal-card { background-color: var(--bg-card); border-radius: 20px; width: 90%; max-width: 400px; padding: 30px; border: 1px solid var(--border-color); text-align: center; }
+        .modal-input { width: 100%; padding: 12px; border-radius: 10px; background: #111; border: 1px solid var(--border-color); color: white; margin-bottom: 15px; }
+        .modal-footer { display: flex; gap: 10px; justify-content: center; }
+        .modal-btn { padding: 10px 20px; border-radius: 10px; font-weight: 600; cursor: pointer; font-size: 14px; border: none; }
+        .modal-btn-confirm { background-color: var(--accent-pink); color: white; }
+        .modal-btn-cancel { background: transparent; color: white; border: 1px solid rgba(255,255,255,0.2); }
+
+        .hidden-file-input { display: none; }
+        .loader { border: 3px solid #333; border-top: 3px solid var(--accent-pink); border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; display: none; position: absolute; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        #top-alert-banner { position: fixed; top: -100px; left: 0; width: 100%; background-color: #f44336; color: white; padding: 15px; text-align: center; font-weight: 600; z-index: 3000; transition: top 0.4s ease; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
+        #top-alert-banner.active { top: 0; }
+    </style>
+</head>
+<body>
+
+    <!-- Botão de Instalação PWA -->
+    <button id="btn-instalar" class="btn-pwa hidden">Baixar App 📱</button>
+
+    <div id="top-alert-banner">⚠️ <span id="alert-message">Aviso!</span></div>
+
+    <div class="main-container">
+        <!-- ================= HEADER DO PERFIL ================= -->
+        <header class="profile-header">
+            <!-- Botão de Engrenagem (Nova Posição) -->
+            <button class="settings-btn-top" onclick="openModal('modal-settings')" title="Configurações">
+                <i class="fas fa-cog"></i>
+            </button>
+
+            <div class="banner" id="banner-view" title="Clique para alterar a capa">
+                <button class="change-cover-btn" id="change-cover-trigger">
+                    <i class="fas fa-camera"></i> Alterar Capa
+                </button>
+                <div class="loader" id="banner-loader" style="top: 20px; left: 20px;"></div>
+            </div>
+
+            <div class="profile-content-wrapper">
+                <div class="avatar-wrapper" id="avatar-trigger" title="Clique para alterar a foto">
+                    <div class="avatar" id="avatar-view"></div>
+                    <div class="change-avatar-icon"><i class="fas fa-camera"></i></div>
+                    <div class="loader" id="avatar-loader" style="top: calc(50% - 12px); left: calc(50% - 12px);"></div>
+                </div>
+
+                <div class="info-card">
+                    <h1 class="user-name" id="display-name">Carregando...</h1>
+                    <div class="user-handle-container" id="edit-handle-trigger" title="Alterar seu @">
+                        @<span class="user-handle" id="display-handle">user</span>
+                        <i class="fas fa-pen" style="font-size: 11px;"></i>
+                    </div>
+                    
+                    <div class="profile-stats">
+                        <div class="stat-badge" id="join-date-badge">
+                            <i class="fas fa-calendar-check"></i> 
+                            <span id="display-join-date">Carregando...</span>
+                        </div>
+                        <div class="stat-badge highlight">
+                            <i class="fas fa-gem"></i> 
+                            <span id="display-points">0</span> pts
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- ================= CARROSSEIS (FILMES E SÉRIES) ================= -->
+        <main class="lists-area">
+            
+            <!-- Minha Lista -->
+            <div class="carousel-section">
+                <div class="carousel-header">
+                    <h2><i class="fas fa-list-ul" style="color: var(--accent-pink);"></i> Minha Lista <span class="carousel-count" id="list-count">0</span></h2>
+                </div>
+                <div class="carousel-track" id="my-list-track">
+                    <!-- Preenchido via JS -->
+                </div>
+            </div>
+
+            <!-- Favoritos -->
+            <div class="carousel-section">
+                <div class="carousel-header">
+                    <h2><i class="fas fa-heart" style="color: var(--accent-pink);"></i> Favoritos <span class="carousel-count" id="fav-count">0</span></h2>
+                </div>
+                <div class="carousel-track" id="fav-track">
+                    <!-- Preenchido via JS -->
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- ================= MENU INFERIOR ================= -->
+    <nav class="bottom-nav">
+        <a href="index.html" class="nav-item">
+            <i class="fas fa-home"></i>
+            <span>Início</span>
+        </a>
+        <a href="generos.html" class="nav-item">
+            <i class="fas fa-th-large"></i>
+            <span>Gêneros</span>
+        </a>
+        <a href="explorar.html" class="nav-item">
+            <i class="fas fa-compass"></i>
+            <span>Explorar</span>
+        </a>
+        <a href="conta.html" class="nav-item active">
+            <i class="fas fa-user"></i>
+            <span>Conta</span>
+        </a>
+    </nav>
+
+    <!-- ================= MODAL: CONFIGURAÇÕES COMPLETAS ================= -->
+    <div class="modal-overlay" id="modal-settings-overlay">
+        <div class="modal-content-settings">
+            <div class="settings-modal-header">
+                <h2>Configurações da Conta</h2>
+                <button class="close-settings-btn" onclick="closeModal('modal-settings')"><i class="fas fa-times"></i></button>
+            </div>
+            
+            <div class="settings-cards-grid">
+                <div class="settings-card">
+                    <div class="card-header"><i class="fas fa-cog"></i> Preferências Gerais</div>
+                    <div class="settings-item">
+                        <div class="item-label"><i class="fas fa-bell"></i><div>Notificações<span class="item-subtext">Alertas no navegador</span></div></div>
+                        <label class="switch"><input type="checkbox" id="cfg-notif" checked><span class="slider"></span></label>
+                    </div>
+                    <div class="settings-item">
+                        <div class="item-label"><i class="fas fa-play-circle"></i><div>Autoplay<span class="item-subtext">Reproduzir próximo</span></div></div>
+                        <label class="switch"><input type="checkbox" id="cfg-autoplay"><span class="slider"></span></label>
+                    </div>
+                    <div class="settings-item">
+                        <div class="item-label"><i class="fas fa-language"></i> Idioma</div>
+                        <select class="action-btn" id="cfg-lang"><option value="pt-br">PT-BR</option><option value="en">EN</option></select>
+                    </div>
+                </div>
+
+                <div class="settings-card">
+                    <div class="card-header"><i class="fas fa-paint-brush"></i> Personalização</div>
+                    <div class="settings-item">
+                        <div class="item-label"><i class="fas fa-adjust"></i> Tema</div>
+                        <select class="action-btn" id="cfg-theme">
+                            <option value="deep-dark">Deep Dark</option>
+                            <option value="light">Claro</option>
+                            <option value="oled">OLED</option>
+                            <option value="pink-gamer">Pink Gamer</option>
+                        </select>
+                    </div>
+                    <div class="settings-item">
+                        <div class="item-label"><i class="fas fa-text-height"></i> Fonte</div>
+                        <select class="action-btn" id="cfg-font-size"><option value="medium">Média</option><option value="small">Pequena</option></select>
+                    </div>
+                    <div class="settings-item">
+                        <div class="item-label"><i class="fas fa-border-all"></i> Layout</div>
+                        <select class="action-btn" id="cfg-home-layout"><option value="grid">Grade</option><option value="list">Lista</option></select>
+                    </div>
+                </div>
+
+                <div class="settings-card">
+                    <div class="card-header"><i class="fas fa-shield-alt"></i> Segurança & Privacidade</div>
+                    <div class="settings-item">
+                        <div class="item-label"><i class="fas fa-key"></i> Senha</div>
+                        <button class="action-btn" onclick="openModal('modal-password')">Alterar</button>
+                    </div>
+                    <div class="settings-item">
+                        <div class="item-label"><i class="fas fa-eye-slash"></i> Perfil Privado</div>
+                        <label class="switch"><input type="checkbox" id="cfg-private-profile"><span class="slider"></span></label>
+                    </div>
+                    <div class="settings-item">
+                        <div class="item-label"><i class="fas fa-calendar-alt"></i> Mostrar Data de Inscrição</div>
+                        <label class="switch"><input type="checkbox" id="cfg-show-join" checked><span class="slider"></span></label>
+                    </div>
+                </div>
+
+                <div class="settings-card">
+                    <div class="card-header"><i class="fas fa-users"></i> Social & Streaming</div>
+                    <div class="settings-item">
+                        <div class="item-label"><i class="fas fa-comments"></i> Ativar Comentários</div>
+                        <label class="switch"><input type="checkbox" id="cfg-comments" checked><span class="slider"></span></label>
+                    </div>
+                    <div class="settings-item">
+                        <div class="item-label"><i class="fas fa-hd"></i> Qualidade Padrão</div>
+                        <select class="action-btn" id="cfg-quality"><option value="auto">Auto</option><option value="1080p">1080p</option></select>
+                    </div>
+                    <div class="settings-item">
+                        <div class="item-label"><i class="fas fa-trash-alt"></i> Limpar Cache</div>
+                        <button class="action-btn">Limpar</button>
+                    </div>
+                </div>
+
+                <div style="grid-column: 1 / -1; display: flex; justify-content: center;">
+                    <button class="logout-btn" id="logout-trigger"><i class="fas fa-sign-out-alt"></i> Sair da Conta</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Inputs Ocultos e Modais Menores -->
+    <input type="file" id="banner-input" class="hidden-file-input" accept="*/*">
+    <input type="file" id="avatar-input" class="hidden-file-input" accept="image/*">
+
+    <div class="modal-overlay" id="modal-handle-overlay">
+        <div class="small-modal-card">
+            <h3 style="margin-bottom: 10px;">Alterar Nome de Usuário</h3>
+            <p style="font-size: 12px; color: #aaa; margin-bottom: 15px;">Crie um @ único. Se alguém já tiver esse nome, você não poderá usá-lo.</p>
+            <input type="text" class="modal-input" id="new-handle-input" placeholder="@novo_usuario">
+            <div class="modal-footer">
+                <button class="modal-btn modal-btn-cancel" onclick="closeModal('modal-handle')">Cancelar</button>
+                <button class="modal-btn modal-btn-confirm" id="confirm-handle-change">Salvar</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modal-password-overlay">
+        <div class="small-modal-card">
+            <h3 style="margin-bottom: 20px;">Alterar Senha</h3>
+            <input type="password" class="modal-input" placeholder="Senha Atual">
+            <input type="password" class="modal-input" placeholder="Nova Senha">
+            <input type="password" class="modal-input" placeholder="Confirmar Nova Senha">
+            <div class="modal-footer">
+                <button class="modal-btn modal-btn-cancel" onclick="closeModal('modal-password')">Cancelar</button>
+                <button class="modal-btn modal-btn-confirm" onclick="closeModal('modal-password')">Salvar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            // ==========================================
+            // REGISTRO DO SERVICE WORKER E LÓGICA PWA
+            // ==========================================
+            if ('serviceWorker' in navigator) {
+                window.addEventListener('load', () => {
+                    navigator.serviceWorker.register('./sw.js')
+                        .then(registration => {
+                            console.log('PWA: ServiceWorker registrado com sucesso:', registration.scope);
+                        })
+                        .catch(error => {
+                            console.log('PWA: Falha no registro do ServiceWorker:', error);
+                        });
+                });
+            }
+
+            let deferredPrompt;
+            const btnInstalar = document.getElementById('btn-instalar');
+
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                deferredPrompt = e;
+                if (btnInstalar) {
+                    btnInstalar.classList.remove('hidden');
+                }
+            });
+
+            if (btnInstalar) {
+                btnInstalar.addEventListener('click', async () => {
+                    if (deferredPrompt) {
+                        deferredPrompt.prompt();
+                        const { outcome } = await deferredPrompt.userChoice;
+                        console.log(`Resultado da instalação: ${outcome}`);
+                        deferredPrompt = null;
+                        btnInstalar.classList.add('hidden');
+                    }
+                });
+            }
+
+            window.addEventListener('appinstalled', () => {
+                if (btnInstalar) {
+                    btnInstalar.classList.add('hidden');
+                }
+                console.log('GAMERADO TV foi instalado com sucesso!');
+            });
+
+            // ==========================================
+            // DADOS DA CONTA & PONTOS
+            // ==========================================
+            let takenUsernames = JSON.parse(localStorage.getItem('globalUsernamesDatabase')) || ['gamerado', 'admin'];
+            
+            if (!localStorage.getItem('selectedUser')) {
+                const defaultUser = {
+                    name: "Gamerado", handle: "gamerado_oficial",
+                    joinTimestamp: new Date().getTime(), points: 0, avatar: "", banner: ""
+                };
+                localStorage.setItem('selectedUser', JSON.stringify(defaultUser));
+            }
+            let userData = JSON.parse(localStorage.getItem('selectedUser'));
+
+            document.getElementById('display-name').textContent = userData.name;
+            document.getElementById('display-handle').textContent = userData.handle;
+            document.getElementById('display-points').textContent = userData.points || 0;
+            
+            if (userData.avatar) document.getElementById('avatar-view').style.backgroundImage = `url(${userData.avatar})`;
+            if (userData.banner) document.getElementById('banner-view').style.backgroundImage = `url(${userData.banner})`;
+
+            function calculateJoinDate(timestamp) {
+                const opts = { year: 'numeric', month: 'short', day: 'numeric' };
+                return new Date(timestamp).toLocaleDateString('pt-BR', opts);
+            }
+            document.getElementById('display-join-date').textContent = calculateJoinDate(userData.joinTimestamp);
+
+            // ==========================================
+            // SISTEMA DE UPLOAD DE CAPA E AVATAR
+            // ==========================================
+            function handleFileUpload(inputId, viewId, loaderId, storageKey) {
+                document.getElementById(inputId).addEventListener('change', (e) => {
+                    const file = e.target.files[0];
+                    if (!file) return;
+                    document.getElementById(loaderId).style.display = 'block';
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        const base64String = event.target.result;
+                        const currentData = JSON.parse(localStorage.getItem('selectedUser'));
+                        currentData[storageKey] = base64String;
+                        localStorage.setItem('selectedUser', JSON.stringify(currentData));
+                        document.getElementById(viewId).style.backgroundImage = `url(${base64String})`;
+                        setTimeout(() => document.getElementById(loaderId).style.display = 'none', 500); 
+                    };
+                    reader.readAsDataURL(file);
+                });
+            }
+            document.getElementById('change-cover-trigger').addEventListener('click', () => document.getElementById('banner-input').click());
+            handleFileUpload('banner-input', 'banner-view', 'banner-loader', 'banner');
+            document.getElementById('avatar-trigger').addEventListener('click', () => document.getElementById('avatar-input').click());
+            handleFileUpload('avatar-input', 'avatar-view', 'avatar-loader', 'avatar');
+
+            // ==========================================
+            // SISTEMA DE ALTERAÇÃO DO @
+            // ==========================================
+            document.getElementById('edit-handle-trigger').addEventListener('click', () => {
+                document.getElementById('new-handle-input').value = document.getElementById('display-handle').textContent;
+                openModal('modal-handle');
+            });
+            document.getElementById('confirm-handle-change').addEventListener('click', () => {
+                let newHandle = document.getElementById('new-handle-input').value.trim().toLowerCase().replace('@', '');
+                if (newHandle.length < 3) return;
+                const currentData = JSON.parse(localStorage.getItem('selectedUser'));
+                if (newHandle === currentData.handle.toLowerCase()) return closeModal('modal-handle');
+                
+                let db = JSON.parse(localStorage.getItem('globalUsernamesDatabase')) || [];
+                if (db.includes(newHandle)) {
+                    showTopAlert(`O @${newHandle} já está em uso!`, '#f44336');
+                } else {
+                    db.push(newHandle);
+                    localStorage.setItem('globalUsernamesDatabase', JSON.stringify(db));
+                    currentData.handle = newHandle;
+                    localStorage.setItem('selectedUser', JSON.stringify(currentData));
+                    document.getElementById('display-handle').textContent = newHandle;
+                    closeModal('modal-handle');
+                    showTopAlert(`@${newHandle} salvo!`, '#4CAF50'); 
+                }
+            });
+
+            // ==========================================
+            // CARROSSEIS LIGADOS AO DETALHES.HTML
+            // ==========================================
+            function loadLists() {
+                const myList = JSON.parse(localStorage.getItem('userMyList')) || [];
+                const favList = JSON.parse(localStorage.getItem('userFavorites')) || [];
+
+                document.getElementById('list-count').textContent = myList.length;
+                document.getElementById('fav-count').textContent = favList.length;
+
+                renderCarousel('my-list-track', myList, 'Sua lista está vazia. Explore e clique no botão "+" em detalhes.');
+                renderCarousel('fav-track', favList, 'Você ainda não tem favoritos. Clique no coração em algum título.');
+            }
+
+            function renderCarousel(trackId, items, emptyMessage) {
+                const track = document.getElementById(trackId);
+                if (items.length === 0) {
+                    track.innerHTML = `<div class="empty-msg">${emptyMessage}</div>`;
+                    return;
+                }
+                track.innerHTML = items.map(item => `
+                    <div class="carousel-card" onclick="window.location.href='detalhes.html?title=${encodeURIComponent(item.title)}&url=${encodeURIComponent(item.url || '#')}'">
+                        <img src="${item.cover || 'https://via.placeholder.com/145x215?text=Sem+Capa'}" alt="${item.title}">
+                    </div>
+                `).join('');
+            }
+            loadLists();
+
+            // ==========================================
+            // CONFIGURAÇÕES PERSISTENTES (MODAL)
+            // ==========================================
+            const settings = JSON.parse(localStorage.getItem('appSettings')) || {
+                notif: true, autoplay: false, lang: 'pt-br', theme: 'deep-dark',
+                fontSize: 'medium', private: false, showJoin: true, comments: true, quality: 'auto'
+            };
+
+            const joinBadge = document.getElementById('join-date-badge');
+            joinBadge.style.display = settings.showJoin ? 'flex' : 'none';
+
+            function addSettingListener(id, key, type) {
+                const el = document.getElementById(id);
+                if(!el) return;
+                
+                if (type === 'checkbox') el.checked = settings[key];
+                else el.value = settings[key];
+
+                el.addEventListener('change', (e) => {
+                    const curr = JSON.parse(localStorage.getItem('appSettings')) || settings;
+                    if (type === 'checkbox') {
+                        curr[key] = e.target.checked;
+                        if (id === 'cfg-show-join') joinBadge.style.display = e.target.checked ? 'flex' : 'none';
+                    } else {
+                        curr[key] = e.target.value;
+                    }
+                    localStorage.setItem('appSettings', JSON.stringify(curr));
+                });
+            }
+            
+            addSettingListener('cfg-show-join', 'showJoin', 'checkbox');
+            addSettingListener('cfg-notif', 'notif', 'checkbox');
+            addSettingListener('cfg-autoplay', 'autoplay', 'checkbox');
+            addSettingListener('cfg-theme', 'theme', 'select');
+
+            document.getElementById('logout-trigger').addEventListener('click', () => {
+                localStorage.removeItem('selectedUser'); window.location.href = 'selecaoconta.html';
+            });
+        });
+
+        // ==========================================
+        // UTILITÁRIOS (MODAIS E AVISOS)
+        // ==========================================
+        function openModal(modalName) { document.getElementById(`${modalName}-overlay`).classList.add('active'); }
+        function closeModal(modalName) { document.getElementById(`${modalName}-overlay`).classList.remove('active'); }
+        
+        document.querySelectorAll('.modal-overlay').forEach(overlay => {
+            overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.classList.remove('active'); });
+        });
+
+        let alertTimeout;
+        function showTopAlert(message, bgColor) {
+            const banner = document.getElementById('top-alert-banner');
+            document.getElementById('alert-message').textContent = message;
+            banner.style.backgroundColor = bgColor;
+            banner.classList.add('active');
+            clearTimeout(alertTimeout);
+            alertTimeout = setTimeout(() => banner.classList.remove('active'), 4000);
+        }
+    </script>
+</body>
+</html>

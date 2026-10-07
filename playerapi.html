@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Assistindo... | GAMERADOFLIX</title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: black;
+            overflow: hidden;
+        }
+
+        .player-page-nav {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 20;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .player-page-nav a {
+            color: white;
+            text-decoration: none;
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        #playerTitle {
+            color: #e50914;
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .video-container {
+            position: fixed;
+            inset: 0;
+            background: black;
+        }
+
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav class="player-page-nav">
+        <a href="index.html">
+            <i class="fas fa-arrow-left"></i> Voltar
+        </a>
+        <span id="playerTitle">Carregando título...</span>
+    </nav>
+
+    <div class="video-container" id="videoContainer">
+        <iframe
+            id="mainPlayer"
+            src=""
+            allowfullscreen
+            allow="fullscreen; accelerometer; gyroscope; autoplay"
+        ></iframe>
+    </div>
+
+    <script>
+        // Dados da URL
+        const params = new URLSearchParams(window.location.search);
+        document.getElementById("playerTitle").innerText =
+            "Assistindo: " + (params.get("title") || "");
+        document.getElementById("mainPlayer").src =
+            params.get("url") || "";
+
+        // Fullscreen automático ao girar o celular
+        function openFullscreen() {
+            const el = document.getElementById("videoContainer");
+
+            if (el.requestFullscreen) {
+                el.requestFullscreen();
+            } else if (el.webkitRequestFullscreen) {
+                el.webkitRequestFullscreen();
+            } else if (el.msRequestFullscreen) {
+                el.msRequestFullscreen();
+            }
+        }
+
+        window.addEventListener("orientationchange", () => {
+            if (window.matchMedia("(orientation: landscape)").matches) {
+                openFullscreen();
+            }
+        });
+    </script>
+
+<script>
+const params = new URLSearchParams(window.location.search);
+
+const url = params.get('url');
+const youtube = params.get('youtube');
+
+const player = document.getElementById('player-container');
+
+if (youtube) {
+    let id = '';
+
+    if (youtube.includes('youtu.be')) {
+        id = youtube.split('youtu.be/')[1];
+    } else if (youtube.includes('v=')) {
+        id = youtube.split('v=')[1].split('&')[0];
+    }
+
+    player.innerHTML = `
+        <iframe
+            src="https://www.youtube.com/embed/${id}?autoplay=1&rel=0"
+            frameborder="0"
+            allow="autoplay; encrypted-media"
+            allowfullscreen
+            style="width:100%; height:100%;">
+        </iframe>
+    `;
+}
+else if (url) {
+    player.innerHTML = `
+        <video controls autoplay style="width:100%; height:100%;">
+            <source src="${url}">
+        </video>
+    `;
+}
+
+<video id="videoPlayer" controls autoplay></video>
+
+<script>
+const params = new URLSearchParams(window.location.search);
+const src = params.get("src");
+const title = params.get("title");
+
+if (title) {
+    document.title = title;
+}
+
+if (src) {
+    const video = document.getElementById("videoPlayer");
+    video.src = src;
+}
+</script>
+
+<script>
+const params = new URLSearchParams(window.location.search);
+const title = params.get("title");
+const src = params.get("src");
+
+document.getElementById("videoTitle").textContent = title || "";
+
+const container = document.getElementById("playerContainer");
+
+if (!src) {
+    container.innerHTML = "<p>Vídeo não encontrado</p>";
+} 
+else if (src.includes("youtube.com") || src.includes("youtu.be")) {
+    container.innerHTML = `
+        <iframe 
+            src="https://www.youtube.com/embed/${getYouTubeID(src)}"
+            frameborder="0"
+            allowfullscreen
+        ></iframe>
+    `;
+} 
+else {
+    container.innerHTML = `
+        <video controls autoplay width="100%" height="100%">
+            <source src="${src}" type="video/mp4">
+        </video>
+    `;
+}
+
+function getYouTubeID(url) {
+    if (url.includes("youtu.be")) {
+        return url.split("/").pop();
+    }
+    const params = new URLSearchParams(url.split("?")[1]);
+    return params.get("v");
+}
+</script>
+<script>
+const params = new URLSearchParams(window.location.search);
+document.getElementById("player").src = params.get("url");
+</script>
+
+</body>
+</html>

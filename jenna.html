@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perfil de Jenna Ortega</title>
+    <style>
+        :root {
+            --bg-color: #000;
+            --text-color: #fff;
+            --accent-color: #d4af37;
+            --gothic-font: 'IM Fell English SC', serif;
+            --serif-font: 'Lora', serif;
+            --sans-serif-font: 'Roboto', sans-serif;
+            --carousel-item-width: 90px;
+            --media-carousel-item-width: 130px;
+        }
+
+        @import url('https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&family=Lora:ital,wght@0,400..700;1,400..700&family=Roboto:wght@300;400;500;700&display=swap');
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: var(--sans-serif-font);
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Cabeçalho */
+        .profile-header {
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .profile-picture-main {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            border: 2px solid var(--accent-color);
+            box-shadow: 0 0 15px var(--accent-color);
+            object-fit: cover;
+            margin-bottom: 20px;
+        }
+
+        .profile-name {
+            font-family: var(--gothic-font);
+            font-size: 2rem;
+            margin: 0;
+            letter-spacing: 1px;
+        }
+
+        .profile-age {
+            font-family: var(--serif-font);
+            font-size: 1rem;
+            opacity: 0.8;
+            margin: 5px 0 30px;
+        }
+
+        /* Seções */
+        .section-container {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            align-self: flex-start;
+            font-family: var(--sans-serif-font);
+            font-weight: 500;
+            font-size: 1.1rem;
+            margin: 0 0 15px;
+            padding-left: 10px;
+            border-left: 2px solid var(--accent-color);
+        }
+
+        .carousel {
+            width: 100%;
+            display: flex;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            padding: 10px 0;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .carousel::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* Personagens */
+        .carousel-item-wrapper {
+            flex: 0 0 auto;
+            width: var(--carousel-item-width);
+            scroll-snap-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-right: 15px;
+        }
+
+        .carousel-item-pic {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            border: 1px solid var(--accent-color);
+            box-shadow: 0 0 5px var(--accent-color);
+            object-fit: cover;
+            margin-bottom: 8px;
+        }
+
+        .carousel-item-placeholder {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            border: 1px solid var(--accent-color);
+            box-shadow: 0 0 5px var(--accent-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #111;
+            margin-bottom: 8px;
+            color: #555;
+            font-size: 1.5rem;
+        }
+
+        .carousel-item-caption {
+            font-family: var(--serif-font);
+            font-size: 0.8rem;
+            text-align: center;
+            opacity: 0.8;
+            word-wrap: break-word;
+        }
+
+        /* Fotos/Vídeos */
+        .media-carousel-item-wrapper {
+            flex: 0 0 auto;
+            width: var(--media-carousel-item-width);
+            scroll-snap-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-right: 20px;
+            position: relative; /* Para posicionar o botão de deletar */
+        }
+
+        .gallery-item {
+            position: relative;
+            width: 100%;
+            padding-bottom: 100%;
+            border-radius: 8px;
+            overflow: hidden;
+            cursor: pointer;
+            border: 1px solid #222;
+            transition: border-color 0.3s ease;
+            background-color: #111;
+        }
+
+        .gallery-item:hover {
+            border-color: var(--accent-color);
+        }
+
+        .gallery-item-img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .gallery-item-video-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .play-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .play-icon svg {
+            width: 20px;
+            height: 20px;
+            fill: #000;
+        }
+
+        /* Botão Remover (X) */
+        .delete-media-btn {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background-color: #a81d33;
+            color: #fff;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 10;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+            transition: transform 0.2s;
+        }
+        .delete-media-btn:hover {
+            transform: scale(1.1);
+            background-color: #ff0000;
+        }
+
+        /* Botão Adicionar (+) */
+        .add-media-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: var(--accent-color);
+            box-shadow: 0 5px 15px rgba(212, 175, 55, 0.5);
+            display: none; 
+            align-items: center;
+            justify-content: center;
+            border: none;
+            cursor: pointer;
+            color: #000;
+            font-size: 2rem;
+            font-weight: bold;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+            z-index: 100;
+        }
+
+        .add-media-btn:hover {
+            background-color: #f1c40f;
+            transform: scale(1.1);
+        }
+
+        /* Modais */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal.open { display: flex; }
+
+        .modal-content {
+            background-color: #111;
+            border-radius: 8px;
+            border: 1px solid var(--accent-color);
+            padding: 30px;
+            width: 90%;
+            max-width: 500px;
+            position: relative;
+        }
+
+        .close-modal-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            border: none;
+            background: none;
+            color: #555;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .close-modal-btn:hover { color: #fff; }
+
+        .add-media-title {
+            font-family: var(--sans-serif-font);
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 1.2rem;
+            color: var(--accent-color);
+        }
+
+        .add-media-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .input-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        input[type="file"], input[type="text"] {
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid #333;
+            background-color: #222;
+            color: #fff;
+            font-family: var(--sans-serif-font);
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+
+        .submit-add-btn {
+            padding: 12px;
+            border-radius: 4px;
+            border: none;
+            background-color: var(--accent-color);
+            color: #000;
+            font-family: var(--sans-serif-font);
+            font-weight: 500;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background-color 0.3s ease;
+        }
+
+        .submit-add-btn:hover { background-color: #f1c40f; }
+
+        /* Lightbox */
+        .modal-lightbox-content {
+            max-width: 90%;
+            max-height: 90%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .lightbox-img, .lightbox-video {
+            max-width: 100%;
+            max-height: 90vh;
+            object-fit: contain;
+            border-radius: 4px;
+        }
+
+        .close-lightbox-btn {
+            position: absolute;
+            top: -40px;
+            right: 0;
+            border: none;
+            background: none;
+            color: #fff;
+            font-size: 2rem;
+            cursor: pointer;
+        }
+
+        @media (max-width: 600px) {
+            .carousel-item-wrapper { width: 80px; }
+            .carousel-item-pic { width: 60px; height: 60px; }
+            .profile-picture-main { width: 130px; height: 130px; }
+            :root { --media-carousel-item-width: 110px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header class="profile-header">
+        <img id="mainProfilePic" src="https://i.imgur.com/msqePQQ.png" alt="Jenna Ortega" class="profile-picture-main">
+        <h1 class="profile-name">Jenna Ortega</h1>
+        <p id="profileAge" class="profile-age">Carregando...</p>
+    </header>
+
+    <section class="section-container">
+        <h2 class="section-title">Personagens:</h2>
+        <div id="charactersCarousel" class="carousel">
+            <div class="carousel-item-wrapper">
+                <img src="https://i.ibb.co/v4bS6kX/jenna-ortega-wednesday-profile.jpg" alt="Wandinha Addams" class="carousel-item-pic">
+                <span class="carousel-item-caption">Wandinha</span>
+            </div>
+            <div class="carousel-item-wrapper"><div class="carousel-item-placeholder">?</div><span class="carousel-item-caption">Mistério</span></div>
+            <div class="carousel-item-wrapper"><div class="carousel-item-placeholder">?</div><span class="carousel-item-caption">Sombra</span></div>
+            <div class="carousel-item-wrapper"><div class="carousel-item-placeholder">?</div><span class="carousel-item-caption">Sombra</span></div>
+        </div>
+    </section>
+
+    <section class="section-container">
+        <h2 class="section-title">Galeria / Arquivos:</h2>
+        <div id="mediaCarousel" class="carousel">
+            </div>
+    </section>
+</div>
+
+<button id="addMediaBtn" class="add-media-btn">+</button>
+
+<div id="addMediaModal" class="modal">
+    <div class="modal-content">
+        <button id="closeAddModal" class="close-modal-btn">&times;</button>
+        <h3 class="add-media-title">Adicionar Arquivo ou Mídia</h3>
+        <form id="addMediaForm" class="add-media-form">
+            <div class="input-group">
+                <label class="input-label">Arquivo Local (Qualquer Formato ou Tamanho)</label>
+                <input type="file" id="mediaFileLocal">
+            </div>
+            <div class="input-group">
+                <label class="input-label">Ou URL do Arquivo/Mídia</label>
+                <input type="text" id="mediaUrl" placeholder="https://exemplo.com/arquivo.zip">
+            </div>
+            <button type="submit" class="submit-add-btn">Adicionar</button>
+        </form>
+    </div>
+</div>
+
+<div id="lightboxModal" class="modal">
+    <div class="modal-lightbox-content">
+        <button id="closeLightboxModal" class="close-lightbox-btn">&times;</button>
+        <div id="lightboxContent"></div>
+    </div>
+</div>
+
+<script>
+    const allowAddingMedia = true;
+    const birthDateStr = '2008-02-28';
+    const genericFileIcon = "data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150' viewBox='0 0 24 24' fill='%23555'%3E%3Cpath d='M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z'/%3E%3C/svg%3E";
+
+    const mediaCarousel = document.getElementById('mediaCarousel');
+    const addMediaBtn = document.getElementById('addMediaBtn');
+    const addModal = document.getElementById('addMediaModal');
+    const lightboxModal = document.getElementById('lightboxModal');
+    const lightboxContent = document.getElementById('lightboxContent');
+
+    // --- 1. Calcular Idade ---
+    function calculateAge(birthDate) {
+        const today = new Date();
+        const birth = new Date(birthDate);
+        let age = today.getFullYear() - birth.getFullYear();
+        const monthDiff = today.getMonth() - birth.getMonth();
+        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) age--;
+        return age;
+    }
+    document.getElementById('profileAge').textContent = calculateAge(birthDateStr) + " anos";
+
+    if (allowAddingMedia) addMediaBtn.style.display = 'flex';
+
+    // --- 2. Banco de Dados IndexedDB (Suporta Arquivos Grandes) ---
+    let db;
+    const dbName = "GameradoMediaDB";
+    
+    function initDB() {
+        const request = indexedDB.open(dbName, 1);
+        
+        request.onupgradeneeded = (event) => {
+            db = event.target.result;
+            if (!db.objectStoreNames.contains("mediaStore")) {
+                db.createObjectStore("mediaStore", { keyPath: "id" });
+            }
+        };
+
+        request.onsuccess = (event) => {
+            db = event.target.result;
+            loadSavedMedia();
+        };
+
+        request.onerror = (event) => {
+            console.error("Erro ao abrir banco de dados", event);
+        };
+    }
+
+    function saveMediaToDB(mediaItem) {
+        const transaction = db.transaction(["mediaStore"], "readwrite");
+        const store = transaction.objectStore("mediaStore");
+        store.put(mediaItem);
+    }
+
+    function deleteMediaFromDB(id) {
+        const transaction = db.transaction(["mediaStore"], "readwrite");
+        const store = transaction.objectStore("mediaStore");
+        store.delete(id);
+    }
+
+    function loadSavedMedia() {
+        // Mídia Padrão
+        const defaultMedia = [
+        ];
+
+        const transaction = db.transaction(["mediaStore"], "readonly");
+        const store = transaction.objectStore("mediaStore");
+        const request = store.getAll();
+
+        request.onsuccess = (event) => {
+            const savedMedia = event.target.result;
+            
+            savedMedia.reverse().forEach(item => {
+                if (item.isLocalFile && item.fileBlob) {
+                    const objectURL = URL.createObjectURL(item.fileBlob);
+                    if (item.type === 'video') item.videoSrc = objectURL;
+                    else item.src = objectURL;
+                }
+                appendMediaToCarousel(item, false);
+            });
+
+            defaultMedia.forEach(m => appendMediaToCarousel(m, false));
+        };
+    }
+
+    // --- 3. Renderização e Remoção ---
+    function appendMediaToCarousel(mediaItem, isNew) {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'media-carousel-item-wrapper';
+        wrapper.id = "wrap-" + mediaItem.id;
+
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'delete-media-btn';
+        deleteBtn.innerHTML = 'X';
+        deleteBtn.onclick = (e) => {
+            e.stopPropagation(); 
+            wrapper.remove();
+            if (!mediaItem.id.startsWith('def')) {
+                deleteMediaFromDB(mediaItem.id);
+            }
+        };
+        wrapper.appendChild(deleteBtn);
+
+        const galleryItem = document.createElement('div');
+        galleryItem.className = 'gallery-item';
+
+        const img = document.createElement('img');
+        img.src = mediaItem.thumbnail || mediaItem.src;
+        img.alt = mediaItem.fileName || 'Mídia';
+        img.className = 'gallery-item-img';
+        
+        // Se for um arquivo de outro tipo, evita que a imagem fique distorcida
+        if (mediaItem.type === 'other') {
+            img.style.objectFit = 'contain';
+            img.style.padding = '20px';
+            img.style.boxSizing = 'border-box';
+        }
+        galleryItem.appendChild(img);
+
+        if (mediaItem.type === 'video') {
+            const overlay = document.createElement('div');
+            overlay.className = 'gallery-item-video-overlay';
+            overlay.innerHTML = '<div class="play-icon"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>';
+            galleryItem.appendChild(overlay);
+        }
+
+        wrapper.appendChild(galleryItem);
+
+        // Passando o objeto inteiro para o lightbox processar qualquer formato
+        galleryItem.addEventListener('click', () => {
+            openLightbox(mediaItem);
+        });
+
+        if (isNew) mediaCarousel.prepend(wrapper);
+        else mediaCarousel.appendChild(wrapper);
+    }
+
+    // --- 4. Lightbox Dinâmico (Fotos, Vídeos e Outros Arquivos) ---
+    function openLightbox(mediaItem) {
+        lightboxContent.innerHTML = '';
+        
+        if (mediaItem.type === 'image') {
+            const img = document.createElement('img');
+            img.src = mediaItem.src;
+            img.className = 'lightbox-img';
+            lightboxContent.appendChild(img);
+        } else if (mediaItem.type === 'video') {
+            const video = document.createElement('video');
+            video.src = mediaItem.videoSrc || mediaItem.src;
+            video.className = 'lightbox-video';
+            video.controls = true;
+            video.autoplay = true;
+            lightboxContent.appendChild(video);
+        } else {
+            // Renderização para outros tipos de arquivo (PDF, ZIP, DOC, etc)
+            const container = document.createElement('div');
+            container.style.textAlign = 'center';
+            container.style.color = '#fff';
+            container.style.padding = '30px';
+            container.style.backgroundColor = '#111';
+            container.style.borderRadius = '8px';
+            container.style.border = '1px solid var(--accent-color)';
+            
+            container.innerHTML = `
+                <h3 style="margin-bottom: 10px; font-family: var(--sans-serif-font);">Arquivo</h3>
+                <p style="margin-bottom: 30px; opacity: 0.8; word-break: break-all;">${mediaItem.fileName || 'Arquivo desconhecido'}</p>
+                <a href="${mediaItem.src}" download="${mediaItem.fileName || 'arquivo'}" style="padding: 12px 24px; background: var(--accent-color); color: #000; text-decoration: none; border-radius: 4px; font-weight: bold; font-family: var(--sans-serif-font); display: inline-block;">Fazer Download / Abrir</a>
+            `;
+            lightboxContent.appendChild(container);
+        }
+        
+        lightboxModal.classList.add('open');
+    }
+
+    // --- 5. Adicionar Nova Mídia/Arquivo ---
+    addMediaBtn.addEventListener('click', () => addModal.classList.add('open'));
+    document.getElementById('closeAddModal').addEventListener('click', () => addModal.classList.remove('open'));
+    document.getElementById('closeLightboxModal').addEventListener('click', closeLightbox);
+
+    function closeLightbox() {
+        lightboxModal.classList.remove('open');
+        if (lightboxContent.firstChild && lightboxContent.firstChild.tagName === 'VIDEO') {
+            lightboxContent.firstChild.pause();
+        }
+    }
+
+    function generateVideoThumbnail(fileURL) {
+        return new Promise((resolve) => {
+            const video = document.createElement('video');
+            video.src = fileURL;
+            video.muted = true;
+            video.crossOrigin = "anonymous";
+            
+            video.onloadeddata = () => { video.currentTime = 1; };
+            
+            video.onseeked = () => {
+                const canvas = document.createElement('canvas');
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                resolve(canvas.toDataURL('image/jpeg', 0.8));
+            };
+            
+            video.onerror = () => resolve('https://i.ibb.co/VvzK8Y9/placeholder-image.jpg');
+        });
+    }
+
+    document.getElementById('addMediaForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const fileInput = document.getElementById('mediaFileLocal');
+        const urlInput = document.getElementById('mediaUrl');
+
+        let mediaItem = { 
+            id: Date.now().toString(), 
+            type: 'image', 
+            src: '', 
+            videoSrc: '', 
+            thumbnail: '',
+            fileName: ''
+        };
+
+        if (fileInput.files && fileInput.files[0]) {
+            const file = fileInput.files[0];
+            const tempURL = URL.createObjectURL(file); 
+
+            mediaItem.isLocalFile = true;
+            mediaItem.fileBlob = file; 
+            mediaItem.fileName = file.name;
+
+            if (file.type.startsWith('video/')) {
+                mediaItem.type = 'video';
+                mediaItem.videoSrc = tempURL;
+                mediaItem.thumbnail = await generateVideoThumbnail(tempURL);
+            } else if (file.type.startsWith('image/')) {
+                mediaItem.type = 'image';
+                mediaItem.src = tempURL;
+                mediaItem.thumbnail = tempURL;
+            } else {
+                // Trata qualquer outro tipo de formato (áudio, pdf, zip, etc)
+                mediaItem.type = 'other';
+                mediaItem.src = tempURL;
+                mediaItem.thumbnail = genericFileIcon; // Usa o ícone SVG configurado no topo
+            }
+        } else if (urlInput.value.trim()) {
+            const url = urlInput.value.trim();
+            mediaItem.fileName = url.split('/').pop() || 'Arquivo_Link';
+
+            if (url.match(/\.(mp4|webm|ogg)$/i) != null) {
+                mediaItem.type = 'video';
+                mediaItem.videoSrc = url;
+                mediaItem.thumbnail = 'https://i.ibb.co/mHq3f7P/wednesday-dance-thumbnail.jpg';
+            } else if (url.match(/\.(jpeg|jpg|gif|png|webp)$/i) != null) {
+                mediaItem.type = 'image';
+                mediaItem.src = url;
+            } else {
+                // Link para qualquer outro tipo de arquivo
+                mediaItem.type = 'other';
+                mediaItem.src = url;
+                mediaItem.thumbnail = genericFileIcon;
+            }
+        } else return;
+
+        saveMediaToDB(mediaItem);
+        appendMediaToCarousel(mediaItem, true);
+
+        fileInput.value = '';
+        urlInput.value = '';
+        addModal.classList.remove('open');
+    });
+
+    // Fechar modais ao clicar fora
+    window.addEventListener('click', (e) => {
+        if (e.target.classList.contains('modal')) {
+            addModal.classList.remove('open');
+            closeLightbox();
+        }
+    });
+
+    initDB();
+</script>
+
+</body>
+</html>

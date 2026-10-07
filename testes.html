@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+    <title>TV ao Vivo - Teste</title>
+
+
+    <style>
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #070707;
+            color: white;
+            font-family: Arial, Helvetica, sans-serif;
+            min-height: 100vh;
+        }
+
+
+        /* =========================
+           HEADER
+        ========================= */
+
+        header {
+            background: #101010;
+
+            border-bottom: 1px solid #292929;
+
+            padding: 22px 20px;
+
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 27px;
+            margin-bottom: 7px;
+        }
+
+        header p {
+            color: #888;
+            font-size: 14px;
+        }
+
+
+        /* =========================
+           CONTAINER
+        ========================= */
+
+        .container {
+            width: 100%;
+            max-width: 1250px;
+
+            margin: auto;
+
+            padding: 25px 18px;
+        }
+
+
+        /* =========================
+           PLAYER
+        ========================= */
+
+        .player-box {
+            width: 100%;
+
+            background: #000;
+
+            border-radius: 12px;
+
+            overflow: hidden;
+
+            margin-bottom: 30px;
+
+            box-shadow:
+                0 10px 45px rgba(0,0,0,.6);
+        }
+
+
+        .player-top {
+            height: 58px;
+
+            background: #151515;
+
+            display: flex;
+            align-items: center;
+
+            gap: 12px;
+
+            padding: 0 18px;
+        }
+
+
+        .player-top h2 {
+            font-size: 17px;
+        }
+
+
+        .live {
+            color: #ff2020;
+
+            font-size: 12px;
+
+            font-weight: bold;
+        }
+
+
+        .live::before {
+            content: "";
+
+            display: inline-block;
+
+            width: 7px;
+            height: 7px;
+
+            background: red;
+
+            border-radius: 50%;
+
+            margin-right: 5px;
+
+            box-shadow: 0 0 8px red;
+        }
+
+
+        .player {
+            width: 100%;
+
+            aspect-ratio: 16 / 9;
+
+            background: #000;
+
+            position: relative;
+        }
+
+
+        .player iframe {
+            width: 100%;
+            height: 100%;
+
+            border: none;
+
+            display: block;
+        }
+
+
+        /* =========================
+           MENSAGEM
+        ========================= */
+
+        .message {
+
+            position: absolute;
+
+            inset: 0;
+
+            background: #050505;
+
+            display: flex;
+
+            align-items: center;
+            justify-content: center;
+
+            flex-direction: column;
+
+            text-align: center;
+
+            padding: 30px;
+
+            z-index: 2;
+        }
+
+
+        .message h2 {
+            margin-bottom: 10px;
+        }
+
+
+        .message p {
+            color: #999;
+
+            max-width: 550px;
+
+            line-height: 1.5;
+
+            font-size: 14px;
+        }
+
+
+        .hidden {
+            display: none !important;
+        }
+
+
+        /* =========================
+           TITULO
+        ========================= */
+
+        .section-title {
+            font-size: 21px;
+
+            margin-bottom: 17px;
+        }
+
+
+        /* =========================
+           GRID
+        ========================= */
+
+        .tv-grid {
+
+            display: grid;
+
+            grid-template-columns:
+                repeat(4, 1fr);
+
+            gap: 15px;
+        }
+
+
+        /* =========================
+           CARD
+        ========================= */
+
+        .tv-card {
+
+            min-height: 155px;
+
+            background:
+                linear-gradient(
+                    145deg,
+                    #191919,
+                    #0d0d0d
+                );
+
+            border: 1px solid #282828;
+
+            border-radius: 12px;
+
+            padding: 18px;
+
+            cursor: pointer;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            flex-direction: column;
+
+            text-align: center;
+
+            transition: .2s;
+        }
+
+
+        .tv-card:hover {
+
+            transform: translateY(-4px);
+
+            border-color: #e50914;
+
+            background: #181818;
+        }
+
+
+        .logo {
+
+            width: 65px;
+            height: 65px;
+
+            border-radius: 14px;
+
+            background: #252525;
+
+            display: flex;
+
+            align-items: center;
+            justify-content: center;
+
+            font-weight: bold;
+
+            font-size: 16px;
+
+            margin-bottom: 12px;
+        }
+
+
+        .tv-card h3 {
+
+            font-size: 16px;
+
+            margin-bottom: 8px;
+        }
+
+
+        .embed-status {
+
+            font-size: 11px;
+
+            padding: 5px 9px;
+
+            border-radius: 20px;
+
+            background: #112511;
+
+            color: #69e669;
+        }
+
+
+        /* =========================
+           AVISO
+        ========================= */
+
+        .notice {
+
+            margin-top: 25px;
+
+            background: #111;
+
+            border: 1px solid #242424;
+
+            border-radius: 9px;
+
+            padding: 15px;
+
+            color: #999;
+
+            font-size: 13px;
+
+            line-height: 1.5;
+        }
+
+
+        /* =========================
+           MOBILE
+        ========================= */
+
+        @media (max-width: 850px) {
+
+            .tv-grid {
+                grid-template-columns:
+                    repeat(3, 1fr);
+            }
+
+        }
+
+
+        @media (max-width: 600px) {
+
+            .container {
+                padding: 18px 10px;
+            }
+
+
+            .tv-grid {
+                grid-template-columns:
+                    repeat(2, 1fr);
+            }
+
+
+            .tv-card {
+                min-height: 135px;
+            }
+
+
+            .logo {
+                width: 55px;
+                height: 55px;
+
+                font-size: 13px;
+            }
+
+
+            .tv-card h3 {
+                font-size: 14px;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<header>
+
+    <h1>📺 TV AO VIVO</h1>
+
+    <p>
+        Teste de incorporações oficiais
+    </p>
+
+</header>
+
+
+
+<main class="container">
+
+
+    <!-- =========================
+         PLAYER
+    ========================= -->
+
+    <div class="player-box">
+
+
+        <div class="player-top">
+
+            <h2 id="channelName">
+                TV Cultura
+            </h2>
+
+            <span class="live">
+                AO VIVO
+            </span>
+
+        </div>
+
+
+        <div class="player">
+
+
+            <div
+                id="message"
+                class="message hidden">
+
+                <h2>
+                    Transmissão não incorporável
+                </h2>
+
+                <p id="messageText">
+                    Esta emissora não disponibiliza
+                    um player incorporável público
+                    ou bloqueia a reprodução por iframe.
+                </p>
+
+            </div>
+
+
+            <iframe
+                id="tvFrame"
+                src="https://culturaplay.tvcultura.com.br/channels/14/embed"
+                allow="
+                    autoplay;
+                    encrypted-media;
+                    picture-in-picture;
+                    fullscreen
+                "
+                allowfullscreen>
+            </iframe>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =========================
+         CANAIS
+    ========================= -->
+
+    <h2 class="section-title">
+        Canais disponíveis
+    </h2>
+
+
+    <div class="tv-grid">
+
+
+        <!-- CULTURA -->
+
+        <div
+            class="tv-card"
+            onclick="abrirEmbed(
+                'TV Cultura',
+                'https://culturaplay.tvcultura.com.br/channels/14/embed'
+            )">
+
+            <div class="logo">
+                CULTURA
+            </div>
+
+            <h3>TV Cultura</h3>
+
+            <span class="embed-status">
+                EMBED
+            </span>
+
+        </div>
+
+
+
+        <!-- SBT -->
+
+        <div
+            class="tv-card"
+            onclick="abrirEmbed(
+                'SBT',
+                'https://www.youtube.com/embed/INtLcsYlcZ4?autoplay=1'
+            )">
+
+            <div class="logo">
+                SBT
+            </div>
+
+            <h3>SBT</h3>
+
+            <span class="embed-status">
+                EMBED
+            </span>
+
+        </div>
+
+
+
+        <!-- GLOBO -->
+
+        <div
+            class="tv-card"
+            onclick="abrirEmbed(
+                'TV Globo',
+                'https://globoplay.globo.com/tv-globo/ao-vivo/7832875/'
+            )">
+
+            <div class="logo">
+                GLOBO
+            </div>
+
+            <h3>TV Globo</h3>
+
+            <span class="embed-status">
+                TENTAR EMBED
+            </span>
+
+        </div>
+
+
+
+        <!-- RECORD -->
+
+        <div
+            class="tv-card"
+            onclick="abrirEmbed(
+                'Record',
+                'https://record.r7.com/'
+            )">
+
+            <div class="logo">
+                RECORD
+            </div>
+
+            <h3>Record</h3>
+
+            <span class="embed-status">
+                TENTAR EMBED
+            </span>
+
+        </div>
+
+
+
+        <!-- BAND -->
+
+        <div
+            class="tv-card"
+            onclick="abrirEmbed(
+                'Band',
+                'https://www.band.uol.com.br/'
+            )">
+
+            <div class="logo">
+                BAND
+            </div>
+
+            <h3>Band</h3>
+
+            <span class="embed-status">
+                TENTAR EMBED
+            </span>
+
+        </div>
+
+
+
+        <!-- REDETV -->
+
+        <div
+            class="tv-card"
+            onclick="abrirEmbed(
+                'RedeTV!',
+                'https://www.redetv.uol.com.br/aovivo/'
+            )">
+
+            <div class="logo">
+                REDETV!
+            </div>
+
+            <h3>RedeTV!</h3>
+
+            <span class="embed-status">
+                TENTAR EMBED
+            </span>
+
+        </div>
+
+
+
+        <!-- TV BRASIL -->
+
+        <div
+            class="tv-card"
+            onclick="abrirEmbed(
+                'TV Brasil',
+                'https://tvbrasil.ebc.com.br/webtv/'
+            )">
+
+            <div class="logo">
+                TV
+            </div>
+
+            <h3>TV Brasil</h3>
+
+            <span class="embed-status">
+                EMBED
+            </span>
+
+        </div>
+
+
+
+        <!-- SBT NEWS -->
+
+        <div
+            class="tv-card"
+            onclick="abrirEmbed(
+                'SBT News',
+                'https://sbtnews.sbt.com.br/videos/ao-vivo'
+            )">
+
+            <div class="logo">
+                SBT
+            </div>
+
+            <h3>SBT News</h3>
+
+            <span class="embed-status">
+                TENTAR EMBED
+            </span>
+
+        </div>
+
+
+    </div>
+
+
+
+    <div class="notice">
+
+        <strong>⚠️ Importante</strong>
+
+        <br><br>
+
+        "Embed" não significa que qualquer página
+        da internet possa ser colocada dentro de
+        um iframe.
+
+        <br><br>
+
+        Se uma emissora bloquear iframe através
+        das políticas do próprio site, o navegador
+        impedirá a incorporação. Nesse caso,
+        é necessário usar o player oficial que
+        a emissora disponibiliza para incorporação.
+
+    </div>
+
+
+</main>
+
+
+
+<script>
+
+
+    function abrirEmbed(nome, url) {
+
+        const frame =
+            document.getElementById(
+                "tvFrame"
+            );
+
+        const channelName =
+            document.getElementById(
+                "channelName"
+            );
+
+        const message =
+            document.getElementById(
+                "message"
+            );
+
+
+        channelName.textContent =
+            nome;
+
+
+        message.classList.add(
+            "hidden"
+        );
+
+
+        frame.style.display =
+            "block";
+
+
+        frame.src =
+            url;
+
+
+        window.scrollTo({
+
+            top: 0,
+
+            behavior: "smooth"
+
+        });
+
+    }
+
+
+</script>
+
+
+</body>
+
+</html>

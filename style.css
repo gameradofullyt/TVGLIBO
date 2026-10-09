@@ -1,0 +1,189 @@
+:root {
+    --bg-color: #0b0b0b;
+    --text-color: #f3f3f3;
+    --primary-red: #e50914;
+    --nav-bg: #0b0b0b;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Poppins', sans-serif; background: var(--bg-color); color: var(--text-color); overflow-x: hidden; }
+
+/* NAVBAR */
+.navbar { position: absolute; width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 10px 5%; background: var(--nav-bg); z-index: 1000; border-bottom: 2px solid var(--primary-red); }
+.logo-rgb {
+    font-size: 1.8rem; 
+    font-weight: 900;
+    color: white;
+}
+
+/* BARRA DE PESQUISA EXPANSÍVEL */
+.search-wrapper { display: flex; align-items: center; justify-content: flex-end; position: relative; margin-right: 15px; }
+.search-input { width: 0; padding: 0; border: none; background: transparent; color: white; font-family: 'Poppins', sans-serif; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); outline: none; border-radius: 20px; opacity: 0; }
+.search-input.active { width: 240px; padding: 8px 40px 8px 15px; border: 1px solid var(--primary-red); background: #111; opacity: 1; }
+.search-input.active:focus { box-shadow: 0 0 10px rgba(229, 9, 20, 0.5); background: #000; }
+.search-icon { position: absolute; right: 5px; font-size: 1.2rem; cursor: pointer; color: white; transition: 0.3s; background: var(--nav-bg); padding: 5px; border-radius: 50%; }
+.search-icon:hover { color: var(--primary-red); }
+
+/* SEÇÕES E SLIDERS */
+.category-slider { margin: 20px 5%; position: relative; }
+.slider-wrapper { position: relative; display: flex; align-items: center; }
+.slider-track { 
+    display: flex; 
+    overflow-x: auto; 
+    scroll-behavior: smooth; 
+    gap: 14px; 
+    padding: 10px 0; 
+    scrollbar-width: none; 
+}
+.slider-track::-webkit-scrollbar { display: none; }
+
+/* ESTILO DOS CABEÇALHOS DE CATEGORIA (IGUAL À FOTO) */
+.category-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+.category-titles { display: flex; flex-direction: column; }
+.category-title { font-size: 1.2rem; font-weight: 700; color: #fff; margin: 0; }
+.category-subtitle { font-size: 0.75rem; color: #aaa; margin-top: 2px; font-weight: 400; }
+.ver-mais-h2 { color: #888; font-size: 0.85rem; text-decoration: none; transition: color 0.2s; font-weight: 500; }
+.ver-mais-h2:hover { color: #fff; }
+
+/* ESTILO DOS CARDS (SEM CONTORNO E MENORES) */
+.card { 
+    min-width: 135px; 
+    width: 135px;
+    background: transparent; 
+    border-radius: 0; 
+    border: none !important;
+    box-shadow: none !important;
+    transition: transform 0.2s ease-in-out; 
+    cursor: pointer; 
+    flex: 0 0 auto; 
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.card::before { display: none !important; } /* REMOVE O CONTORNO GRADIENTE */
+.card:hover { transform: scale(1.04); border: none !important; }
+
+/* IMAGEM DO PÔSTER */
+.card img { 
+    width: 100%; 
+    height: 195px; 
+    border-radius: 10px; 
+    object-fit: cover; 
+    display: block; 
+}
+
+/* CARD REDUZIDO DE "ÚLTIMOS EPISÓDIOS" */
+.card.card-wide {
+    min-width: 240px;
+    width: 240px;
+}
+.card.card-wide img {
+    height: 135px;
+}
+
+/* LAYOUT DAS INFORMAÇÕES ABAIXO DO PÔSTER (ESTILO FOTO) */
+.card-info-modern, .card-info {
+    position: relative;
+    bottom: auto;
+    left: auto;
+    right: auto;
+    padding: 2px 0 0 0;
+    background: transparent;
+    display: flex;
+    flex-direction: column;
+}
+
+.card-info-modern h4, .card-info h4 {
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: #ffffff;
+    text-shadow: none;
+    text-align: left;
+}
+
+.meta-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.7rem;
+    font-weight: 600;
+}
+
+.meta-left { display: flex; gap: 4px; align-items: center; }
+
+.tipo-filme, .tipo-serie { color: #aaa; text-transform: uppercase; }
+.badge-audio { color: #2ed573; text-transform: uppercase; } /* Cor verde para DUB */
+.meta-divider { color: #555; }
+.meta-data, .card-date { color: #777; font-weight: 400; }
+
+/* SETAS DOS SLIDERS */
+.slider-arrow {
+    position: absolute;
+    top: 40%;
+    transform: translateY(-50%);
+    background: rgba(0,0,0,0.8);
+    color: white;
+    border: 1px solid #333;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 10;
+    font-size: 0.9rem;
+}
+.slider-arrow.prev { left: -15px; }
+.slider-arrow.next { right: -15px; }
+.slider-arrow:hover { background: var(--primary-red); }
+
+/* GRID DE PESQUISA */
+.content { padding-top: 85px; } 
+.grid-filmes { display: grid; grid-template-columns: repeat(auto-fill, minmax(135px, 1fr)); gap: 15px; padding: 20px 0; }
+.grid-filmes .card { min-width: 0; width: 100%; }
+.grid-filmes .card img { height: 195px; }
+
+.tela-pesquisa { padding-top: 90px; min-height: 80vh; padding-left: 5%; padding-right: 5%; padding-bottom: 40px; background: radial-gradient(circle at top, rgba(139,0,0,0.15) 0%, var(--bg-color) 70%); }
+.hidden { display: none !important; }
+.category-title { 
+    font-size: 1.2rem; 
+    font-weight: 700; 
+    color: #fff; 
+    margin: 0; 
+    display: flex; 
+    align-items: center; /* Mantém o título e o botão na mesma linha horizontal */
+}
+
+.ver-mais-h2 { 
+    margin-left: auto; /* Empurra o link para o canto direito */
+    color: var(--primary-red, #e50914); /* Define a cor vermelha */
+    font-size: 0.85rem; 
+    text-decoration: none; 
+    transition: color 0.2s; 
+    font-weight: 500; 
+}
+
+.ver-mais-h2:hover { 
+    color: #ff2a35; /* Vermelho um pouco mais claro ao passar o mouse */
+}
+.meta-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.65rem; /* Reduzido levemente de 0.7rem para caber tudo em 135px */
+    font-weight: 600;
+}
+
+.meta-right {
+    white-space: nowrap; /* Impede que o "6" e o "Temporadas" fiquem em linhas separadas */
+    text-align: right;
+}
+html, body {
+    /* Remove a ação de arrastar para baixo para atualizar no Android/Chrome */
+    overscroll-behavior-y: contain; 
+    /* Permite apenas a rolagem vertical, ajudando a bloquear gestos de zoom */
+    touch-action: pan-y; 
+}
